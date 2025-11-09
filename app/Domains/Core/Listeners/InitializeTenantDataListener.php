@@ -17,14 +17,6 @@ use Illuminate\Support\Facades\Log;
 class InitializeTenantDataListener implements ShouldQueue
 {
     /**
-     * Create the event listener
-     */
-    public function __construct()
-    {
-        //
-    }
-
-    /**
      * Handle the event
      *
      * @param  TenantCreatedEvent  $event  The tenant created event
