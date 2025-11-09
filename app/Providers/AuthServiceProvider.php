@@ -6,6 +6,7 @@ namespace App\Providers;
 
 use App\Domains\Core\Models\Tenant;
 use App\Domains\Core\Policies\TenantPolicy;
+use App\Models\User;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
 
@@ -43,7 +44,7 @@ class AuthServiceProvider extends ServiceProvider
 
         // Define gate for tenant impersonation
         // Only users with super admin privileges can impersonate tenants
-        Gate::define('impersonate-tenant', function ($user, $tenant) {
+        Gate::define('impersonate-tenant', function (User $user, Tenant $tenant): bool {
             // For now, only admins can impersonate tenants
             // TODO: Replace with spatie/laravel-permission check when implemented
             return $user->isAdmin();

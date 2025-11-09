@@ -7,6 +7,7 @@ namespace Tests\Unit\Domains\Core\Policies;
 use App\Domains\Core\Models\Tenant;
 use App\Domains\Core\Policies\TenantPolicy;
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
@@ -16,6 +17,8 @@ use Tests\TestCase;
  */
 class TenantPolicyTest extends TestCase
 {
+    use RefreshDatabase;
+
     protected TenantPolicy $policy;
 
     protected User $adminUser;
@@ -29,9 +32,9 @@ class TenantPolicyTest extends TestCase
         parent::setUp();
 
         $this->policy = new TenantPolicy;
-        $this->adminUser = new User(['is_admin' => true]);
-        $this->normalUser = new User(['is_admin' => false]);
-        $this->tenant = new Tenant;
+        $this->adminUser = User::factory()->create(['is_admin' => true]);
+        $this->normalUser = User::factory()->create(['is_admin' => false]);
+        $this->tenant = Tenant::factory()->create();
     }
 
     /**

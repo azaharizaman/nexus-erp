@@ -632,6 +632,67 @@ public function impersonate(Tenant $tenant, string $reason): void
 
 ---
 
+---
+
+### 9a. Gate Closures Must Have Type Hints
+
+**✅ REQUIRED:** All Gate closure parameters and return types MUST be explicitly declared.
+
+#### ❌ Incorrect
+
+```php
+// In AuthServiceProvider.php
+Gate::define('impersonate-tenant', function ($user, $tenant) {
+    return $user->isAdmin();
+});
+```
+
+#### ✅ Correct
+
+```php
+// In AuthServiceProvider.php
+use App\Domains\Core\Models\Tenant;
+use App\Models\User;
+
+Gate::define('impersonate-tenant', function (User $user, Tenant $tenant): bool {
+    return $user->isAdmin();
+});
+```
+
+**Why:** 
+- Type hints provide compile-time type checking and prevent runtime errors
+- Makes the gate's expected parameters explicit and self-documenting
+- Enables better IDE support with autocomplete and error detection
+- Aligns with the project's strict typing standards (PHP 8.2+)
+
+**Pattern to Follow:**
+
+```php
+use Illuminate\Support\Facades\Gate;
+
+// In your AuthServiceProvider boot() method:
+Gate::define('gate-name', function (User $user, ModelClass $model): bool {
+    // Authorization logic
+    return $user->hasPermission('permission-name');
+});
+
+// For gates without additional parameters:
+Gate::define('gate-name', function (User $user): bool {
+    return $user->isAdmin();
+});
+
+// For nullable parameters:
+Gate::define('gate-name', function (?User $user, ModelClass $model): bool {
+    if (!$user) {
+        return false;
+    }
+    return $user->can('action', $model);
+});
+```
+
+**Note:** Always import the model classes at the top of your service provider file to use them in type hints.
+
+
 ### 10. Defensive Programming with Authentication
 
 **✅ REQUIRED:** When using `auth()->user()` in methods that can be called without authentication, use defensive checks or conditional assignment.
@@ -1142,6 +1203,97 @@ class TenantHelperTest extends TestCase
 ```
 
 **Why:** Unit tests should be fast, isolated, and not depend on external state. Database dependencies make tests slower and more fragile.
+
+
+---
+
+### 17a. Policy Testing Best Practices
+
+**✅ REQUIRED:** Policy tests should use `RefreshDatabase` trait and factory-created models to test against real Eloquent instances.
+
+#### ❌ Incorrect
+
+```php
+// In tests/Unit/Domains/Core/Policies/TenantPolicyTest.php
+class TenantPolicyTest extends TestCase
+{
+    protected function setUp(): void
+    {
+        parent::setUp();
+        
+        $this->policy = new TenantPolicy;
+        // Creating models without persisting - won't test actual behavior
+        $this->adminUser = new User(['is_admin' => true]);
+        $this->normalUser = new User(['is_admin' => false]);
+        $this->tenant = new Tenant;
+    }
+}
+```
+
+#### ✅ Correct
+
+```php
+// In tests/Unit/Domains/Core/Policies/TenantPolicyTest.php
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+class TenantPolicyTest extends TestCase
+{
+    use RefreshDatabase;
+    
+    protected function setUp(): void
+    {
+        parent::setUp();
+        
+        $this->policy = new TenantPolicy;
+        // Use factories to create properly persisted models
+        $this->adminUser = User::factory()->create(['is_admin' => true]);
+        $this->normalUser = User::factory()->create(['is_admin' => false]);
+        $this->tenant = Tenant::factory()->create();
+    }
+}
+```
+
+**Why:** 
+- Policy tests verify authorization rules that often depend on model relationships and database state
+- Using `RefreshDatabase` ensures test isolation and proper cleanup between tests
+- Factory-created models are properly persisted with all attributes and relationships
+- Testing with real Eloquent models catches issues that mocked objects might miss
+
+**Note:** While unit tests typically avoid database dependencies, policy tests are an exception because:
+1. Policies interact directly with Eloquent models
+2. Authorization logic often depends on model relationships (e.g., `$user->tenant`)
+3. Testing against real models ensures policies work correctly in production
+4. Policy tests remain fast due to SQLite in-memory database
+
+**Pattern to Follow:**
+
+```php
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+class YourPolicyTest extends TestCase
+{
+    use RefreshDatabase;
+    
+    protected YourPolicy $policy;
+    
+    protected function setUp(): void
+    {
+        parent::setUp();
+        
+        $this->policy = new YourPolicy;
+        // Create test fixtures using factories
+        $this->user = User::factory()->create(['is_admin' => true]);
+        $this->resource = YourModel::factory()->create();
+    }
+    
+    public function test_policy_method(): void
+    {
+        $result = $this->policy->method($this->user, $this->resource);
+        
+        $this->assertTrue($result);
+    }
+}
+```
 
 ---
 
