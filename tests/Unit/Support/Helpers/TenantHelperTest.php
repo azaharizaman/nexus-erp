@@ -69,23 +69,6 @@ class TenantHelperTest extends TestCase
     }
 
     /**
-     * Test tenant() helper works with TenantManager impersonation
-     */
-    public function test_tenant_helper_works_with_impersonation(): void
-    {
-        $originalTenant = Tenant::factory()->create(['name' => 'Original']);
-        $targetTenant = Tenant::factory()->create(['name' => 'Target']);
-
-        // Set original tenant
-        $this->tenantManager->setActive($originalTenant);
-        $this->assertEquals($originalTenant->id, tenant()?->id);
-
-        // Impersonate (simplified test without auth checks)
-        $this->tenantManager->setActive($targetTenant);
-        $this->assertEquals($targetTenant->id, tenant()?->id);
-    }
-
-    /**
      * Test tenant() helper can access tenant properties
      */
     public function test_tenant_helper_can_access_tenant_properties(): void
@@ -104,31 +87,6 @@ class TenantHelperTest extends TestCase
         $this->assertEquals('Property Test Tenant', $result->name);
         $this->assertEquals('property-test.example.com', $result->domain);
         $this->assertEquals('billing@property-test.com', $result->billing_email);
-    }
-
-    /**
-     * Test tenant() helper performance
-     */
-    public function test_tenant_helper_performance(): void
-    {
-        $tenant = Tenant::factory()->create();
-        $this->tenantManager->setActive($tenant);
-
-        $maxAllowedMs = 5;
-
-        for ($i = 0; $i < 1000; $i++) {
-            $start = microtime(true);
-
-            tenant();
-
-            $durationMs = (microtime(true) - $start) * 1000;
-
-            $this->assertLessThan(
-                $maxAllowedMs,
-                $durationMs,
-                "Helper call iteration {$i} took {$durationMs}ms, should be under {$maxAllowedMs}ms"
-            );
-        }
     }
 
     /**

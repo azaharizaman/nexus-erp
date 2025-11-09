@@ -29,13 +29,20 @@ class IdentifyTenant
      * Handle an incoming request
      *
      * Resolves tenant from authenticated user and sets it in the TenantManager.
-     * If no authenticated user or user has no tenant, responds with 401/403.
+     * This middleware should be applied after authentication middleware (e.g., auth:sanctum).
+     *
+     * Returns error responses for different failure modes:
+     * - 401 Unauthenticated: if no user is authenticated
+     * - 403 Forbidden: if user has no tenant_id
+     * - 404 Not Found: if tenant cannot be resolved from database
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @return Response
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // Check if user is authenticated
+        // Note: This check is redundant if auth middleware is properly applied
+        // but provides a safety net for misconfigured routes
         if (! auth()->check()) {
             return response()->json([
                 'message' => 'Unauthenticated.',
@@ -51,8 +58,8 @@ class IdentifyTenant
             ], 403);
         }
 
-        // Resolve tenant from user
-        $tenant = $user->tenant;
+        // Resolve tenant from user using direct query to avoid N+1
+        $tenant = \App\Domains\Core\Models\Tenant::find($user->tenant_id);
 
         // Handle missing tenant gracefully
         if (! $tenant) {

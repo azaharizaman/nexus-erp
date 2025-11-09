@@ -11,6 +11,8 @@ if (! function_exists('tenant')) {
      *
      * Convenience helper to access the current tenant set by IdentifyTenant middleware.
      * Returns null if no tenant is set in the current request context.
+     *
+     * @return Tenant|null The current tenant or null if not set
      */
     function tenant(): ?Tenant
     {

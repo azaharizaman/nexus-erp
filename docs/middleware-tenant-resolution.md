@@ -17,9 +17,12 @@ The `IdentifyTenant` middleware resolves the current tenant from the authenticat
 **Features:**
 - Validates user authentication (401 if not authenticated)
 - Verifies user has tenant_id (403 if missing)
-- Resolves tenant from database (404 if not found)
+- Resolves tenant from database using direct query (404 if not found)
 - Sets tenant context via TenantManager for request lifecycle
 - Graceful error handling with proper HTTP status codes
+- Optimized to avoid N+1 query issues
+
+**Important:** This middleware should be applied after authentication middleware (e.g., `auth:sanctum`) to ensure the user is authenticated before tenant resolution.
 
 **Usage:** Automatically applied to all API routes via `bootstrap/app.php`
 
@@ -165,10 +168,11 @@ $user->tenant     // Load tenant model
 
 ## Performance
 
-- Middleware execution: < 10ms per request
-- Helper function: < 5ms per call
-- Minimal database queries (user already loaded during auth)
+- Middleware execution: typically < 10ms per request under normal load
+- Helper function: typically < 5ms per call under normal load
+- Single direct database query per request (Tenant::find())
 - Tenant cached in application container per request
+- Performance may vary based on server resources and database latency
 
 ## Future Enhancements
 

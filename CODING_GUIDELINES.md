@@ -840,6 +840,398 @@ Before submitting code for review, ensure:
 
 ---
 
+## Middleware Best Practices
+
+### 13. Avoid N+1 Queries in Middleware
+
+**✅ REQUIRED:** Middleware should avoid triggering lazy loading that causes N+1 queries, especially for operations that run on every request.
+
+#### ❌ Incorrect
+
+```php
+public function handle(Request $request, Closure $next): Response
+{
+    $user = auth()->user();
+    
+    // This triggers an N+1 query via lazy loading
+    $tenant = $user->tenant;
+    
+    $this->tenantManager->setActive($tenant);
+    return $next($request);
+}
+```
+
+#### ✅ Correct
+
+```php
+public function handle(Request $request, Closure $next): Response
+{
+    $user = auth()->user();
+    
+    // Use direct query to avoid N+1
+    $tenant = Tenant::find($user->tenant_id);
+    
+    $this->tenantManager->setActive($tenant);
+    return $next($request);
+}
+```
+
+**Why:** Middleware runs on every request. N+1 queries in middleware multiply across all requests, causing significant performance degradation. Always use direct queries or ensure relationships are eager loaded.
+
+**Alternative approaches:**
+1. Use `Tenant::find($user->tenant_id)` for direct lookup
+2. Eager load on User model with `protected $with = ['tenant']` if needed globally
+3. Use caching for frequently accessed tenant data
+
+---
+
+### 14. Middleware Ordering and Responsibilities
+
+**✅ REQUIRED:** Middleware should not duplicate responsibilities already handled by other middleware. Document dependencies clearly.
+
+#### ❌ Incorrect
+
+```php
+// IdentifyTenant middleware performing authentication
+public function handle(Request $request, Closure $next): Response
+{
+    if (! auth()->check()) {
+        return response()->json(['message' => 'Unauthenticated.'], 401);
+    }
+    // ... tenant resolution
+}
+
+// No comment about dependency on auth middleware
+```
+
+#### ✅ Correct
+
+```php
+// IdentifyTenant middleware with clear documentation
+/**
+ * This middleware should be applied after authentication middleware (e.g., auth:sanctum).
+ */
+public function handle(Request $request, Closure $next): Response
+{
+    // Note: This check is redundant if auth middleware is properly applied
+    // but provides a safety net for misconfigured routes
+    if (! auth()->check()) {
+        return response()->json(['message' => 'Unauthenticated.'], 401);
+    }
+    // ... tenant resolution
+}
+
+// In bootstrap/app.php
+$middleware->api(append: [
+    IdentifyTenant::class, // Runs after auth:sanctum in API middleware stack
+]);
+```
+
+**Why:** Clear middleware ordering prevents bugs and ensures each middleware has a single responsibility. Documentation helps future developers understand dependencies.
+
+---
+
+### 15. Complete PHPDoc for Middleware
+
+**✅ REQUIRED:** Middleware PHPDoc must document all possible return conditions, especially error responses.
+
+#### ❌ Incorrect
+
+```php
+/**
+ * Handle an incoming request
+ *
+ * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+ */
+public function handle(Request $request, Closure $next): Response
+```
+
+#### ✅ Correct
+
+```php
+/**
+ * Handle an incoming request
+ *
+ * Resolves tenant from authenticated user and sets it in the TenantManager.
+ * This middleware should be applied after authentication middleware (e.g., auth:sanctum).
+ *
+ * Returns error responses for different failure modes:
+ * - 401 Unauthenticated: if no user is authenticated
+ * - 403 Forbidden: if user has no tenant_id
+ * - 404 Not Found: if tenant cannot be resolved from database
+ *
+ * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+ * @return Response
+ */
+public function handle(Request $request, Closure $next): Response
+```
+
+**Why:** Complete documentation helps developers understand all possible outcomes and error conditions.
+
+---
+
+## Testing Best Practices (Continued)
+
+### 16. Unit vs Feature Test Classification
+
+**✅ REQUIRED:** Unit tests should not depend on database or external systems. Tests using database should be feature/integration tests.
+
+#### ❌ Incorrect
+
+```php
+// In tests/Unit/Support/Helpers/TenantHelperTest.php
+class TenantHelperTest extends TestCase
+{
+    use RefreshDatabase; // Unit tests should not use database
+    
+    public function test_helper_returns_tenant(): void
+    {
+        $tenant = Tenant::factory()->create(); // Creating database records
+        // ...
+    }
+}
+```
+
+#### ✅ Correct
+
+Option 1: Move to feature tests
+```php
+// In tests/Feature/Support/Helpers/TenantHelperTest.php
+class TenantHelperTest extends TestCase
+{
+    use RefreshDatabase; // OK for feature tests
+    
+    public function test_helper_returns_tenant(): void
+    {
+        $tenant = Tenant::factory()->create();
+        // ...
+    }
+}
+```
+
+Option 2: Use mocking for true unit tests
+```php
+// In tests/Unit/Support/Helpers/TenantHelperTest.php
+class TenantHelperTest extends TestCase
+{
+    public function test_helper_returns_tenant(): void
+    {
+        $mockTenant = Mockery::mock(Tenant::class);
+        $mockManager = Mockery::mock(TenantManagerContract::class);
+        $mockManager->shouldReceive('current')->andReturn($mockTenant);
+        // ...
+    }
+}
+```
+
+**Why:** Unit tests should be fast, isolated, and not depend on external state. Database dependencies make tests slower and more fragile.
+
+---
+
+### 17. Avoid Hard-Coded Values in Tests
+
+**✅ REQUIRED:** Tests should avoid hard-coded values that might conflict with actual data or be environment-dependent.
+
+#### ❌ Incorrect
+
+```php
+public function test_handles_missing_tenant(): void
+{
+    // Hard-coded ID might conflict with actual records
+    $user = User::factory()->create(['tenant_id' => 99999]);
+}
+```
+
+#### ✅ Correct
+
+```php
+public function test_handles_missing_tenant(): void
+{
+    // Generate guaranteed non-existent ID
+    $nonExistentTenantId = Tenant::max('id') + 1;
+    $user = User::factory()->create(['tenant_id' => $nonExistentTenantId]);
+}
+```
+
+**Why:** Hard-coded values can cause test failures in different environments or with parallel test execution.
+
+---
+
+### 18. Performance Tests Should Be Flexible
+
+**❌ AVOID:** Hard-coded time limits in performance tests that run in CI environments.
+
+```php
+public function test_performance(): void
+{
+    $maxAllowedMs = 10; // Too strict for CI
+    
+    for ($i = 0; $i < 100; $i++) {
+        $start = microtime(true);
+        $this->operation();
+        $duration = (microtime(true) - $start) * 1000;
+        
+        $this->assertLessThan($maxAllowedMs, $duration); // Will fail on slow CI
+    }
+}
+```
+
+**✅ RECOMMENDED:** Remove performance tests from unit/feature suites or make them configurable.
+
+```php
+// Option 1: Skip in CI
+public function test_performance(): void
+{
+    if (env('CI')) {
+        $this->markTestSkipped('Performance test skipped in CI environment');
+    }
+    // ... test code
+}
+
+// Option 2: Use environment-based thresholds
+public function test_performance(): void
+{
+    $maxAllowedMs = env('PERF_THRESHOLD_MS', 50); // More lenient default
+    // ... test code
+}
+
+// Option 3: Remove from regular test suite (best approach)
+// Create dedicated performance benchmarking suite
+```
+
+**Why:** CI environments often have variable performance characteristics. Hard-coded time limits cause flaky tests that fail intermittently.
+
+**Alternative:** Use dedicated performance testing tools like:
+- Laravel Dusk for browser performance
+- Apache JMeter for load testing
+- Custom benchmark scripts for specific operations
+
+---
+
+## Documentation Standards (Continued)
+
+### 19. Qualify Performance Claims
+
+**✅ REQUIRED:** Performance metrics in documentation must be qualified with conditions and disclaimers.
+
+#### ❌ Incorrect
+
+```markdown
+## Performance
+
+- Middleware execution: < 10ms per request
+- Helper function: < 5ms per call
+```
+
+#### ✅ Correct
+
+```markdown
+## Performance
+
+- Middleware execution: typically < 10ms per request under normal load
+- Helper function: typically < 5ms per call under normal load
+- Single direct database query per request (Tenant::find())
+- Performance may vary based on server resources and database latency
+```
+
+**Why:** Absolute performance claims are misleading. Performance varies by environment, load, and configuration.
+
+---
+
+## Common Mistakes and How to Avoid Them (Continued)
+
+### Mistake 11: N+1 Queries in Middleware
+
+**Problem:** Using lazy loading in middleware that runs on every request.
+
+**Solution:** Use direct queries or eager loading.
+
+```php
+// Before
+$tenant = $user->tenant; // N+1 query
+
+// After
+$tenant = Tenant::find($user->tenant_id); // Direct query
+```
+
+### Mistake 12: Performance Tests in Test Suites
+
+**Problem:** Including time-sensitive performance tests in regular test suites.
+
+**Solution:** Remove performance tests or make them optional/environment-aware.
+
+```php
+// Before
+$this->assertLessThan(10, $duration); // Fails in CI
+
+// After - Option 1: Remove the test
+// After - Option 2: Skip in CI
+if (env('CI')) {
+    $this->markTestSkipped('Performance test skipped in CI');
+}
+```
+
+### Mistake 13: Unit Tests with Database Dependencies
+
+**Problem:** Placing tests that use database in Unit test directory.
+
+**Solution:** Move to Feature tests or use mocking.
+
+```php
+// Before: tests/Unit/MyTest.php
+use RefreshDatabase;
+
+// After: tests/Feature/MyTest.php
+use RefreshDatabase;
+// OR use mocking to keep in Unit tests
+```
+
+### Mistake 14: Incomplete Middleware Documentation
+
+**Problem:** Not documenting all error responses and dependencies in middleware PHPDoc.
+
+**Solution:** Document all return conditions, error codes, and middleware dependencies.
+
+```php
+/**
+ * Returns error responses for different failure modes:
+ * - 401 Unauthenticated: if no user is authenticated
+ * - 403 Forbidden: if user has no tenant_id
+ * - 404 Not Found: if tenant cannot be resolved
+ *
+ * This middleware should be applied after authentication middleware.
+ */
+```
+
+---
+
+## Code Review Checklist (Updated)
+
+Before submitting code for review, ensure:
+
+- [ ] All PHP files have `declare(strict_types=1);`
+- [ ] All method parameters have type hints
+- [ ] All methods declare return types
+- [ ] All public/protected methods have complete PHPDoc blocks with `@return` tags
+- [ ] PHPDoc documents all error responses and conditions
+- [ ] All migrations use anonymous class format
+- [ ] Data access uses repository pattern (no direct `Model::create()` or `Model::find()` in services)
+- [ ] Authentication checks before using `auth()->user()`
+- [ ] Authorization checks for privileged operations
+- [ ] Complete validation rules for all fillable fields
+- [ ] Accurate `@throws` tags in PHPDoc matching actual exceptions
+- [ ] **No N+1 queries in middleware or frequently-called code**
+- [ ] **Middleware dependencies and ordering documented**
+- [ ] **Unit tests do not use database (or are in Feature directory)**
+- [ ] **No hard-coded IDs or values in tests**
+- [ ] **No performance tests with hard time limits in regular test suites**
+- [ ] **Performance claims in documentation are qualified**
+- [ ] Code passes Laravel Pint formatting (`./vendor/bin/pint`)
+- [ ] All tests pass (`php artisan test`)
+- [ ] No untyped variables or parameters remain
+
+---
+
 ## Questions or Suggestions
 
 If you have questions about these guidelines or suggestions for improvements, please:

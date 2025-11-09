@@ -14,6 +14,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         // Register IdentifyTenant middleware for API routes
+        // This runs after auth:sanctum middleware to ensure user is authenticated first
         $middleware->api(append: [
             IdentifyTenant::class,
         ]);

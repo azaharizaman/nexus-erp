@@ -92,8 +92,9 @@ class IdentifyTenantTest extends TestCase
      */
     public function test_middleware_returns_404_when_tenant_not_found(): void
     {
-        // Create user with non-existent tenant_id
-        $user = User::factory()->create(['tenant_id' => 99999]);
+        // Create user with guaranteed non-existent tenant_id
+        $nonExistentTenantId = Tenant::max('id') + 1;
+        $user = User::factory()->create(['tenant_id' => $nonExistentTenantId]);
 
         $this->actingAs($user);
 
@@ -196,37 +197,5 @@ class IdentifyTenantTest extends TestCase
             'tenant_id' => $tenant->id,
             'tenant_name' => $tenant->name,
         ]);
-    }
-
-    /**
-     * Test performance - middleware should complete under 10ms
-     */
-    public function test_middleware_performance(): void
-    {
-        $tenant = Tenant::factory()->create();
-        $user = User::factory()->create(['tenant_id' => $tenant->id]);
-
-        $this->actingAs($user);
-
-        $maxAllowedMs = 10;
-
-        for ($i = 0; $i < 100; $i++) {
-            $request = Request::create('/api/test', 'GET');
-            $middleware = new IdentifyTenant($this->tenantManager);
-
-            $start = microtime(true);
-
-            $middleware->handle($request, function ($req) {
-                return response()->json(['success' => true]);
-            });
-
-            $durationMs = (microtime(true) - $start) * 1000;
-
-            $this->assertLessThan(
-                $maxAllowedMs,
-                $durationMs,
-                "Middleware execution iteration {$i} took {$durationMs}ms, should be under {$maxAllowedMs}ms"
-            );
-        }
     }
 }
