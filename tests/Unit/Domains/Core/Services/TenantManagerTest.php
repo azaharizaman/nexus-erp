@@ -25,7 +25,7 @@ class TenantManagerTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->tenantManager = new TenantManager;
+        $this->tenantManager = app(TenantManagerContract::class);
     }
 
     /**
@@ -171,6 +171,9 @@ class TenantManagerTest extends TestCase
         $user = User::factory()->create();
         $this->actingAs($user);
 
+        // Grant impersonation permission
+        \Illuminate\Support\Facades\Gate::define('impersonate-tenant', fn () => true);
+
         $originalTenant = Tenant::factory()->create(['name' => 'Original Tenant']);
         $targetTenant = Tenant::factory()->create(['name' => 'Target Tenant']);
 
@@ -190,6 +193,9 @@ class TenantManagerTest extends TestCase
         $user = User::factory()->create();
         $this->actingAs($user);
 
+        // Grant impersonation permission
+        \Illuminate\Support\Facades\Gate::define('impersonate-tenant', fn () => true);
+
         $targetTenant = Tenant::factory()->create(['name' => 'Target Tenant']);
 
         $this->tenantManager->impersonate($targetTenant, 'Initial support access');
@@ -206,6 +212,9 @@ class TenantManagerTest extends TestCase
     {
         $user = User::factory()->create();
         $this->actingAs($user);
+
+        // Grant impersonation permission
+        \Illuminate\Support\Facades\Gate::define('impersonate-tenant', fn () => true);
 
         $originalTenant = Tenant::factory()->create(['name' => 'Original Tenant']);
         $targetTenant = Tenant::factory()->create(['name' => 'Target Tenant']);
@@ -227,6 +236,9 @@ class TenantManagerTest extends TestCase
         $user = User::factory()->create();
         $this->actingAs($user);
 
+        // Grant impersonation permission
+        \Illuminate\Support\Facades\Gate::define('impersonate-tenant', fn () => true);
+
         $targetTenant = Tenant::factory()->create(['name' => 'Target Tenant']);
 
         $this->tenantManager->impersonate($targetTenant, 'Support access');
@@ -234,6 +246,36 @@ class TenantManagerTest extends TestCase
 
         $current = $this->tenantManager->current();
         $this->assertNull($current);
+    }
+
+    /**
+     * Test impersonation fails without authentication
+     */
+    public function test_impersonation_fails_without_authentication(): void
+    {
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('Impersonation requires an authenticated user');
+
+        $tenant = Tenant::factory()->create();
+        $this->tenantManager->impersonate($tenant, 'Should fail');
+    }
+
+    /**
+     * Test impersonation fails without authorization
+     */
+    public function test_impersonation_fails_without_authorization(): void
+    {
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        // Deny impersonation permission
+        \Illuminate\Support\Facades\Gate::define('impersonate-tenant', fn () => false);
+
+        $this->expectException(\Illuminate\Auth\Access\AuthorizationException::class);
+        $this->expectExceptionMessage('Unauthorized to impersonate this tenant');
+
+        $tenant = Tenant::factory()->create();
+        $this->tenantManager->impersonate($tenant, 'Should fail');
     }
 
     /**

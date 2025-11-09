@@ -20,7 +20,7 @@ interface TenantManagerContract
      * @param  array<string, mixed>  $data  Tenant data (name, domain, email, etc.)
      * @return Tenant The created tenant instance
      *
-     * @throws \InvalidArgumentException If validation fails
+     * @throws \Illuminate\Validation\ValidationException If validation fails
      */
     public function create(array $data): Tenant;
 

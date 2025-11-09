@@ -5,9 +5,12 @@ declare(strict_types=1);
 namespace App\Domains\Core\Services;
 
 use App\Domains\Core\Contracts\TenantManagerContract;
+use App\Domains\Core\Contracts\TenantRepositoryContract;
 use App\Domains\Core\Enums\TenantStatus;
 use App\Domains\Core\Models\Tenant;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -34,6 +37,13 @@ class TenantManager implements TenantManagerContract
     protected const IMPERSONATION_KEY = 'tenant.impersonation';
 
     /**
+     * Create a new TenantManager instance
+     */
+    public function __construct(
+        protected readonly TenantRepositoryContract $tenantRepository
+    ) {}
+
+    /**
      * Create a new tenant with validation
      *
      * @param  array<string, mixed>  $data
@@ -52,6 +62,7 @@ class TenantManager implements TenantManagerContract
             'contact_phone' => ['nullable', 'string', 'max:50'],
             'subscription_plan' => ['nullable', 'string', 'max:100'],
             'configuration' => ['nullable', 'array'],
+            'status' => ['nullable', 'string', Rule::in(TenantStatus::values())],
         ]);
 
         if ($validator->fails()) {
@@ -64,14 +75,17 @@ class TenantManager implements TenantManagerContract
         // Set default status if not provided
         $validatedData['status'] = $validatedData['status'] ?? TenantStatus::ACTIVE;
 
-        // Create tenant
-        $tenant = Tenant::create($validatedData);
+        // Create tenant using repository
+        $tenant = $this->tenantRepository->create($validatedData);
 
         // Log tenant creation
-        activity()
-            ->performedOn($tenant)
-            ->causedBy(auth()->user())
-            ->log('Tenant created');
+        $activity = activity()->performedOn($tenant);
+
+        if (auth()->check()) {
+            $activity->causedBy(auth()->user());
+        }
+
+        $activity->log('Tenant created');
 
         return $tenant;
     }
@@ -94,9 +108,21 @@ class TenantManager implements TenantManagerContract
 
     /**
      * Impersonate a tenant for support operations
+     *
+     * @throws AuthorizationException
      */
     public function impersonate(Tenant $tenant, string $reason): void
     {
+        // Require authentication for impersonation
+        if (! auth()->check()) {
+            throw new \RuntimeException('Impersonation requires an authenticated user');
+        }
+
+        // Check authorization to impersonate tenants
+        if (! auth()->user()->can('impersonate-tenant', $tenant)) {
+            throw new AuthorizationException('Unauthorized to impersonate this tenant');
+        }
+
         // Store current tenant if exists
         $currentTenant = $this->current();
         if ($currentTenant !== null) {
@@ -107,12 +133,17 @@ class TenantManager implements TenantManagerContract
         $this->setActive($tenant);
 
         // Store impersonation context
-        app()->instance(self::IMPERSONATION_KEY, [
+        $context = [
             'tenant_id' => $tenant->id,
             'reason' => $reason,
             'started_at' => now(),
-            'user_id' => auth()->id(),
-        ]);
+        ];
+
+        if (auth()->check()) {
+            $context['user_id'] = auth()->id();
+        }
+
+        app()->instance(self::IMPERSONATION_KEY, $context);
 
         // Log impersonation for audit trail
         activity()
@@ -136,15 +167,19 @@ class TenantManager implements TenantManagerContract
 
         // Log impersonation end
         if ($currentTenant !== null) {
-            activity()
+            $activity = activity()
                 ->performedOn($currentTenant)
-                ->causedBy(auth()->user())
                 ->withProperties([
                     'duration' => isset($impersonation['started_at'])
                         ? now()->diffInSeconds($impersonation['started_at'])
                         : null,
-                ])
-                ->log('Tenant impersonation stopped');
+                ]);
+
+            if (auth()->check()) {
+                $activity->causedBy(auth()->user());
+            }
+
+            $activity->log('Tenant impersonation stopped');
         }
 
         // Restore original tenant

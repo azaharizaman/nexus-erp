@@ -68,6 +68,9 @@ class TenantManagerFeatureTest extends TestCase
         $user = User::factory()->create();
         $this->actingAs($user);
 
+        // Grant impersonation permission
+        \Illuminate\Support\Facades\Gate::define('impersonate-tenant', fn () => true);
+
         $originalTenant = Tenant::factory()->create(['name' => 'Original']);
         $targetTenant = Tenant::factory()->create(['name' => 'Target']);
 
@@ -97,6 +100,9 @@ class TenantManagerFeatureTest extends TestCase
     {
         $user = User::factory()->create();
         $this->actingAs($user);
+
+        // Grant impersonation permission
+        \Illuminate\Support\Facades\Gate::define('impersonate-tenant', fn () => true);
 
         $tenant = Tenant::factory()->create();
 
@@ -148,6 +154,9 @@ class TenantManagerFeatureTest extends TestCase
     {
         $user = User::factory()->create();
         $this->actingAs($user);
+
+        // Grant impersonation permission
+        \Illuminate\Support\Facades\Gate::define('impersonate-tenant', fn () => true);
 
         $tenant1 = Tenant::factory()->create(['name' => 'User Tenant']);
         $tenant2 = Tenant::factory()->create(['name' => 'Support Target']);
@@ -209,21 +218,26 @@ class TenantManagerFeatureTest extends TestCase
         $tenant = Tenant::factory()->create();
         $this->tenantManager->setActive($tenant);
 
-        $startTime = microtime(true);
+        // Test that each individual context resolution is under 10ms
+        $maxAllowedMs = 10;
+        $maxObservedMs = 0;
 
-        // Perform multiple context resolutions
         for ($i = 0; $i < 100; $i++) {
+            $start = microtime(true);
             $this->tenantManager->current();
+            $end = microtime(true);
+            $durationMs = ($end - $start) * 1000;
+
+            if ($durationMs > $maxObservedMs) {
+                $maxObservedMs = $durationMs;
+            }
+
+            $this->assertLessThan(
+                $maxAllowedMs,
+                $durationMs,
+                "Context resolution iteration {$i} took {$durationMs}ms, should be under {$maxAllowedMs}ms"
+            );
         }
-
-        $endTime = microtime(true);
-        $duration = ($endTime - $startTime) * 1000; // Convert to milliseconds
-        $averageTime = $duration / 100;
-
-        // Average time per resolution should be well under 10ms
-        $this->assertLessThan(10, $averageTime,
-            "Context resolution took {$averageTime}ms, should be under 10ms"
-        );
     }
 
     /**

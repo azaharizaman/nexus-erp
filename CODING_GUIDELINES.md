@@ -419,6 +419,427 @@ PHPStan will catch type errors, missing return types, and other issues before ru
 
 ---
 
+## Architecture Patterns
+
+### 7. Repository Pattern
+
+**✅ REQUIRED:** All data access operations MUST go through repository classes that implement repository contracts.
+
+#### ❌ Incorrect
+
+```php
+class TenantManager
+{
+    public function create(array $data): Tenant
+    {
+        // Direct model access violates repository pattern
+        return Tenant::create($data);
+    }
+}
+```
+
+#### ✅ Correct
+
+```php
+class TenantManager
+{
+    public function __construct(
+        protected readonly TenantRepositoryContract $tenantRepository
+    ) {}
+    
+    public function create(array $data): Tenant
+    {
+        // Use repository for data access
+        return $this->tenantRepository->create($data);
+    }
+}
+```
+
+**Why:** The repository pattern abstracts data access logic, making code more testable, maintainable, and allows for easier database implementation changes.
+
+**Steps to implement:**
+1. Create a contract interface in `app/Domains/{Domain}/Contracts/`
+2. Create a repository implementation in `app/Domains/{Domain}/Repositories/`
+3. Bind the contract to implementation in a service provider
+4. Inject the contract into services that need data access
+
+---
+
+## Security Best Practices
+
+### 8. Authentication and Authorization
+
+**✅ REQUIRED:** All operations that require authentication MUST check for authenticated users. All privileged operations MUST check authorization.
+
+#### ❌ Incorrect
+
+```php
+public function impersonate(Tenant $tenant, string $reason): void
+{
+    // No authentication or authorization check
+    activity()
+        ->causedBy(auth()->user()) // Will fail if not authenticated
+        ->log('Impersonation started');
+}
+```
+
+#### ✅ Correct
+
+```php
+public function impersonate(Tenant $tenant, string $reason): void
+{
+    // Check authentication
+    if (! auth()->check()) {
+        throw new \RuntimeException('Impersonation requires an authenticated user');
+    }
+    
+    // Check authorization
+    if (! auth()->user()->can('impersonate-tenant', $tenant)) {
+        throw new AuthorizationException('Unauthorized to impersonate this tenant');
+    }
+    
+    // Now safe to use auth()->user()
+    activity()
+        ->causedBy(auth()->user())
+        ->log('Impersonation started');
+}
+```
+
+**Why:** Prevents runtime errors and security vulnerabilities by ensuring proper authentication and authorization checks.
+
+**Common scenarios requiring checks:**
+- Impersonation and privileged operations
+- Audit logging with user context
+- Operations that modify data on behalf of a user
+- Support and administrative functions
+
+---
+
+### 9. Defensive Programming with Authentication
+
+**✅ REQUIRED:** When using `auth()->user()` in methods that can be called without authentication, use defensive checks or conditional assignment.
+
+#### ❌ Incorrect
+
+```php
+public function create(array $data): Tenant
+{
+    $tenant = Tenant::create($data);
+    
+    // Will fail if called from CLI, queue, or seeder
+    activity()
+        ->performedOn($tenant)
+        ->causedBy(auth()->user())
+        ->log('Tenant created');
+        
+    return $tenant;
+}
+```
+
+#### ✅ Correct
+
+```php
+public function create(array $data): Tenant
+{
+    $tenant = $this->repository->create($data);
+    
+    // Defensive approach: check authentication first
+    $activity = activity()->performedOn($tenant);
+    
+    if (auth()->check()) {
+        $activity->causedBy(auth()->user());
+    }
+    
+    $activity->log('Tenant created');
+    
+    return $tenant;
+}
+```
+
+**Alternative approach for optional fields:**
+
+```php
+$context = [
+    'action' => 'impersonation',
+    'started_at' => now(),
+];
+
+// Only add user_id if authenticated
+if (auth()->check()) {
+    $context['user_id'] = auth()->id();
+}
+```
+
+**Why:** Allows methods to work in multiple contexts (web requests, CLI commands, queued jobs, seeders) without throwing exceptions.
+
+---
+
+## Validation Best Practices
+
+### 10. Complete Validation Rules
+
+**✅ REQUIRED:** All fields that can be provided by users MUST have validation rules, even if they have defaults or are optional.
+
+#### ❌ Incorrect
+
+```php
+$validator = Validator::make($data, [
+    'name' => ['required', 'string'],
+    'email' => ['required', 'email'],
+    // Missing 'status' field validation even though it's in fillable
+]);
+
+// Setting default without validation
+$validatedData['status'] = $validatedData['status'] ?? TenantStatus::ACTIVE;
+```
+
+#### ✅ Correct
+
+```php
+$validator = Validator::make($data, [
+    'name' => ['required', 'string', 'max:255'],
+    'email' => ['required', 'email', 'max:255'],
+    'status' => ['nullable', 'string', Rule::in(TenantStatus::values())],
+]);
+
+// Now status is validated if provided
+$validatedData['status'] = $validatedData['status'] ?? TenantStatus::ACTIVE;
+```
+
+**Why:** Prevents invalid data from bypassing validation and ensures data integrity at the application level.
+
+**Best practices:**
+- Validate all fillable fields
+- Use `Rule::in()` for enum values
+- Include `max` constraints for strings
+- Use `nullable` for optional fields
+- Validate arrays and nested data structures
+
+---
+
+## PHPDoc Standards
+
+### 11. Accurate Exception Documentation
+
+**✅ REQUIRED:** The `@throws` tag in PHPDoc MUST match the actual exceptions thrown by the method.
+
+#### ❌ Incorrect
+
+```php
+/**
+ * Create a new tenant
+ * 
+ * @throws \InvalidArgumentException If validation fails
+ */
+public function create(array $data): Tenant
+{
+    $validator = Validator::make($data, [...]);
+    
+    if ($validator->fails()) {
+        // Actually throws ValidationException, not InvalidArgumentException
+        throw new ValidationException($validator);
+    }
+}
+```
+
+#### ✅ Correct
+
+```php
+/**
+ * Create a new tenant
+ * 
+ * @throws \Illuminate\Validation\ValidationException If validation fails
+ */
+public function create(array $data): Tenant
+{
+    $validator = Validator::make($data, [...]);
+    
+    if ($validator->fails()) {
+        throw new ValidationException($validator);
+    }
+}
+```
+
+**Why:** Accurate documentation helps developers understand error handling and use try-catch blocks correctly.
+
+---
+
+## Testing Best Practices
+
+### 12. Performance Testing
+
+**✅ RECOMMENDED:** When testing performance constraints, test individual operations rather than averages.
+
+#### ❌ Incorrect
+
+```php
+public function test_performance(): void
+{
+    $start = microtime(true);
+    
+    for ($i = 0; $i < 100; $i++) {
+        $this->service->operation();
+    }
+    
+    $avgTime = ((microtime(true) - $start) * 1000) / 100;
+    
+    // Testing average can miss slow individual calls
+    $this->assertLessThan(10, $avgTime);
+}
+```
+
+#### ✅ Correct
+
+```php
+public function test_performance(): void
+{
+    $maxAllowed = 10; // milliseconds
+    
+    for ($i = 0; $i < 100; $i++) {
+        $start = microtime(true);
+        $this->service->operation();
+        $duration = (microtime(true) - $start) * 1000;
+        
+        // Test each individual call
+        $this->assertLessThan(
+            $maxAllowed,
+            $duration,
+            "Iteration {$i} took {$duration}ms, should be under {$maxAllowed}ms"
+        );
+    }
+}
+```
+
+**Why:** Testing averages can hide slow individual operations. Testing each call ensures consistent performance.
+
+**Note:** Performance tests in unit/integration suites can be unreliable due to system load. Consider dedicated performance test suites for critical paths.
+
+---
+
+## Common Mistakes and How to Avoid Them
+
+### Mistake 6: Direct Model Access in Services
+
+**Problem:** Services directly using `Model::create()` or `Model::find()` instead of repositories.
+
+**Solution:** Always use repository pattern for data access.
+
+```php
+// Before
+class TenantManager
+{
+    public function create(array $data): Tenant
+    {
+        return Tenant::create($data);
+    }
+}
+
+// After
+class TenantManager
+{
+    public function __construct(
+        protected readonly TenantRepositoryContract $repository
+    ) {}
+    
+    public function create(array $data): Tenant
+    {
+        return $this->repository->create($data);
+    }
+}
+```
+
+### Mistake 7: Missing Authentication Checks
+
+**Problem:** Using `auth()->user()` without checking if user is authenticated.
+
+**Solution:** Always check `auth()->check()` before accessing `auth()->user()`.
+
+```php
+// Before
+$activity->causedBy(auth()->user()); // Fails if not authenticated
+
+// After
+if (auth()->check()) {
+    $activity->causedBy(auth()->user());
+}
+```
+
+### Mistake 8: Missing Authorization for Privileged Operations
+
+**Problem:** Allowing any authenticated user to perform privileged operations like impersonation.
+
+**Solution:** Add authorization checks using gates or policies.
+
+```php
+// Before
+public function impersonate(Tenant $tenant): void
+{
+    // Anyone can impersonate!
+}
+
+// After
+public function impersonate(Tenant $tenant): void
+{
+    if (! auth()->user()->can('impersonate-tenant', $tenant)) {
+        throw new AuthorizationException('Unauthorized');
+    }
+}
+```
+
+### Mistake 9: Incomplete Validation Rules
+
+**Problem:** Not validating all user-provided fields, especially optional ones.
+
+**Solution:** Add validation for all fillable fields, using `nullable` for optional ones.
+
+```php
+// Before
+'name' => ['required'],
+// Missing status validation
+
+// After
+'name' => ['required', 'string', 'max:255'],
+'status' => ['nullable', 'string', Rule::in(TenantStatus::values())],
+```
+
+### Mistake 10: Incorrect PHPDoc Exception Types
+
+**Problem:** Documenting wrong exception types in `@throws` tags.
+
+**Solution:** Match `@throws` documentation with actual thrown exceptions.
+
+```php
+// Before
+/** @throws \InvalidArgumentException */
+throw new ValidationException($validator);
+
+// After
+/** @throws \Illuminate\Validation\ValidationException */
+throw new ValidationException($validator);
+```
+
+---
+
+## Code Review Checklist
+
+Before submitting code for review, ensure:
+
+- [ ] All PHP files have `declare(strict_types=1);`
+- [ ] All method parameters have type hints
+- [ ] All methods declare return types
+- [ ] All public/protected methods have PHPDoc blocks with `@return` tags
+- [ ] All migrations use anonymous class format
+- [ ] Data access uses repository pattern (no direct `Model::create()` or `Model::find()` in services)
+- [ ] Authentication checks before using `auth()->user()`
+- [ ] Authorization checks for privileged operations
+- [ ] Complete validation rules for all fillable fields
+- [ ] Accurate `@throws` tags in PHPDoc matching actual exceptions
+- [ ] Code passes Laravel Pint formatting (`./vendor/bin/pint`)
+- [ ] All tests pass (`php artisan test`)
+- [ ] No untyped variables or parameters remain
+
+---
+
 ## Questions or Suggestions
 
 If you have questions about these guidelines or suggestions for improvements, please:

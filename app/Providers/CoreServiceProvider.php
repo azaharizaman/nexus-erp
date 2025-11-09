@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Domains\Core\Contracts\TenantManagerContract;
+use App\Domains\Core\Contracts\TenantRepositoryContract;
+use App\Domains\Core\Repositories\TenantRepository;
 use App\Domains\Core\Services\TenantManager;
 use Illuminate\Support\ServiceProvider;
 
@@ -21,6 +23,9 @@ class CoreServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        // Bind TenantRepository contract to implementation
+        $this->app->singleton(TenantRepositoryContract::class, TenantRepository::class);
+
         // Bind TenantManager contract to implementation
         $this->app->singleton(TenantManagerContract::class, TenantManager::class);
     }
@@ -30,6 +35,12 @@ class CoreServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Define gate for tenant impersonation
+        // Only users with 'super-admin' role or specific permission can impersonate
+        \Illuminate\Support\Facades\Gate::define('impersonate-tenant', function ($user, $tenant) {
+            // Check if user has the impersonate-tenant permission
+            // This allows integration with spatie/laravel-permission or similar
+            return method_exists($user, 'can') && $user->can('impersonate-tenants');
+        });
     }
 }
