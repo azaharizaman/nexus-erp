@@ -124,7 +124,7 @@ class UpdateTenantAction
      */
     public function asCommand(Command $command): void
     {
-        $tenantId = $command->argument('tenant_id');
+        $tenantId = (string) $command->argument('tenant_id');
         $tenant = $this->repository->findById($tenantId);
 
         if (! $tenant) {
