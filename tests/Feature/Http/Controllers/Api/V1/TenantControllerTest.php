@@ -8,6 +8,7 @@ use App\Domains\Core\Enums\TenantStatus;
 use App\Domains\Core\Models\Tenant;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -285,7 +286,7 @@ class TenantControllerTest extends TestCase
     {
         Sanctum::actingAs($this->adminUser);
 
-        $nonExistentId = '00000000-0000-0000-0000-000000000000';
+        $nonExistentId = (string) Str::uuid();
 
         $response = $this->getJson("/api/v1/tenants/{$nonExistentId}");
 
