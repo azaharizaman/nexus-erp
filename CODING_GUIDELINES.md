@@ -188,11 +188,85 @@ public function execute(InventoryItem $item, float $quantity, string $reason): b
 }
 ```
 
+### 6. Use Imported Class Names in PHPDoc
+
+**✅ REQUIRED:** When a class is imported at the top of the file with a `use` statement, PHPDoc blocks MUST use the short class name instead of the fully qualified class name (FQCN).
+
+#### ❌ Incorrect
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Domains\Core\Listeners;
+
+use App\Domains\Core\Events\TenantCreatedEvent;
+use App\Domains\Core\Models\Tenant;
+
+class InitializeTenantDataListener
+{
+    /**
+     * Create default roles for the tenant
+     *
+     * @param  \App\Domains\Core\Models\Tenant  $tenant  // ❌ Don't use FQCN when class is imported
+     */
+    protected function createDefaultRoles(\App\Domains\Core\Models\Tenant $tenant): void
+    {
+        // Implementation
+    }
+}
+```
+
+#### ✅ Correct
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Domains\Core\Listeners;
+
+use App\Domains\Core\Events\TenantCreatedEvent;
+use App\Domains\Core\Models\Tenant;
+
+class InitializeTenantDataListener
+{
+    /**
+     * Create default roles for the tenant
+     *
+     * @param  Tenant  $tenant  // ✅ Use short name when class is imported
+     */
+    protected function createDefaultRoles(Tenant $tenant): void
+    {
+        // Implementation
+    }
+}
+```
+
+**Why:** 
+- **Consistency:** The PHPDoc should match the method signature, which uses the imported class name
+- **Maintainability:** If you change the import (e.g., aliasing), you only update it in one place
+- **Readability:** Shorter, cleaner documentation that's easier to read
+- **IDE Support:** Better autocomplete and navigation when class names are consistent
+- **Laravel/PHP Best Practices:** Following PSR standards and Laravel conventions
+
+**Key Points:**
+- Import the class at the top: `use App\Domains\Core\Models\Tenant;`
+- Use short name in PHPDoc: `@param Tenant $tenant`
+- Use short name in method signature: `function method(Tenant $tenant)`
+- Only use FQCN when the class is NOT imported (rare cases, generally avoid)
+
+**When to use FQCN:**
+- When you need to reference a class without importing it (to avoid naming conflicts)
+- In rare documentation-only scenarios where the class isn't used in the signature
+- Generally, prefer importing the class instead
+
 ---
 
 ## Migration Standards
 
-### 6. Migration Class Format
+### 7. Migration Class Format
 
 **✅ REQUIRED:** Use anonymous migration classes with `return new class extends Migration`.
 
@@ -306,7 +380,50 @@ public function save(Model $model): bool {
 }
 ```
 
-### Mistake 4: Incomplete PHPDoc Blocks
+### Mistake 4: Inconsistent Class Names in PHPDoc
+
+**Problem:** Using fully qualified class names (FQCN) in PHPDoc when the class is already imported leads to inconsistency between documentation and code, making it harder to maintain.
+
+**Solution:** Always use the imported short class name in PHPDoc blocks when the class has a `use` statement at the top of the file.
+
+**Example of fixing:**
+```php
+// Before - Inconsistent (FQCN in PHPDoc, short name in signature)
+use App\Domains\Core\Models\Tenant;
+
+/**
+ * @param  \App\Domains\Core\Models\Tenant  $tenant  // ❌ FQCN doesn't match signature
+ */
+protected function createDefaultRoles(\App\Domains\Core\Models\Tenant $tenant): void
+{
+    // Implementation
+}
+
+// After - Consistent (short name everywhere)
+use App\Domains\Core\Models\Tenant;
+
+/**
+ * @param  Tenant  $tenant  // ✅ Matches the import and signature
+ */
+protected function createDefaultRoles(Tenant $tenant): void
+{
+    // Implementation
+}
+```
+
+**Benefits of consistency:**
+- PHPDoc matches method signature
+- Easier refactoring (change import once)
+- Better IDE support and autocomplete
+- Cleaner, more readable documentation
+- Follows Laravel and PSR conventions
+
+**Detection:**
+- Code review tools will flag FQCN usage when class is imported
+- IDE warnings may indicate redundant FQCN
+- Laravel Pint may not catch this, so manual review is important
+
+### Mistake 5: Incomplete PHPDoc Blocks
 
 **Problem:** Missing `@return` or other PHPDoc tags reduce code documentation quality.
 
@@ -326,7 +443,7 @@ public function save(Model $model): bool {
  */
 ```
 
-### Mistake 5: Using Named Migration Classes
+### Mistake 6: Using Named Migration Classes
 
 **Problem:** Named migration classes can cause conflicts and don't follow Laravel 12+ conventions.
 
@@ -421,7 +538,7 @@ PHPStan will catch type errors, missing return types, and other issues before ru
 
 ## Architecture Patterns
 
-### 7. Repository Pattern
+### 8. Repository Pattern
 
 **✅ REQUIRED:** All data access operations MUST go through repository classes that implement repository contracts.
 
@@ -467,7 +584,7 @@ class TenantManager
 
 ## Security Best Practices
 
-### 8. Authentication and Authorization
+### 9. Authentication and Authorization
 
 **✅ REQUIRED:** All operations that require authentication MUST check for authenticated users. All privileged operations MUST check authorization.
 
@@ -515,7 +632,7 @@ public function impersonate(Tenant $tenant, string $reason): void
 
 ---
 
-### 9. Defensive Programming with Authentication
+### 10. Defensive Programming with Authentication
 
 **✅ REQUIRED:** When using `auth()->user()` in methods that can be called without authentication, use defensive checks or conditional assignment.
 
@@ -576,7 +693,7 @@ if (auth()->check()) {
 
 ## Validation Best Practices
 
-### 10. Complete Validation Rules
+### 11. Complete Validation Rules
 
 **✅ REQUIRED:** All fields that can be provided by users MUST have validation rules, even if they have defaults or are optional.
 
@@ -619,7 +736,7 @@ $validatedData['status'] = $validatedData['status'] ?? TenantStatus::ACTIVE;
 
 ## PHPDoc Standards
 
-### 11. Accurate Exception Documentation
+### 12. Accurate Exception Documentation
 
 **✅ REQUIRED:** The `@throws` tag in PHPDoc MUST match the actual exceptions thrown by the method.
 
@@ -666,7 +783,7 @@ public function create(array $data): Tenant
 
 ## Testing Best Practices
 
-### 12. Performance Testing
+### 13. Performance Testing
 
 **✅ RECOMMENDED:** When testing performance constraints, test individual operations rather than averages.
 
@@ -718,7 +835,7 @@ public function test_performance(): void
 
 ## Common Mistakes and How to Avoid Them
 
-### Mistake 6: Direct Model Access in Services
+### Mistake 7: Direct Model Access in Services
 
 **Problem:** Services directly using `Model::create()` or `Model::find()` instead of repositories.
 
@@ -748,7 +865,7 @@ class TenantManager
 }
 ```
 
-### Mistake 7: Missing Authentication Checks
+### Mistake 8: Missing Authentication Checks
 
 **Problem:** Using `auth()->user()` without checking if user is authenticated.
 
@@ -764,7 +881,7 @@ if (auth()->check()) {
 }
 ```
 
-### Mistake 8: Missing Authorization for Privileged Operations
+### Mistake 9: Missing Authorization for Privileged Operations
 
 **Problem:** Allowing any authenticated user to perform privileged operations like impersonation.
 
@@ -786,7 +903,7 @@ public function impersonate(Tenant $tenant): void
 }
 ```
 
-### Mistake 9: Incomplete Validation Rules
+### Mistake 10: Incomplete Validation Rules
 
 **Problem:** Not validating all user-provided fields, especially optional ones.
 
@@ -802,7 +919,7 @@ public function impersonate(Tenant $tenant): void
 'status' => ['nullable', 'string', Rule::in(TenantStatus::values())],
 ```
 
-### Mistake 10: Incorrect PHPDoc Exception Types
+### Mistake 11: Incorrect PHPDoc Exception Types
 
 **Problem:** Documenting wrong exception types in `@throws` tags.
 
@@ -842,7 +959,7 @@ Before submitting code for review, ensure:
 
 ## Middleware Best Practices
 
-### 13. Avoid N+1 Queries in Middleware
+### 14. Avoid N+1 Queries in Middleware
 
 **✅ REQUIRED:** Middleware should avoid triggering lazy loading that causes N+1 queries, especially for operations that run on every request.
 
@@ -885,7 +1002,7 @@ public function handle(Request $request, Closure $next): Response
 
 ---
 
-### 14. Middleware Ordering and Responsibilities
+### 15. Middleware Ordering and Responsibilities
 
 **✅ REQUIRED:** Middleware should not duplicate responsibilities already handled by other middleware. Document dependencies clearly.
 
@@ -931,7 +1048,7 @@ $middleware->api(append: [
 
 ---
 
-### 15. Complete PHPDoc for Middleware
+### 16. Complete PHPDoc for Middleware
 
 **✅ REQUIRED:** Middleware PHPDoc must document all possible return conditions, especially error responses.
 
@@ -972,7 +1089,7 @@ public function handle(Request $request, Closure $next): Response
 
 ## Testing Best Practices (Continued)
 
-### 16. Unit vs Feature Test Classification
+### 17. Unit vs Feature Test Classification
 
 **✅ REQUIRED:** Unit tests should not depend on database or external systems. Tests using database should be feature/integration tests.
 
@@ -1028,7 +1145,7 @@ class TenantHelperTest extends TestCase
 
 ---
 
-### 17. Avoid Hard-Coded Values in Tests
+### 18. Avoid Hard-Coded Values in Tests
 
 **✅ REQUIRED:** Tests should avoid hard-coded values that might conflict with actual data or be environment-dependent.
 
@@ -1057,7 +1174,7 @@ public function test_handles_missing_tenant(): void
 
 ---
 
-### 18. Performance Tests Should Be Flexible
+### 19. Performance Tests Should Be Flexible
 
 **❌ AVOID:** Hard-coded time limits in performance tests that run in CI environments.
 
@@ -1110,7 +1227,7 @@ public function test_performance(): void
 
 ## Documentation Standards (Continued)
 
-### 19. Qualify Performance Claims
+### 20. Qualify Performance Claims
 
 **✅ REQUIRED:** Performance metrics in documentation must be qualified with conditions and disclaimers.
 
@@ -1140,7 +1257,7 @@ public function test_performance(): void
 
 ## Common Mistakes and How to Avoid Them (Continued)
 
-### Mistake 11: N+1 Queries in Middleware
+### Mistake 12: N+1 Queries in Middleware
 
 **Problem:** Using lazy loading in middleware that runs on every request.
 
@@ -1154,7 +1271,7 @@ $tenant = $user->tenant; // N+1 query
 $tenant = Tenant::find($user->tenant_id); // Direct query
 ```
 
-### Mistake 12: Performance Tests in Test Suites
+### Mistake 13: Performance Tests in Test Suites
 
 **Problem:** Including time-sensitive performance tests in regular test suites.
 
@@ -1171,7 +1288,7 @@ if (env('CI')) {
 }
 ```
 
-### Mistake 13: Unit Tests with Database Dependencies
+### Mistake 14: Unit Tests with Database Dependencies
 
 **Problem:** Placing tests that use database in Unit test directory.
 
@@ -1186,7 +1303,7 @@ use RefreshDatabase;
 // OR use mocking to keep in Unit tests
 ```
 
-### Mistake 14: Incomplete Middleware Documentation
+### Mistake 15: Incomplete Middleware Documentation
 
 **Problem:** Not documenting all error responses and dependencies in middleware PHPDoc.
 
