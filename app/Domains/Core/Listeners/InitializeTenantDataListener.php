@@ -45,7 +45,7 @@ class InitializeTenantDataListener implements ShouldQueue
      * Creates foundational roles like 'admin', 'manager', and 'user' that
      * are common across all tenants in the ERP system.
      *
-     * @param  \App\Domains\Core\Models\Tenant  $tenant  The tenant to initialize roles for
+     * @param  Tenant  $tenant  The tenant to initialize roles for
      */
     protected function createDefaultRoles(\App\Domains\Core\Models\Tenant $tenant): void
     {
