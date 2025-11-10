@@ -74,7 +74,7 @@ This implementation plan establishes a comprehensive, hierarchical settings mana
 ### Implementation Phase 1: Foundation (Database & Core Models)
 
 - GOAL-001: Create settings table, model, enums, and seed default data
-- **Combines:** Database Schema + Setting Model + Settings Seeder
+- **Combines:** Original phases 1-4 (Database Schema + Enums + Setting Model + Settings Seeder)
 
 | Task | Description | Completed | Date |
 |------|-------------|-----------|------|
@@ -105,7 +105,7 @@ This implementation plan establishes a comprehensive, hierarchical settings mana
 ### Implementation Phase 2: Data Access Layer (Repository & Service)
 
 - GOAL-002: Build repository, service layer, facade, and helper function
-- **Combines:** Setting Repository + Settings Service + Settings Facade & Helper
+- **Combines:** Original phases 5-7 (Setting Repository + Settings Service + Settings Facade & Helper)
 
 | Task | Description | Completed | Date |
 |------|-------------|-----------|------|
@@ -147,7 +147,7 @@ This implementation plan establishes a comprehensive, hierarchical settings mana
 ### Implementation Phase 3: Configuration & Validation
 
 - GOAL-003: Define setting schemas, implement validation, and configure caching
-- **Combines:** Setting Schema Definition + Setting Validation + Cache Implementation
+- **Combines:** Original phases 8-10 (Setting Schema Definition + Setting Validation + Cache Implementation)
 
 | Task | Description | Completed | Date |
 |------|-------------|-----------|------|
@@ -182,7 +182,7 @@ This implementation plan establishes a comprehensive, hierarchical settings mana
 ### Implementation Phase 4: API Layer (Endpoints & Resources)
 
 - GOAL-004: Build RESTful API endpoints, routes, and authorization policies
-- **Combines:** API Endpoints + Routes Definition + Authorization Policies
+- **Combines:** Original phases 11-13 (API Endpoints + Routes Definition + Authorization Policies)
 
 | Task | Description | Completed | Date |
 |------|-------------|-----------|------|
@@ -225,7 +225,7 @@ This implementation plan establishes a comprehensive, hierarchical settings mana
 ### Implementation Phase 5: Bulk Operations & CLI
 
 - GOAL-005: Implement import/export and CLI commands for settings management
-- **Combines:** Settings Import/Export + CLI Commands
+- **Combines:** Original phases 14-15 (Settings Import/Export + CLI Commands)
 
 | Task | Description | Completed | Date |
 |------|-------------|-----------|------|
@@ -299,9 +299,6 @@ This implementation plan establishes a comprehensive, hierarchical settings mana
 | TASK-160 | Test settings hierarchy across all three scopes | | |
 | TASK-161 | Test settings audit logging captures changes | | |
 | TASK-162 | Test cache performance improvement | | |
-
-| Task | Description | Completed | Date |
-|------|-------------|-----------|------|
 | TASK-135 | Create SettingsTest feature test in tests/Feature/Core/SettingsTest.php | | |
 | TASK-136 | Test settings() helper returns SettingsService instance | | |
 | TASK-137 | Test get() with hierarchy: user setting overrides tenant overrides global | | |
