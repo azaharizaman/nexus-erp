@@ -2,247 +2,164 @@
 
 declare(strict_types=1);
 
-namespace Tests\Feature\Auth;
-
 use App\Domains\Core\Models\Tenant;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
-use Tests\TestCase;
 
-class SanctumAuthenticationTest extends TestCase
-{
-    use RefreshDatabase;
+uses(RefreshDatabase::class);
 
-    protected User $user;
+beforeEach(function () {
+    $this->tenant = Tenant::factory()->create();
+    $this->user = User::factory()->create([
+        'tenant_id' => $this->tenant->id,
+    ]);
+    $this->adminUser = User::factory()->admin()->create([
+        'tenant_id' => $this->tenant->id,
+    ]);
+});
 
-    protected User $adminUser;
+test('authenticated user can access protected routes', function () {
+    Sanctum::actingAs($this->adminUser);
 
-    protected Tenant $tenant;
+    $response = $this->getJson('/api/v1/tenants');
 
-    protected function setUp(): void
-    {
-        parent::setUp();
+    $response->assertSuccessful();
+});
 
-        $this->tenant = Tenant::factory()->create();
-        $this->user = User::factory()->create([
-            'tenant_id' => $this->tenant->id,
-        ]);
-        $this->adminUser = User::factory()->admin()->create([
-            'tenant_id' => $this->tenant->id,
-        ]);
-    }
+test('unauthenticated user cannot access protected routes', function () {
+    $response = $this->getJson('/api/v1/tenants');
 
-    /**
-     * Test that authenticated users can access protected routes.
-     */
-    public function test_authenticated_user_can_access_protected_routes(): void
-    {
-        Sanctum::actingAs($this->adminUser);
+    $response->assertUnauthorized();
+});
 
-        $response = $this->getJson('/api/v1/tenants');
+test('user can create token with abilities', function () {
+    $token = $this->user->createToken('test-token', ['tenant:read', 'tenant:write']);
 
-        $response->assertSuccessful();
-    }
+    expect($token->plainTextToken)->not->toBeNull();
+    expect($token->accessToken->abilities)->toBe(['tenant:read', 'tenant:write']);
+});
 
-    /**
-     * Test that unauthenticated users cannot access protected routes.
-     */
-    public function test_unauthenticated_user_cannot_access_protected_routes(): void
-    {
-        $response = $this->getJson('/api/v1/tenants');
+test('user can create token without abilities', function () {
+    $token = $this->user->createToken('test-token');
 
-        $response->assertUnauthorized();
-    }
+    expect($token->plainTextToken)->not->toBeNull();
+    expect($token->accessToken->abilities)->toBe(['*']);
+});
 
-    /**
-     * Test that tokens can be created with abilities.
-     */
-    public function test_user_can_create_token_with_abilities(): void
-    {
-        $token = $this->user->createToken('test-token', ['tenant:read', 'tenant:write']);
+test('token abilities are properly checked', function () {
+    $token = $this->user->createToken('test-token', ['tenant:read']);
 
-        $this->assertNotNull($token->plainTextToken);
-        $this->assertEquals(['tenant:read', 'tenant:write'], $token->accessToken->abilities);
-    }
+    Sanctum::actingAs($this->user, ['tenant:read']);
 
-    /**
-     * Test that tokens can be created without abilities (all access).
-     */
-    public function test_user_can_create_token_without_abilities(): void
-    {
-        $token = $this->user->createToken('test-token');
+    expect(auth()->user()->tokenCan('tenant:read'))->toBeTrue();
+    expect(auth()->user()->tokenCan('tenant:write'))->toBeFalse();
+});
 
-        $this->assertNotNull($token->plainTextToken);
-        $this->assertEquals(['*'], $token->accessToken->abilities);
-    }
+test('wildcard ability grants all access', function () {
+    Sanctum::actingAs($this->user, ['*']);
 
-    /**
-     * Test that token abilities are properly checked.
-     */
-    public function test_token_abilities_are_properly_checked(): void
-    {
-        $token = $this->user->createToken('test-token', ['tenant:read']);
+    expect(auth()->user()->tokenCan('tenant:read'))->toBeTrue();
+    expect(auth()->user()->tokenCan('tenant:write'))->toBeTrue();
+    expect(auth()->user()->tokenCan('any:ability'))->toBeTrue();
+});
 
-        Sanctum::actingAs($this->user, ['tenant:read']);
+test('token expiration is configured', function () {
+    $expirationMinutes = config('sanctum.expiration');
 
-        $this->assertTrue(auth()->user()->tokenCan('tenant:read'));
-        $this->assertFalse(auth()->user()->tokenCan('tenant:write'));
-    }
+    expect($expirationMinutes)->not->toBeNull();
+    expect((int) $expirationMinutes)->toBe(480); // 8 hours
+});
 
-    /**
-     * Test that wildcard ability grants all access.
-     */
-    public function test_wildcard_ability_grants_all_access(): void
-    {
-        Sanctum::actingAs($this->user, ['*']);
+test('user can have multiple tokens', function () {
+    $token1 = $this->user->createToken('token-1', ['tenant:read']);
+    $token2 = $this->user->createToken('token-2', ['tenant:write']);
 
-        $this->assertTrue(auth()->user()->tokenCan('tenant:read'));
-        $this->assertTrue(auth()->user()->tokenCan('tenant:write'));
-        $this->assertTrue(auth()->user()->tokenCan('any:ability'));
-    }
+    expect($this->user->tokens)->toHaveCount(2);
+    expect($token1->plainTextToken)->not->toBe($token2->plainTextToken);
+});
 
-    /**
-     * Test that token expiration is properly configured.
-     */
-    public function test_token_expiration_is_configured(): void
-    {
-        $expirationMinutes = config('sanctum.expiration');
+test('user can revoke token', function () {
+    $token = $this->user->createToken('test-token');
 
-        $this->assertNotNull($expirationMinutes);
-        $this->assertEquals(480, $expirationMinutes); // 8 hours
-    }
+    expect($this->user->tokens)->toHaveCount(1);
 
-    /**
-     * Test that user can have multiple tokens.
-     */
-    public function test_user_can_have_multiple_tokens(): void
-    {
-        $token1 = $this->user->createToken('token-1', ['tenant:read']);
-        $token2 = $this->user->createToken('token-2', ['tenant:write']);
+    $this->user->tokens()->delete();
 
-        $this->assertCount(2, $this->user->tokens);
-        $this->assertNotEquals($token1->plainTextToken, $token2->plainTextToken);
-    }
+    expect($this->user->fresh()->tokens)->toHaveCount(0);
+});
 
-    /**
-     * Test that tokens can be revoked.
-     */
-    public function test_user_can_revoke_token(): void
-    {
-        $token = $this->user->createToken('test-token');
+test('user can revoke specific token', function () {
+    $token1 = $this->user->createToken('token-1');
+    $token2 = $this->user->createToken('token-2');
 
-        $this->assertCount(1, $this->user->tokens);
+    expect($this->user->tokens)->toHaveCount(2);
 
-        $this->user->tokens()->delete();
+    $token1->accessToken->delete();
 
-        $this->assertCount(0, $this->user->fresh()->tokens);
-    }
+    expect($this->user->fresh()->tokens)->toHaveCount(1);
+    // After deleting token-1, only token-2 remains (latest)
+    $latestToken = $this->user->tokens()->latest()->first();
+    expect($latestToken->name)->toBe('token-2');
+});
 
-    /**
-     * Test that specific token can be revoked by id.
-     */
-    public function test_user_can_revoke_specific_token(): void
-    {
-        $token1 = $this->user->createToken('token-1');
-        $token2 = $this->user->createToken('token-2');
+test('tokens can have descriptive names', function () {
+    $token = $this->user->createToken('mobile-app-token');
 
-        $this->assertCount(2, $this->user->tokens);
+    expect($token->accessToken->name)->toBe('mobile-app-token');
+});
 
-        $token1->accessToken->delete();
+test('different users have isolated tokens', function () {
+    $user2 = User::factory()->create([
+        'tenant_id' => $this->tenant->id,
+    ]);
 
-        $this->assertCount(1, $this->user->fresh()->tokens);
-        // After deleting token-1, only token-2 remains (latest)
-        $latestToken = $this->user->tokens()->latest()->first();
-        $this->assertEquals('token-2', $latestToken->name);
-    }
+    $this->user->createToken('user1-token');
+    $user2->createToken('user2-token');
 
-    /**
-     * Test that tokens can have descriptive names.
-     */
-    public function test_tokens_can_have_descriptive_names(): void
-    {
-        $token = $this->user->createToken('mobile-app-token');
+    expect($this->user->tokens)->toHaveCount(1);
+    expect($user2->tokens)->toHaveCount(1);
+    expect($this->user->tokens->first()->id)->not->toBe($user2->tokens->first()->id);
+});
 
-        $this->assertEquals('mobile-app-token', $token->accessToken->name);
-    }
+test('token can be used for api authentication', function () {
+    $token = $this->adminUser->createToken('api-token');
 
-    /**
-     * Test that different users have isolated tokens.
-     */
-    public function test_different_users_have_isolated_tokens(): void
-    {
-        $user2 = User::factory()->create([
-            'tenant_id' => $this->tenant->id,
-        ]);
+    $response = $this->withHeaders([
+        'Authorization' => 'Bearer '.$token->plainTextToken,
+    ])->getJson('/api/v1/tenants');
 
-        $this->user->createToken('user1-token');
-        $user2->createToken('user2-token');
+    $response->assertSuccessful();
+});
 
-        $this->assertCount(1, $this->user->tokens);
-        $this->assertCount(1, $user2->tokens);
-        $this->assertNotEquals($this->user->tokens->first()->id, $user2->tokens->first()->id);
-    }
+test('invalid token is rejected', function () {
+    $response = $this->withHeaders([
+        'Authorization' => 'Bearer invalid-token-string',
+    ])->getJson('/api/v1/tenants');
 
-    /**
-     * Test that token can be used for API authentication.
-     */
-    public function test_token_can_be_used_for_api_authentication(): void
-    {
-        $token = $this->adminUser->createToken('api-token');
+    $response->assertUnauthorized();
+});
 
-        $response = $this->withHeaders([
-            'Authorization' => 'Bearer '.$token->plainTextToken,
-        ])->getJson('/api/v1/tenants');
+test('sanctum stateful domains is configured', function () {
+    $statefulDomains = config('sanctum.stateful');
 
-        $response->assertSuccessful();
-    }
+    expect($statefulDomains)->toBeArray();
+    expect($statefulDomains)->toContain('localhost');
+    expect($statefulDomains)->toContain('127.0.0.1');
+});
 
-    /**
-     * Test that invalid token is rejected.
-     */
-    public function test_invalid_token_is_rejected(): void
-    {
-        $response = $this->withHeaders([
-            'Authorization' => 'Bearer invalid-token-string',
-        ])->getJson('/api/v1/tenants');
+test('sanctum guard is configured', function () {
+    $guard = config('sanctum.guard');
 
-        $response->assertUnauthorized();
-    }
+    expect($guard)->toBeArray();
+    expect($guard)->toContain('web');
+});
 
-    /**
-     * Test sanctum stateful domains configuration.
-     */
-    public function test_sanctum_stateful_domains_is_configured(): void
-    {
-        $statefulDomains = config('sanctum.stateful');
+test('sanctum middleware configuration exists', function () {
+    $middleware = config('sanctum.middleware');
 
-        $this->assertIsArray($statefulDomains);
-        $this->assertContains('localhost', $statefulDomains);
-        $this->assertContains('127.0.0.1', $statefulDomains);
-    }
-
-    /**
-     * Test sanctum guard configuration.
-     */
-    public function test_sanctum_guard_is_configured(): void
-    {
-        $guard = config('sanctum.guard');
-
-        $this->assertIsArray($guard);
-        $this->assertContains('web', $guard);
-    }
-
-    /**
-     * Test that middleware configuration exists.
-     */
-    public function test_sanctum_middleware_configuration_exists(): void
-    {
-        $middleware = config('sanctum.middleware');
-
-        $this->assertIsArray($middleware);
-        $this->assertArrayHasKey('authenticate_session', $middleware);
-        $this->assertArrayHasKey('encrypt_cookies', $middleware);
-        $this->assertArrayHasKey('validate_csrf_token', $middleware);
-    }
-}
+    expect($middleware)->toBeArray();
+    expect($middleware)->toHaveKey('authenticate_session');
+    expect($middleware)->toHaveKey('encrypt_cookies');
+    expect($middleware)->toHaveKey('validate_csrf_token');
+});
