@@ -56,8 +56,13 @@ This implementation plan details the integration of the Office Management system
 
 ## 2. Implementation Steps
 
-### Implementation Phase 1: Package Configuration
+> **Note:** This implementation has been condensed from 12 phases to 6 phases for better project management. All 95 original tasks are preserved with their full details. Tasks are grouped by architectural layers for logical flow and reduced context switching.
 
+### Implementation Phase 1: Package Setup & Database Schema
+
+**Objective:** Configure laravel-backoffice package and extend office schema for ERP requirements
+
+#### Package Configuration
 - GOAL-001: Configure laravel-backoffice package for office management
 
 | Task | Description | Completed | Date |
@@ -67,8 +72,7 @@ This implementation plan details the integration of the Office Management system
 | TASK-003 | Review published office migration structure | | |
 | TASK-004 | Verify package configuration for office model | | |
 
-### Implementation Phase 2: Database Schema Extension
-
+#### Database Schema Extension
 - GOAL-002: Extend office schema for tenant isolation and ERP requirements
 
 | Task | Description | Completed | Date |
@@ -83,8 +87,13 @@ This implementation plan details the integration of the Office Management system
 | TASK-012 | Add latitude and longitude columns for mapping (decimal, nullable) | | |
 | TASK-013 | Run migrations to update database schema | | |
 
-### Implementation Phase 3: Model Extension
+---
 
+### Implementation Phase 2: Model & Repository Layer
+
+**Objective:** Extend package Office model and implement repository pattern for data access
+
+#### Model Extension
 - GOAL-003: Extend package Office model with ERP functionality
 
 | Task | Description | Completed | Date |
@@ -103,8 +112,7 @@ This implementation plan details the integration of the Office Management system
 | TASK-025 | Add scopeByType() query scope | | |
 | TASK-026 | Add getFullAddressAttribute() accessor returning formatted address | | |
 
-### Implementation Phase 4: Repository Layer
-
+#### Repository Layer
 - GOAL-004: Implement repository for office data access
 
 | Task | Description | Completed | Date |
@@ -121,8 +129,13 @@ This implementation plan details the integration of the Office Management system
 | TASK-036 | Implement getHierarchy() to build office tree structure | | |
 | TASK-037 | Bind OfficeRepositoryInterface to OfficeRepository in BackofficeServiceProvider | | |
 
-### Implementation Phase 5: Action Classes
+---
 
+### Implementation Phase 3: Business Logic Layer
+
+**Objective:** Create action classes and event system for office operations
+
+#### Action Classes
 - GOAL-005: Create action classes for office operations
 
 | Task | Description | Completed | Date |
@@ -137,8 +150,25 @@ This implementation plan details the integration of the Office Management system
 | TASK-045 | Create GetOfficesByCompanyAction in app/Domains/Backoffice/Actions/GetOfficesByCompanyAction.php | | |
 | TASK-046 | Implement handle() to retrieve offices for a specific company | | |
 
-### Implementation Phase 6: API Controllers & Routes
+#### Events & Listeners
+- GOAL-011: Implement event system for office operations
 
+| Task | Description | Completed | Date |
+|------|-------------|-----------|------|
+| TASK-086 | Create OfficeCreatedEvent in app/Domains/Backoffice/Events/OfficeCreatedEvent.php | | |
+| TASK-087 | Create OfficeUpdatedEvent in app/Domains/Backoffice/Events/OfficeUpdatedEvent.php | | |
+| TASK-088 | Create OfficeDeletedEvent in app/Domains/Backoffice/Events/OfficeDeletedEvent.php | | |
+| TASK-089 | Dispatch events from action classes | | |
+| TASK-090 | Create LogOfficeActivityListener for audit trail | | |
+| TASK-091 | Register events in EventServiceProvider | | |
+
+---
+
+### Implementation Phase 4: API Layer
+
+**Objective:** Build RESTful API with controllers, validation, resources, and authorization
+
+#### API Controllers & Routes
 - GOAL-006: Implement RESTful API endpoints
 
 | Task | Description | Completed | Date |
@@ -153,8 +183,7 @@ This implementation plan details the integration of the Office Management system
 | TASK-054 | Apply auth:sanctum middleware to all routes | | |
 | TASK-055 | Apply can:manage-offices middleware to modification routes | | |
 
-### Implementation Phase 7: Request Validation
-
+#### Request Validation
 - GOAL-007: Implement form requests for input validation
 
 | Task | Description | Completed | Date |
@@ -168,8 +197,7 @@ This implementation plan details the integration of the Office Management system
 | TASK-062 | Define validation rules for partial updates | | |
 | TASK-063 | Add custom validation to verify company belongs to same tenant | | |
 
-### Implementation Phase 8: API Resources
-
+#### API Resources
 - GOAL-008: Create API resource transformers
 
 | Task | Description | Completed | Date |
@@ -183,8 +211,7 @@ This implementation plan details the integration of the Office Management system
 | TASK-070 | Add HATEOAS links | | |
 | TASK-071 | Create OfficeCollection resource | | |
 
-### Implementation Phase 9: Authorization Policies
-
+#### Authorization Policies
 - GOAL-009: Implement authorization policies
 
 | Task | Description | Completed | Date |
@@ -197,8 +224,13 @@ This implementation plan details the integration of the Office Management system
 | TASK-077 | Implement delete() with checks for dependent records | | |
 | TASK-078 | Register OfficePolicy in AuthServiceProvider | | |
 
-### Implementation Phase 10: CLI Commands
+---
 
+### Implementation Phase 5: CLI Commands & Integration
+
+**Objective:** Create CLI commands and set up module integration points
+
+#### CLI Commands
 - GOAL-010: Create CLI commands for office management
 
 | Task | Description | Completed | Date |
@@ -211,21 +243,7 @@ This implementation plan details the integration of the Office Management system
 | TASK-084 | Add filtering options: --tenant, --company, --type | | |
 | TASK-085 | Register commands in Console/Kernel.php | | |
 
-### Implementation Phase 11: Events & Listeners
-
-- GOAL-011: Implement event system for office operations
-
-| Task | Description | Completed | Date |
-|------|-------------|-----------|------|
-| TASK-086 | Create OfficeCreatedEvent in app/Domains/Backoffice/Events/OfficeCreatedEvent.php | | |
-| TASK-087 | Create OfficeUpdatedEvent in app/Domains/Backoffice/Events/OfficeUpdatedEvent.php | | |
-| TASK-088 | Create OfficeDeletedEvent in app/Domains/Backoffice/Events/OfficeDeletedEvent.php | | |
-| TASK-089 | Dispatch events from action classes | | |
-| TASK-090 | Create LogOfficeActivityListener for audit trail | | |
-| TASK-091 | Register events in EventServiceProvider | | |
-
-### Implementation Phase 12: Integration Points
-
+#### Integration Points
 - GOAL-012: Set up integration with other modules
 
 | Task | Description | Completed | Date |
@@ -234,6 +252,14 @@ This implementation plan details the integration of the Office Management system
 | TASK-093 | Create helper method in Office model for warehouse assignment | | |
 | TASK-094 | Create helper method for staff assignment | | |
 | TASK-095 | Add validation for office-company tenant matching | | |
+
+---
+
+### Implementation Phase 6: Testing & Verification
+
+**Objective:** Comprehensive testing across unit, feature, and integration levels
+
+See **Section 6: Testing** below for complete test specifications (31 tests total).
 
 ## 3. Alternatives Considered
 

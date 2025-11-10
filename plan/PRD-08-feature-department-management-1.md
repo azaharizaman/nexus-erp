@@ -54,8 +54,13 @@ This implementation plan details the integration of the Department Management sy
 
 ## 2. Implementation Steps
 
-### Implementation Phase 1: Package Configuration
+> **Note:** This implementation has been condensed from 10 phases to 6 phases for better project management. All 56 original tasks are preserved with their full details. Tasks are grouped by architectural layers for logical flow and reduced context switching.
 
+### Implementation Phase 1: Package Setup & Database Schema
+
+**Objective:** Configure package and extend schema for ERP requirements
+
+#### Package Configuration
 - GOAL-001: Configure package for department management
 
 | Task | Description | Completed | Date |
@@ -64,8 +69,7 @@ This implementation plan details the integration of the Department Management sy
 | TASK-002 | Publish department migrations if separate | | |
 | TASK-003 | Review department migration structure | | |
 
-### Implementation Phase 2: Database Schema
-
+#### Database Schema
 - GOAL-002: Extend schema for ERP requirements
 
 | Task | Description | Completed | Date |
@@ -79,8 +83,13 @@ This implementation plan details the integration of the Department Management sy
 | TASK-010 | Add is_active boolean with default true | | |
 | TASK-011 | Run migrations | | |
 
-### Implementation Phase 3: Model & Enums
+---
 
+### Implementation Phase 2: Model & Repository Layer
+
+**Objective:** Create Department model with relationships and implement repository pattern
+
+#### Model & Enums
 - GOAL-003: Create Department model with relationships
 
 | Task | Description | Completed | Date |
@@ -97,8 +106,7 @@ This implementation plan details the integration of the Department Management sy
 | TASK-021 | Add staff() HasMany relationship | | |
 | TASK-022 | Add scopeActive() and scopeByType() | | |
 
-### Implementation Phase 4: Repository Layer
-
+#### Repository Layer
 - GOAL-004: Implement repository pattern
 
 | Task | Description | Completed | Date |
@@ -110,8 +118,13 @@ This implementation plan details the integration of the Department Management sy
 | TASK-027 | Implement getHierarchy() for tree structure | | |
 | TASK-028 | Bind interface in BackofficeServiceProvider | | |
 
-### Implementation Phase 5: Actions
+---
 
+### Implementation Phase 3: Business Logic Layer
+
+**Objective:** Create action classes and event system
+
+#### Actions
 - GOAL-005: Create action classes
 
 | Task | Description | Completed | Date |
@@ -123,8 +136,24 @@ This implementation plan details the integration of the Department Management sy
 | TASK-033 | Create AssignDepartmentHeadAction | | |
 | TASK-034 | Implement department head assignment logic | | |
 
-### Implementation Phase 6: API Layer
+#### Events
+- GOAL-010: Implement event system
 
+| Task | Description | Completed | Date |
+|------|-------------|-----------|------|
+| TASK-052 | Create DepartmentCreatedEvent | | |
+| TASK-053 | Create DepartmentUpdatedEvent | | |
+| TASK-054 | Create DepartmentDeletedEvent | | |
+| TASK-055 | Create DepartmentHeadAssignedEvent | | |
+| TASK-056 | Register events in EventServiceProvider | | |
+
+---
+
+### Implementation Phase 4: API Layer
+
+**Objective:** Build RESTful API with controllers, validation, resources, and authorization
+
+#### API Layer
 - GOAL-006: Build REST API endpoints
 
 | Task | Description | Completed | Date |
@@ -136,8 +165,7 @@ This implementation plan details the integration of the Department Management sy
 | TASK-039 | Create routes in routes/api.php | | |
 | TASK-040 | Apply middleware | | |
 
-### Implementation Phase 7: Validation & Resources
-
+#### Validation & Resources
 - GOAL-007: Create validation and API resources
 
 | Task | Description | Completed | Date |
@@ -148,8 +176,7 @@ This implementation plan details the integration of the Department Management sy
 | TASK-044 | Create DepartmentResource | | |
 | TASK-045 | Create DepartmentCollection | | |
 
-### Implementation Phase 8: Authorization
-
+#### Authorization
 - GOAL-008: Implement policies
 
 | Task | Description | Completed | Date |
@@ -158,7 +185,11 @@ This implementation plan details the integration of the Department Management sy
 | TASK-047 | Implement policy methods | | |
 | TASK-048 | Register policy in AuthServiceProvider | | |
 
-### Implementation Phase 9: CLI Commands
+---
+
+### Implementation Phase 5: CLI Commands
+
+**Objective:** Create CLI commands for department management
 
 - GOAL-009: Create CLI commands
 
@@ -168,17 +199,13 @@ This implementation plan details the integration of the Department Management sy
 | TASK-050 | Create ListDepartmentsCommand | | |
 | TASK-051 | Register commands | | |
 
-### Implementation Phase 10: Events
+---
 
-- GOAL-010: Implement event system
+### Implementation Phase 6: Testing & Verification
 
-| Task | Description | Completed | Date |
-|------|-------------|-----------|------|
-| TASK-052 | Create DepartmentCreatedEvent | | |
-| TASK-053 | Create DepartmentUpdatedEvent | | |
-| TASK-054 | Create DepartmentDeletedEvent | | |
-| TASK-055 | Create DepartmentHeadAssignedEvent | | |
-| TASK-056 | Register events in EventServiceProvider | | |
+**Objective:** Comprehensive testing across unit, feature, and integration levels
+
+See **Section 6: Testing** below for complete test specifications (13 tests total).
 
 ## 3. Alternatives Considered
 

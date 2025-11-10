@@ -57,8 +57,13 @@ This implementation plan details the integration of the Staff Management system 
 
 ## 2. Implementation Steps
 
-### Implementation Phase 1: Package Configuration
+> **Note:** This implementation has been condensed from 12 phases to 6 phases for better project management. All 100 original tasks are preserved with their full details. Tasks are grouped by architectural layers for logical flow and reduced context switching.
 
+### Implementation Phase 1: Package Setup & Database Schema
+
+**Objective:** Configure package and extend schema for ERP requirements
+
+#### Package Configuration
 - GOAL-001: Configure package for staff management
 
 | Task | Description | Completed | Date |
@@ -67,8 +72,7 @@ This implementation plan details the integration of the Staff Management system 
 | TASK-002 | Publish staff migrations if separate | | |
 | TASK-003 | Review staff table structure | | |
 
-### Implementation Phase 2: Database Schema
-
+#### Database Schema
 - GOAL-002: Extend schema for ERP requirements
 
 | Task | Description | Completed | Date |
@@ -84,8 +88,13 @@ This implementation plan details the integration of the Staff Management system 
 | TASK-012 | Add is_active boolean with default true | | |
 | TASK-013 | Run migrations | | |
 
-### Implementation Phase 3: Model & Enums
+---
 
+### Implementation Phase 2: Model & Repository Layer
+
+**Objective:** Create Staff model with relationships and implement repository pattern
+
+#### Model & Enums
 - GOAL-003: Create Staff model with relationships
 
 | Task | Description | Completed | Date |
@@ -104,8 +113,7 @@ This implementation plan details the integration of the Staff Management system 
 | TASK-025 | Add getFullNameAttribute() accessor | | |
 | TASK-026 | Add getIsManagerAttribute() accessor checking if has direct reports | | |
 
-### Implementation Phase 4: Repository Layer
-
+#### Repository Layer
 - GOAL-004: Implement repository pattern
 
 | Task | Description | Completed | Date |
@@ -120,8 +128,13 @@ This implementation plan details the integration of the Staff Management system 
 | TASK-034 | Implement getOrganizationalChart() for full org chart | | |
 | TASK-035 | Bind interface in BackofficeServiceProvider | | |
 
-### Implementation Phase 5: Services
+---
 
+### Implementation Phase 3: Business Logic Layer
+
+**Objective:** Create services, actions, and event system
+
+#### Services
 - GOAL-005: Create organizational services
 
 | Task | Description | Completed | Date |
@@ -132,8 +145,7 @@ This implementation plan details the integration of the Staff Management system 
 | TASK-039 | Implement getDirectReports() for subordinates | | |
 | TASK-040 | Optimize queries with eager loading | | |
 
-### Implementation Phase 6: Actions
-
+#### Actions
 - GOAL-006: Create action classes
 
 | Task | Description | Completed | Date |
@@ -149,8 +161,26 @@ This implementation plan details the integration of the Staff Management system 
 | TASK-049 | Create TerminateStaffAction | | |
 | TASK-050 | Implement termination with date recording and status update | | |
 
-### Implementation Phase 7: API Layer
+#### Events
+- GOAL-011: Implement event system
 
+| Task | Description | Completed | Date |
+|------|-------------|-----------|------|
+| TASK-090 | Create StaffCreatedEvent | | |
+| TASK-091 | Create StaffUpdatedEvent | | |
+| TASK-092 | Create StaffDeletedEvent | | |
+| TASK-093 | Create StaffTerminatedEvent | | |
+| TASK-094 | Create ManagerAssignedEvent | | |
+| TASK-095 | Dispatch events from actions | | |
+| TASK-096 | Register events in EventServiceProvider | | |
+
+---
+
+### Implementation Phase 4: API Layer
+
+**Objective:** Build RESTful API with controllers, validation, resources, and authorization
+
+#### API Layer
 - GOAL-007: Build REST API endpoints
 
 | Task | Description | Completed | Date |
@@ -168,8 +198,7 @@ This implementation plan details the integration of the Staff Management system 
 | TASK-061 | Apply auth:sanctum middleware | | |
 | TASK-062 | Apply can:manage-staff middleware to modification routes | | |
 
-### Implementation Phase 8: Validation & Resources
-
+#### Validation & Resources
 - GOAL-008: Create validation and API resources
 
 | Task | Description | Completed | Date |
@@ -186,8 +215,7 @@ This implementation plan details the integration of the Staff Management system 
 | TASK-072 | Add computed fields (full_name, is_manager) | | |
 | TASK-073 | Create StaffCollection resource | | |
 
-### Implementation Phase 9: Authorization
-
+#### Authorization
 - GOAL-009: Implement policies
 
 | Task | Description | Completed | Date |
@@ -200,8 +228,13 @@ This implementation plan details the integration of the Staff Management system 
 | TASK-079 | Implement delete() with dependency validation | | |
 | TASK-080 | Register StaffPolicy in AuthServiceProvider | | |
 
-### Implementation Phase 10: CLI Commands
+---
 
+### Implementation Phase 5: CLI Commands & Integration
+
+**Objective:** Create CLI commands and set up cross-module integration
+
+#### CLI Commands
 - GOAL-010: Create CLI commands
 
 | Task | Description | Completed | Date |
@@ -216,22 +249,7 @@ This implementation plan details the integration of the Staff Management system 
 | TASK-088 | Implement handle() displaying tree structure | | |
 | TASK-089 | Register commands in Console/Kernel.php | | |
 
-### Implementation Phase 11: Events
-
-- GOAL-011: Implement event system
-
-| Task | Description | Completed | Date |
-|------|-------------|-----------|------|
-| TASK-090 | Create StaffCreatedEvent | | |
-| TASK-091 | Create StaffUpdatedEvent | | |
-| TASK-092 | Create StaffDeletedEvent | | |
-| TASK-093 | Create StaffTerminatedEvent | | |
-| TASK-094 | Create ManagerAssignedEvent | | |
-| TASK-095 | Dispatch events from actions | | |
-| TASK-096 | Register events in EventServiceProvider | | |
-
-### Implementation Phase 12: Integration
-
+#### Integration
 - GOAL-012: Set up cross-module integration
 
 | Task | Description | Completed | Date |
@@ -240,6 +258,14 @@ This implementation plan details the integration of the Staff Management system 
 | TASK-098 | Create helper to get current user's staff record | | |
 | TASK-099 | Document staff_id foreign key pattern for future modules | | |
 | TASK-100 | Create staff assignment helpers for workflow routing | | |
+
+---
+
+### Implementation Phase 6: Testing & Verification
+
+**Objective:** Comprehensive testing across unit, feature, and integration levels
+
+See **Section 6: Testing** below for complete test specifications (14 tests total).
 
 ## 3. Alternatives Considered
 
