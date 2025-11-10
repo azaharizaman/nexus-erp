@@ -1088,13 +1088,6 @@ class LoggingServiceProvider extends ServiceProvider
 
 **See:** [docs/architecture/PACKAGE-DECOUPLING-STRATEGY.md](docs/architecture/PACKAGE-DECOUPLING-STRATEGY.md) for comprehensive decoupling guide.
 
-**Pattern:**
-1. Create contract in `app/Support/Contracts/`
-2. Create adapter in `app/Support/Services/{Category}/`
-3. Bind in service provider
-4. Inject contract in business code
-5. Never import package classes in domain code
-
 ### 9a. Using Wrapper Traits in Models
 
 **✅ REQUIRED:** Models MUST use our wrapper traits instead of direct package traits to maintain decoupling.
