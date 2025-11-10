@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Domains\Core\Repositories;
 
-use App\Domains\Core\Contracts\TenantRepositoryContract;
 use App\Domains\Core\Models\Tenant;
 use Illuminate\Database\Eloquent\Collection;
+use App\Domains\Core\Contracts\TenantRepositoryContract;
 
 /**
  * Tenant Repository
@@ -63,5 +63,13 @@ class TenantRepository implements TenantRepositoryContract
     public function archive(Tenant $tenant): bool
     {
         return $tenant->delete();
+    }
+
+    /**
+     * Get a query builder for tenants
+     */
+    public function query()
+    {
+        return Tenant::query();
     }
 }

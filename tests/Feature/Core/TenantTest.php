@@ -387,7 +387,7 @@ class TenantTest extends TestCase
         $response = $this->postJson('/api/v1/tenants', []);
 
         $response->assertUnprocessable()
-            ->assertJsonValidationErrors(['name', 'domain', 'billing_email']);
+            ->assertJsonValidationErrors(['name', 'domain', 'contact_email']);
     }
 
     /**

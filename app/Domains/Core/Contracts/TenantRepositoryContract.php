@@ -56,4 +56,11 @@ interface TenantRepositoryContract
      * @param  Tenant  $tenant  The tenant to archive
      */
     public function archive(Tenant $tenant): bool;
+
+    /**
+     * Get a query builder for tenants
+     *
+     * @return \Illuminate\Database\Eloquent\Builder<Tenant>
+     */
+    public function query();
 }

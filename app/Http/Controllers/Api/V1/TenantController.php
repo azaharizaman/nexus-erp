@@ -117,8 +117,10 @@ class TenantController extends Controller
         $this->authorize('view', $tenant);
 
         // Eager load users count if requested
-        if (request()->boolean('with_users_count')) {
-            $tenant->loadCount('users');
+        if (request('with_users_count')) {
+            $tenant->loadCount(['users' => function ($query) {
+                $query->withoutGlobalScope(\App\Domains\Core\Scopes\TenantScope::class);
+            }]);
         }
 
         return TenantResource::make($tenant);

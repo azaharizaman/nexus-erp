@@ -92,9 +92,12 @@ class IdentifyTenantTest extends TestCase
      */
     public function test_middleware_returns_404_when_tenant_not_found(): void
     {
-        // Create user with guaranteed non-existent tenant_id (use a valid UUID format)
-        $nonExistentTenantId = '00000000-0000-0000-0000-000000000000';
-        $user = User::factory()->create(['tenant_id' => $nonExistentTenantId]);
+        // Create user with a tenant, then delete the tenant to simulate non-existent tenant
+        $tenant = Tenant::factory()->create(['name' => 'Test Tenant']);
+        $user = User::factory()->create(['tenant_id' => $tenant->id]);
+
+        // Delete the tenant to make it non-existent
+        $tenant->delete();
 
         $this->actingAs($user);
 
