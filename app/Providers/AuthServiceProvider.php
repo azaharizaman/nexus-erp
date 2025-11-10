@@ -7,6 +7,8 @@ namespace App\Providers;
 use App\Domains\Core\Models\Tenant;
 use App\Domains\Core\Policies\TenantPolicy;
 use App\Models\User;
+use App\Support\Contracts\TokenServiceContract;
+use App\Support\Services\Auth\SanctumTokenService;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
 
@@ -31,7 +33,18 @@ class AuthServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Bind TokenServiceContract to implementation
+        $this->app->singleton(TokenServiceContract::class, function ($app) {
+            $driver = config('packages.token_service', 'sanctum');
+
+            return match ($driver) {
+                'sanctum' => new SanctumTokenService,
+                // Future implementations can be added here:
+                // 'jwt' => new JwtTokenService(),
+                // 'session' => new SessionTokenService(),
+                default => new SanctumTokenService,
+            };
+        });
     }
 
     /**

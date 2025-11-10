@@ -7,19 +7,18 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Domains\Core\Enums\UserStatus;
 use App\Domains\Core\Traits\BelongsToTenant;
+use App\Support\Traits\HasActivityLogging;
+use App\Support\Traits\HasTokens;
+use App\Support\Traits\IsSearchable;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
-use Laravel\Scout\Searchable;
-use Spatie\Activitylog\LogOptions;
-use Spatie\Activitylog\Traits\LogsActivity;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use BelongsToTenant, HasApiTokens, HasFactory, HasUuids, LogsActivity, Notifiable, Searchable;
+    use BelongsToTenant, HasActivityLogging, HasFactory, HasTokens, HasUuids, IsSearchable, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -154,12 +153,15 @@ class User extends Authenticatable
     }
 
     /**
-     * Get the activity log options for the model.
+     * Configure activity logging for this model.
+     *
+     * @return array<string, mixed>
      */
-    public function getActivitylogOptions(): LogOptions
+    protected function configureActivityLogging(): array
     {
-        return LogOptions::defaults()
-            ->logOnly([
+        return [
+            'log_name' => 'users',
+            'log_attributes' => [
                 'name',
                 'email',
                 'status',
@@ -167,32 +169,30 @@ class User extends Authenticatable
                 'is_admin',
                 'mfa_enabled',
                 'last_login_at',
-            ])
-            ->logOnlyDirty()
-            ->dontSubmitEmptyLogs();
+            ],
+            'log_only_dirty' => true,
+            'dont_submit_empty_logs' => true,
+        ];
     }
 
     /**
-     * Get the name of the index associated with the model.
+     * Configure search behavior for this model.
+     *
+     * @return array<string, mixed>
      */
-    public function searchableAs(): string
-    {
-        return 'users';
-    }
-
-    /**
-     * Get the indexable data array for the model.
-     */
-    public function toSearchableArray(): array
+    protected function configureSearchable(): array
     {
         return [
-            'id' => $this->id,
-            'name' => $this->name,
-            'email' => $this->email,
-            'status' => $this->status,
-            'tenant_id' => $this->tenant_id,
-            'is_admin' => $this->is_admin,
-            'created_at' => $this->created_at?->timestamp,
+            'index_name' => 'users',
+            'searchable_fields' => [
+                'id',
+                'name',
+                'email',
+                'status',
+                'tenant_id',
+                'is_admin',
+                'created_at',
+            ],
         ];
     }
 }

@@ -5,18 +5,17 @@ declare(strict_types=1);
 namespace App\Domains\Core\Models;
 
 use App\Domains\Core\Enums\TenantStatus;
+use App\Support\Traits\HasActivityLogging;
+use App\Support\Traits\IsSearchable;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Laravel\Scout\Searchable;
-use Spatie\Activitylog\LogOptions;
-use Spatie\Activitylog\Traits\LogsActivity;
 
 class Tenant extends Model
 {
-    use HasFactory, HasUuids, LogsActivity, Searchable, SoftDeletes;
+    use HasActivityLogging, HasFactory, HasUuids, IsSearchable, SoftDeletes;
 
     /**
      * The attributes that are mass assignable.
@@ -89,12 +88,15 @@ class Tenant extends Model
     }
 
     /**
-     * Get the activity log options for the model.
+     * Configure activity logging for this model.
+     *
+     * @return array<string, mixed>
      */
-    public function getActivitylogOptions(): LogOptions
+    protected function configureActivityLogging(): array
     {
-        return LogOptions::defaults()
-            ->logOnly([
+        return [
+            'log_name' => 'tenants',
+            'log_attributes' => [
                 'name',
                 'domain',
                 'status',
@@ -103,34 +105,32 @@ class Tenant extends Model
                 'contact_name',
                 'contact_email',
                 'contact_phone',
-            ])
-            ->logOnlyDirty()
-            ->dontSubmitEmptyLogs();
+            ],
+            'log_only_dirty' => true,
+            'dont_submit_empty_logs' => true,
+        ];
     }
 
     /**
-     * Get the name of the index associated with the model.
+     * Configure search behavior for this model.
+     *
+     * @return array<string, mixed>
      */
-    public function searchableAs(): string
-    {
-        return 'tenants';
-    }
-
-    /**
-     * Get the indexable data array for the model.
-     */
-    public function toSearchableArray(): array
+    protected function configureSearchable(): array
     {
         return [
-            'id' => $this->id,
-            'name' => $this->name,
-            'domain' => $this->domain,
-            'status' => $this->status,
-            'subscription_plan' => $this->subscription_plan,
-            'billing_email' => $this->billing_email,
-            'contact_name' => $this->contact_name,
-            'contact_email' => $this->contact_email,
-            'created_at' => $this->created_at?->timestamp,
+            'index_name' => 'tenants',
+            'searchable_fields' => [
+                'id',
+                'name',
+                'domain',
+                'status',
+                'subscription_plan',
+                'billing_email',
+                'contact_name',
+                'contact_email',
+                'created_at',
+            ],
         ];
     }
 

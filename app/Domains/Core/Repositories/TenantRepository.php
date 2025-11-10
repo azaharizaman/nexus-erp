@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Domains\Core\Repositories;
 
+use App\Domains\Core\Contracts\TenantRepositoryContract;
 use App\Domains\Core\Models\Tenant;
 use Illuminate\Database\Eloquent\Collection;
-use App\Domains\Core\Contracts\TenantRepositoryContract;
 
 /**
  * Tenant Repository

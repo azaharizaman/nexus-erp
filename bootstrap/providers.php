@@ -5,4 +5,6 @@ return [
     App\Providers\AuthServiceProvider::class,
     App\Providers\CoreServiceProvider::class,
     App\Providers\EventServiceProvider::class,
+    App\Providers\LoggingServiceProvider::class,
+    App\Providers\SearchServiceProvider::class,
 ];

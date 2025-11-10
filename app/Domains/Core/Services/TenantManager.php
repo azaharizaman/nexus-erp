@@ -8,6 +8,7 @@ use App\Domains\Core\Contracts\TenantManagerContract;
 use App\Domains\Core\Contracts\TenantRepositoryContract;
 use App\Domains\Core\Enums\TenantStatus;
 use App\Domains\Core\Models\Tenant;
+use App\Support\Contracts\ActivityLoggerContract;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
@@ -40,7 +41,8 @@ class TenantManager implements TenantManagerContract
      * Create a new TenantManager instance
      */
     public function __construct(
-        protected readonly TenantRepositoryContract $tenantRepository
+        protected readonly TenantRepositoryContract $tenantRepository,
+        protected readonly ActivityLoggerContract $activityLogger
     ) {}
 
     /**
@@ -78,14 +80,8 @@ class TenantManager implements TenantManagerContract
         // Create tenant using repository
         $tenant = $this->tenantRepository->create($validatedData);
 
-        // Log tenant creation
-        $activity = activity()->performedOn($tenant);
-
-        if (auth()->check()) {
-            $activity->causedBy(auth()->user());
-        }
-
-        $activity->log('Tenant created');
+        // Log tenant creation using our abstracted logger
+        $this->activityLogger->log('Tenant created', $tenant);
 
         return $tenant;
     }
@@ -145,15 +141,16 @@ class TenantManager implements TenantManagerContract
 
         app()->instance(self::IMPERSONATION_KEY, $context);
 
-        // Log impersonation for audit trail
-        activity()
-            ->performedOn($tenant)
-            ->causedBy(auth()->user())
-            ->withProperties([
+        // Log impersonation for audit trail using our abstracted logger
+        $this->activityLogger->log(
+            'Tenant impersonation started',
+            $tenant,
+            auth()->user(),
+            [
                 'reason' => $reason,
                 'original_tenant_id' => $currentTenant?->id,
-            ])
-            ->log('Tenant impersonation started');
+            ]
+        );
     }
 
     /**
@@ -165,21 +162,20 @@ class TenantManager implements TenantManagerContract
         $impersonation = app()->has(self::IMPERSONATION_KEY) ? app(self::IMPERSONATION_KEY) : null;
         $currentTenant = $this->current();
 
-        // Log impersonation end
+        // Log impersonation end using our abstracted logger
         if ($currentTenant !== null) {
-            $activity = activity()
-                ->performedOn($currentTenant)
-                ->withProperties([
-                    'duration' => isset($impersonation['started_at'])
-                        ? now()->diffInSeconds($impersonation['started_at'])
-                        : null,
-                ]);
+            $properties = [
+                'duration' => isset($impersonation['started_at'])
+                    ? now()->diffInSeconds($impersonation['started_at'])
+                    : null,
+            ];
 
-            if (auth()->check()) {
-                $activity->causedBy(auth()->user());
-            }
-
-            $activity->log('Tenant impersonation stopped');
+            $this->activityLogger->log(
+                'Tenant impersonation stopped',
+                $currentTenant,
+                auth()->check() ? auth()->user() : null,
+                $properties
+            );
         }
 
         // Restore original tenant
