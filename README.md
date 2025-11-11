@@ -5,6 +5,14 @@
 ![Laravel](https://img.shields.io/badge/Laravel-12+-red)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
+## 🎥 Project Explainer Video
+
+[![Laravel ERP System Explainer](https://img.youtube.com/vi/X9IVHM1Mpl4/maxresdefault.jpg)](https://youtu.be/X9IVHM1Mpl4)
+
+**Watch the video above** to get a comprehensive overview of the Laravel ERP System architecture, features, and capabilities.
+
+---
+
 **Enterprise-grade, headless ERP backend system** built with Laravel 12+ and PHP 8.2+. Designed to rival SAP, Odoo, and Microsoft Dynamics while maintaining superior modularity, extensibility, and agentic capabilities.
 
 This is a **monorepo** containing:
