@@ -1,0 +1,195 @@
+version: '3.9'
+
+services:
+  # Laravel Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: laravel-erp-app
+    working_dir: /workspace
+    environment:
+      APP_NAME: "Laravel ERP"
+      APP_ENV: local
+      APP_DEBUG: "true"
+      APP_URL: http://localhost:8000
+      APP_TIMEZONE: UTC
+      
+      # Database Configuration
+      DB_CONNECTION: pgsql
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_DATABASE: laravel_erp
+      DB_USERNAME: erp_user
+      DB_PASSWORD: erp_password
+      
+      # Cache Configuration
+      CACHE_DRIVER: redis
+      CACHE_REDIS_HOST: redis
+      CACHE_REDIS_PASSWORD: null
+      CACHE_REDIS_PORT: 6379
+      
+      # Queue Configuration
+      QUEUE_CONNECTION: redis
+      REDIS_HOST: redis
+      REDIS_PASSWORD: null
+      REDIS_PORT: 6379
+      
+      # Session Configuration
+      SESSION_DRIVER: redis
+      SESSION_REDIS_HOST: redis
+      SESSION_REDIS_PASSWORD: null
+      SESSION_REDIS_PORT: 6379
+      
+      # Mail Configuration (for development)
+      MAIL_MAILER: log
+      MAIL_FROM_ADDRESS: noreply@laravel-erp.local
+      MAIL_FROM_NAME: "Laravel ERP"
+      
+      # Search Configuration
+      SCOUT_DRIVER: meilisearch
+      MEILISEARCH_HOST: http://meilisearch:7700
+      MEILISEARCH_KEY: masterKey
+      
+    volumes:
+      - .:/workspace
+      - ./docker/php.ini:/usr/local/etc/php/conf.d/99-laravel.ini:ro
+      - ./docker/.bashrc:/home/www-data/.bashrc:ro
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - laravel-erp
+    restart: unless-stopped
+    command: >
+      sh -c "
+        composer install --no-interaction --optimize-autoloader &&
+        npm install &&
+        npm run dev &
+        php artisan serve --host=0.0.0.0 --port=8000
+      "
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: laravel-erp-postgres
+    environment:
+      POSTGRES_DB: laravel_erp
+      POSTGRES_USER: erp_user
+      POSTGRES_PASSWORD: erp_password
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=en_US.UTF-8"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres-init.sql:/docker-entrypoint-initdb.d/01-init.sql:ro
+    ports:
+      - "5432:5432"
+    networks:
+      - laravel-erp
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U erp_user -d laravel_erp"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis Cache & Queue
+  redis:
+    image: redis:7-alpine
+    container_name: laravel-erp-redis
+    command: redis-server --appendonly yes --requirepass ""
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - laravel-erp
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Meilisearch (Full-text Search)
+  meilisearch:
+    image: getmeili/meilisearch:v1.7
+    container_name: laravel-erp-meilisearch
+    environment:
+      MEILI_NO_ANALYTICS: "true"
+      MEILI_ENV: development
+      MEILI_MASTER_KEY: masterKey
+    volumes:
+      - meilisearch_data:/meili_data
+    ports:
+      - "7700:7700"
+    networks:
+      - laravel-erp
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:7700/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # PgAdmin (PostgreSQL Management)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: laravel-erp-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@laravel-erp.local
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+      PGADMIN_CONFIG_ENHANCED_SECURITY: "False"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+      - ./docker/pgadmin-servers.json:/pgadmin4/servers.json:ro
+    ports:
+      - "5050:80"
+    networks:
+      - laravel-erp
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+  # Mailhog (Email Testing)
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: laravel-erp-mailhog
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    networks:
+      - laravel-erp
+    restart: unless-stopped
+
+  # Redis Commander (Redis Management)
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: laravel-erp-redis-commander
+    environment:
+      REDIS_HOSTS: local:redis:6379:0:""
+    ports:
+      - "8081:8081"
+    networks:
+      - laravel-erp
+    depends_on:
+      - redis
+    restart: unless-stopped
+
+networks:
+  laravel-erp:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  meilisearch_data:
+    driver: local
+  pgadmin_data:
+    driver: local

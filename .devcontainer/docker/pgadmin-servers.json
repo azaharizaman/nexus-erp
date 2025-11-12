@@ -1,0 +1,25 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "Laravel ERP (Development)",
+      "Group": "Servers",
+      "Host": "postgres",
+      "Port": 5432,
+      "MaintenanceDB": "postgres",
+      "Username": "erp_user",
+      "Password": "erp_password",
+      "SSLMode": "prefer",
+      "Comment": "Development PostgreSQL database for Laravel ERP"
+    },
+    "2": {
+      "Name": "Local PostgreSQL",
+      "Group": "Servers",
+      "Host": "localhost",
+      "Port": 5432,
+      "MaintenanceDB": "postgres",
+      "Username": "postgres",
+      "SSLMode": "prefer",
+      "Comment": "Local PostgreSQL instance (when running outside Docker)"
+    }
+  }
+}

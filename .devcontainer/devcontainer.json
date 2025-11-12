@@ -1,9 +1,12 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the
 // README at: https://github.com/devcontainers/templates/tree/main/src/php
 {
-	"name": "PHP",
+	"name": "Nexus ERP Dev Container",
+	"dockerComposeFile": "../docker-compose.yml",
+	"service": "app",
+	"workspaceFolder": "/workspace",
 	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-	"image": "mcr.microsoft.com/devcontainers/php:1-8.3-bullseye",
+
 
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	// "features": {},
@@ -17,8 +20,34 @@
 		9000
 	],
 	"features": {
-		"ghcr.io/devcontainers/features/github-cli:1": {},
-		"ghcr.io/devcontainers-extra/features/composer:1": {}
+		"ghcr.io/devcontainers/features/docker-in-docker:2": {
+			"moby": true,
+			"azureDnsAutoDetection": true,
+			"installDockerBuildx": true,
+			"installDockerComposeSwitch": true,
+			"version": "latest",
+			"dockerDashComposeVersion": "v2"
+		}
+	},
+	"runServices": [
+		"app", "db"
+	],
+	"postCreateCommand": "composer install && cp .env.example .env && php artisan key:generate && npm install && npm run dev",
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"bmewburn.vscode-intelephense-client",
+				"esbenp.prettier-vscode",
+				"mikestead.dotenv",
+				"ms-azuretools.vscode-docker",
+				"naumovs.color-highlight",
+				"EditorConfig.EditorConfig",
+				"Github.copilot",
+				"Github.copilot-chat",
+				"Xdebug.php-debug",
+				"Github.github-mcp-server"
+			]
+		}
 	}
 
 	// Use 'postCreateCommand' to run commands after the container is created.
