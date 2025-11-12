@@ -85,9 +85,14 @@ class DatabaseUomRepository implements UomRepositoryContract
      */
     public function create(array $data): Uom
     {
+        // System UOMs should have null tenant_id to be globally available
+        if (!empty($data['is_system'])) {
+            $data['tenant_id'] = null;
+        }
+
         $uom = Uom::create($data);
 
-        return $uom;
+        return $uom->fresh();
     }
 
     /**
