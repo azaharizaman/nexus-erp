@@ -24,7 +24,8 @@ class RequestPasswordResetAction
      */
     public function __construct(
         private readonly UserRepositoryContract $userRepository
-    ) {}
+    ) {
+    }
 
     /**
      * Request password reset for user

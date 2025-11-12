@@ -31,7 +31,7 @@ class TenantPolicyTest extends TestCase
     {
         parent::setUp();
 
-        $this->policy = new TenantPolicy;
+        $this->policy = new TenantPolicy();
         $this->adminUser = User::factory()->create(['is_admin' => true]);
         $this->normalUser = User::factory()->create(['is_admin' => false]);
         $this->tenant = Tenant::factory()->create();

@@ -29,7 +29,8 @@ class LoginAction
      */
     public function __construct(
         private readonly UserRepositoryContract $userRepository
-    ) {}
+    ) {
+    }
 
     /**
      * Authenticate user and generate API token
@@ -59,7 +60,7 @@ class LoginAction
         // Check if account is locked (permanent or temporary)
         if ($user->isLocked()) {
             throw new AccountLockedException(
-                'Account is locked. '.($user->locked_until ? 'Try again after '.$user->locked_until->format('Y-m-d H:i:s') : 'Please contact administrator.')
+                'Account is locked. ' . ($user->locked_until ? 'Try again after ' . $user->locked_until->format('Y-m-d H:i:s') : 'Please contact administrator.')
             );
         }
 

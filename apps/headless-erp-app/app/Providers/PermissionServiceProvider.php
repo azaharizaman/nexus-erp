@@ -25,7 +25,7 @@ class PermissionServiceProvider extends ServiceProvider
             // Could switch based on config in the future
             // $driver = config('packages.permission_service', 'spatie');
 
-            return new SpatiePermissionService;
+            return new SpatiePermissionService();
         });
     }
 

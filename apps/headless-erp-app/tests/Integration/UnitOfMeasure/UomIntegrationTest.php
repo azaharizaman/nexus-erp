@@ -15,11 +15,11 @@ uses(RefreshDatabase::class);
 test('Uom with BelongsToTenant trait filters by current tenant', function () {
     $tenant1 = \Illuminate\Support\Str::uuid();
     $tenant2 = \Illuminate\Support\Str::uuid();
-    
+
     Uom::factory()->create(['tenant_id' => $tenant1]);
     Uom::factory()->create(['tenant_id' => $tenant1]);
     Uom::factory()->create(['tenant_id' => $tenant2]);
-    
+
     // This would require tenant context middleware in real app
     // For now, verify UOMs are created correctly
     expect(Uom::where('tenant_id', $tenant1)->count())->toBe(2);
@@ -28,9 +28,9 @@ test('Uom with BelongsToTenant trait filters by current tenant', function () {
 
 test('Uom with HasActivityLogging trait logs changes', function () {
     $uom = Uom::factory()->create(['name' => 'Original']);
-    
+
     $uom->update(['name' => 'Updated']);
-    
+
     // Activity logging should be recorded (assuming LogsActivity trait is working)
     $uom->refresh();
     expect($uom->name)->toBe('Updated');
@@ -39,13 +39,13 @@ test('Uom with HasActivityLogging trait logs changes', function () {
 test('soft delete preserves audit trail', function () {
     $uom = Uom::factory()->create();
     $id = $uom->id;
-    
+
     // Delete soft deletes
     $uom->delete();
-    
+
     // Should be gone from normal query
     expect(Uom::find($id))->toBeNull();
-    
+
     // But recoverable with withTrashed
     expect(Uom::withTrashed()->find($id))->not->toBeNull();
     expect(Uom::withTrashed()->find($id)->deleted_at)->not->toBeNull();
@@ -61,13 +61,13 @@ test('can query UOMs with multiple scopes chained', function () {
     Uom::factory()->system()->length()->create();
     Uom::factory()->custom()->length()->create(['is_active' => false]);
     Uom::factory()->system()->mass()->create();
-    
+
     // Chain scopes: system AND length AND active
     $result = Uom::system()
         ->category(UomCategory::LENGTH)
         ->active()
         ->get();
-    
+
     expect($result)->toHaveCount(2);
     expect($result->every(fn ($u) => $u->is_system))->toBeTrue();
     expect($result->every(fn ($u) => $u->category === UomCategory::LENGTH))->toBeTrue();
@@ -78,13 +78,13 @@ test('can count UOMs by category', function () {
     Uom::factory()->length()->count(5)->create();
     Uom::factory()->mass()->count(3)->create();
     Uom::factory()->volume()->count(4)->create();
-    
+
     $counts = [
         'LENGTH' => Uom::category(UomCategory::LENGTH)->count(),
         'MASS' => Uom::category(UomCategory::MASS)->count(),
         'VOLUME' => Uom::category(UomCategory::VOLUME)->count(),
     ];
-    
+
     expect($counts['LENGTH'])->toBe(5);
     expect($counts['MASS'])->toBe(3);
     expect($counts['VOLUME'])->toBe(4);
@@ -109,22 +109,22 @@ test('bulk create maintains data integrity', function () {
             'updated_at' => now(),
         ];
     }
-    
+
     \DB::table('uoms')->insert($data);
-    
+
     $created = Uom::where('code', 'like', 'BULK-%')->get();
     expect($created)->toHaveCount(10);
 });
 
 test('concurrent modifications maintain consistency', function () {
     $uom = Uom::factory()->create();
-    
+
     $uom->update(['name' => 'First Update']);
     expect($uom->fresh()->name)->toBe('First Update');
-    
+
     $uom->update(['is_active' => false]);
     expect($uom->fresh()->is_active)->toBeFalse();
-    
+
     $uom->update(['conversion_factor' => '2.5000000000']);
     expect($uom->fresh()->conversion_factor)->toBe('2.5000000000');
 });
@@ -132,10 +132,10 @@ test('concurrent modifications maintain consistency', function () {
 test('can restore soft-deleted UOM', function () {
     $uom = Uom::factory()->create();
     $id = $uom->id;
-    
+
     $uom->delete();
     expect(Uom::find($id))->toBeNull();
-    
+
     // Restore
     Uom::withTrashed()->find($id)->restore();
     expect(Uom::find($id))->not->toBeNull();

@@ -86,7 +86,7 @@ class DatabaseUomRepository implements UomRepositoryContract
     public function create(array $data): Uom
     {
         $uom = Uom::create($data);
-        
+
         return $uom;
     }
 
@@ -100,7 +100,7 @@ class DatabaseUomRepository implements UomRepositoryContract
     public function update(Uom $uom, array $data): Uom
     {
         $uom->update($data);
-        
+
         return $uom->fresh();
     }
 
@@ -151,7 +151,7 @@ class DatabaseUomRepository implements UomRepositoryContract
     public function isInUse(Uom $uom): bool
     {
         $references = $this->getReferences($uom);
-        
+
         return array_sum($references) > 0;
     }
 

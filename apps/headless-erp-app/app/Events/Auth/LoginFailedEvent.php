@@ -15,7 +15,9 @@ use Illuminate\Queue\SerializesModels;
  */
 class LoginFailedEvent
 {
-    use Dispatchable, InteractsWithSockets, SerializesModels;
+    use Dispatchable;
+    use InteractsWithSockets;
+    use SerializesModels;
 
     /**
      * Create a new event instance
@@ -28,5 +30,6 @@ class LoginFailedEvent
         public readonly string $email,
         public readonly string $tenantId,
         public readonly int $attemptsRemaining
-    ) {}
+    ) {
+    }
 }

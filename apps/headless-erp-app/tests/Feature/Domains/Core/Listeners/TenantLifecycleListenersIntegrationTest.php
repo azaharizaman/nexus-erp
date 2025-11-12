@@ -92,7 +92,7 @@ class TenantLifecycleListenersIntegrationTest extends TestCase
         Log::shouldReceive('info')->twice();
         Log::shouldReceive('debug')->times(3);
 
-        $listener = new InitializeTenantDataListener;
+        $listener = new InitializeTenantDataListener();
         $event = new TenantCreatedEvent($tenant);
 
         $listener->handle($event);
@@ -179,7 +179,7 @@ class TenantLifecycleListenersIntegrationTest extends TestCase
      */
     public function test_listener_is_queued(): void
     {
-        $listener = new InitializeTenantDataListener;
+        $listener = new InitializeTenantDataListener();
 
         $this->assertInstanceOf(
             \Illuminate\Contracts\Queue\ShouldQueue::class,

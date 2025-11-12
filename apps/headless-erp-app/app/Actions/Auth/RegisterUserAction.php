@@ -23,7 +23,8 @@ class RegisterUserAction
      */
     public function __construct(
         private readonly UserRepositoryContract $userRepository
-    ) {}
+    ) {
+    }
 
     /**
      * Register a new user

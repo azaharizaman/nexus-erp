@@ -15,7 +15,8 @@ use Illuminate\Queue\SerializesModels;
  */
 class RoleRevokedEvent
 {
-    use Dispatchable, SerializesModels;
+    use Dispatchable;
+    use SerializesModels;
 
     /**
      * Create a new event instance
@@ -26,5 +27,6 @@ class RoleRevokedEvent
     public function __construct(
         public readonly User $user,
         public readonly string|object $role
-    ) {}
+    ) {
+    }
 }

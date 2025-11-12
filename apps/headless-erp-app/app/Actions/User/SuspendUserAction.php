@@ -26,7 +26,8 @@ class SuspendUserAction
     public function __construct(
         private readonly TokenServiceContract $tokenService,
         private readonly ActivityLoggerContract $activityLogger
-    ) {}
+    ) {
+    }
 
     /**
      * Execute the action

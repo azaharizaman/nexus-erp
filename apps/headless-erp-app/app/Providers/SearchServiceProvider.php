@@ -25,12 +25,12 @@ class SearchServiceProvider extends ServiceProvider
             $driver = config('packages.search_driver', 'scout');
 
             return match ($driver) {
-                'scout' => new ScoutSearchService,
+                'scout' => new ScoutSearchService(),
                 // Future implementations can be added here:
                 // 'database' => new DatabaseSearchService(),
                 // 'meilisearch' => new MeilisearchSearchService(),
                 // 'null' => new NullSearchService(),
-                default => new ScoutSearchService,
+                default => new ScoutSearchService(),
             };
         });
     }

@@ -21,7 +21,7 @@ class InitializeTenantDataListenerTest extends TestCase
     {
         parent::setUp();
 
-        $this->listener = new InitializeTenantDataListener;
+        $this->listener = new InitializeTenantDataListener();
     }
 
     /**

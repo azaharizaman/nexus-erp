@@ -14,7 +14,8 @@ use Illuminate\Queue\SerializesModels;
  */
 class RoleCreatedEvent
 {
-    use Dispatchable, SerializesModels;
+    use Dispatchable;
+    use SerializesModels;
 
     /**
      * Create a new event instance
@@ -27,5 +28,6 @@ class RoleCreatedEvent
         public readonly mixed $role,
         public readonly array $permissions,
         public readonly string|int|null $tenantId
-    ) {}
+    ) {
+    }
 }

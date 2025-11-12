@@ -65,7 +65,7 @@ class ListTenantsCommand extends Command
                 // Validate status
                 if (! in_array($status, TenantStatus::values(), true)) {
                     $this->error("Invalid status: {$status}");
-                    $this->line('Valid statuses: '.implode(', ', TenantStatus::values()));
+                    $this->line('Valid statuses: ' . implode(', ', TenantStatus::values()));
 
                     return self::FAILURE;
                 }

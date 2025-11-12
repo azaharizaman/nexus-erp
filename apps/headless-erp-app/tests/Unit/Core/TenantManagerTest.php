@@ -324,7 +324,7 @@ class TenantManagerTest extends TestCase
         foreach ($testPlans as $plan) {
             $data = [
                 'name' => "Tenant with {$plan}",
-                'domain' => strtolower($plan).'.example.com',
+                'domain' => strtolower($plan) . '.example.com',
                 'billing_email' => "billing@{$plan}.com",
                 'subscription_plan' => $plan,
             ];

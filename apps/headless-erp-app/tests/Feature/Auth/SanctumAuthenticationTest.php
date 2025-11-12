@@ -126,7 +126,7 @@ test('token can be used for api authentication', function () {
     $token = $this->adminUser->createToken('api-token');
 
     $response = $this->withHeaders([
-        'Authorization' => 'Bearer '.$token->plainTextToken,
+        'Authorization' => 'Bearer ' . $token->plainTextToken,
     ])->getJson('/api/v1/tenants');
 
     $response->assertSuccessful();

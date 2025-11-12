@@ -25,7 +25,8 @@ class CreateRoleAction
     public function __construct(
         private readonly PermissionServiceContract $permissionService,
         private readonly ActivityLoggerContract $activityLogger
-    ) {}
+    ) {
+    }
 
     /**
      * Execute the action

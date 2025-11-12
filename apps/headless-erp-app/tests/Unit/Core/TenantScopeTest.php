@@ -236,7 +236,7 @@ class TenantScopeTest extends TestCase
 
         $this->actingAs($user);
 
-        $scope = new TenantScope;
+        $scope = new TenantScope();
         $reflection = new \ReflectionClass($scope);
         $method = $reflection->getMethod('getCurrentTenantId');
         $method->setAccessible(true);
@@ -256,7 +256,7 @@ class TenantScopeTest extends TestCase
         // Bind tenant to container
         app()->instance('tenant.current', $tenant);
 
-        $scope = new TenantScope;
+        $scope = new TenantScope();
         $reflection = new \ReflectionClass($scope);
         $method = $reflection->getMethod('getCurrentTenantId');
         $method->setAccessible(true);
@@ -280,7 +280,7 @@ class TenantScopeTest extends TestCase
         // No tenant in container
         app()->forgetInstance('tenant.current');
 
-        $scope = new TenantScope;
+        $scope = new TenantScope();
         $reflection = new \ReflectionClass($scope);
         $method = $reflection->getMethod('getCurrentTenantId');
         $method->setAccessible(true);
@@ -295,7 +295,7 @@ class TenantScopeTest extends TestCase
      */
     public function test_implements_scope_interface(): void
     {
-        $scope = new TenantScope;
+        $scope = new TenantScope();
 
         $this->assertInstanceOf(\Illuminate\Database\Eloquent\Scope::class, $scope);
     }

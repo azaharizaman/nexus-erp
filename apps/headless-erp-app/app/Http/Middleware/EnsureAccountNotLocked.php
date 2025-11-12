@@ -46,7 +46,7 @@ class EnsureAccountNotLocked
 
             // Account is still locked
             throw new AccountLockedException(
-                'Account is locked. '.($user->locked_until ? 'Try again after '.$user->locked_until->format('Y-m-d H:i:s') : 'Please contact administrator.')
+                'Account is locked. ' . ($user->locked_until ? 'Try again after ' . $user->locked_until->format('Y-m-d H:i:s') : 'Please contact administrator.')
             );
         }
 

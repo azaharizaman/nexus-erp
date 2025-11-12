@@ -15,7 +15,8 @@ use Illuminate\Queue\SerializesModels;
  */
 class UserSuspendedEvent
 {
-    use Dispatchable, SerializesModels;
+    use Dispatchable;
+    use SerializesModels;
 
     /**
      * Create a new event instance
@@ -26,5 +27,6 @@ class UserSuspendedEvent
     public function __construct(
         public readonly User $user,
         public readonly string $reason
-    ) {}
+    ) {
+    }
 }

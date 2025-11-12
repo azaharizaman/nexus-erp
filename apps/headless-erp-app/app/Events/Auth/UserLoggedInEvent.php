@@ -16,7 +16,9 @@ use Illuminate\Queue\SerializesModels;
  */
 class UserLoggedInEvent
 {
-    use Dispatchable, InteractsWithSockets, SerializesModels;
+    use Dispatchable;
+    use InteractsWithSockets;
+    use SerializesModels;
 
     /**
      * Create a new event instance
@@ -29,5 +31,6 @@ class UserLoggedInEvent
         public readonly User $user,
         public readonly string $token,
         public readonly string $deviceName
-    ) {}
+    ) {
+    }
 }

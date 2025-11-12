@@ -53,7 +53,7 @@ trait HasTokens
 
         // Apply token prefix if configured
         if (isset($config['token_prefix'])) {
-            $name = $config['token_prefix'].'-'.$name;
+            $name = $config['token_prefix'] . '-' . $name;
         }
 
         return $this->createToken($name, $abilities);

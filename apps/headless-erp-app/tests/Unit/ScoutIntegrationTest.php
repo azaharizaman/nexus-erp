@@ -13,14 +13,14 @@ class ScoutIntegrationTest extends TestCase
 
     public function test_user_model_uses_searchable_trait(): void
     {
-        $user = new User;
+        $user = new User();
         // Check for our wrapper trait instead of direct Scout trait
         $this->assertContains('App\Support\Traits\IsSearchable', class_uses($user));
     }
 
     public function test_user_model_has_searchable_as_method(): void
     {
-        $user = new User;
+        $user = new User();
         $this->assertEquals('users', $user->searchableAs());
     }
 
@@ -47,14 +47,14 @@ class ScoutIntegrationTest extends TestCase
 
     public function test_tenant_model_uses_searchable_trait(): void
     {
-        $tenant = new Tenant;
+        $tenant = new Tenant();
         // Check for our wrapper trait instead of direct Scout trait
         $this->assertContains('App\Support\Traits\IsSearchable', class_uses($tenant));
     }
 
     public function test_tenant_model_has_searchable_as_method(): void
     {
-        $tenant = new Tenant;
+        $tenant = new Tenant();
         $this->assertEquals('tenants', $tenant->searchableAs());
     }
 

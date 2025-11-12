@@ -26,7 +26,8 @@ class UserRepository implements UserRepositoryContract
      */
     public function __construct(
         private readonly User $model
-    ) {}
+    ) {
+    }
 
     /**
      * Find a user by ID

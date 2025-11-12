@@ -16,7 +16,9 @@ use Illuminate\Queue\SerializesModels;
  */
 class UserRegisteredEvent
 {
-    use Dispatchable, InteractsWithSockets, SerializesModels;
+    use Dispatchable;
+    use InteractsWithSockets;
+    use SerializesModels;
 
     /**
      * Create a new event instance
@@ -25,5 +27,6 @@ class UserRegisteredEvent
      */
     public function __construct(
         public readonly User $user
-    ) {}
+    ) {
+    }
 }

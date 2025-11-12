@@ -16,7 +16,9 @@ use Illuminate\Queue\SerializesModels;
  */
 class UserLoggedOutEvent
 {
-    use Dispatchable, InteractsWithSockets, SerializesModels;
+    use Dispatchable;
+    use InteractsWithSockets;
+    use SerializesModels;
 
     /**
      * Create a new event instance
@@ -27,5 +29,6 @@ class UserLoggedOutEvent
     public function __construct(
         public readonly User $user,
         public readonly ?int $tokenId
-    ) {}
+    ) {
+    }
 }

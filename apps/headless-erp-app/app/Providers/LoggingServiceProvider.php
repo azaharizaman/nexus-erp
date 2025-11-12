@@ -25,11 +25,11 @@ class LoggingServiceProvider extends ServiceProvider
             $driver = config('packages.activity_logger', 'spatie');
 
             return match ($driver) {
-                'spatie' => new SpatieActivityLogger,
+                'spatie' => new SpatieActivityLogger(),
                 // Future implementations can be added here:
                 // 'database' => new DatabaseActivityLogger(),
                 // 'null' => new NullActivityLogger(),
-                default => new SpatieActivityLogger,
+                default => new SpatieActivityLogger(),
             };
         });
     }

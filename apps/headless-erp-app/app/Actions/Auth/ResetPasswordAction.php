@@ -23,7 +23,8 @@ class ResetPasswordAction
      */
     public function __construct(
         private readonly UserRepositoryContract $userRepository
-    ) {}
+    ) {
+    }
 
     /**
      * Reset user password with token

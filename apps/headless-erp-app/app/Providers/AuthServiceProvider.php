@@ -43,11 +43,11 @@ class AuthServiceProvider extends ServiceProvider
             $driver = config('packages.token_service', 'sanctum');
 
             return match ($driver) {
-                'sanctum' => new SanctumTokenService,
+                'sanctum' => new SanctumTokenService(),
                 // Future implementations can be added here:
                 // 'jwt' => new JwtTokenService(),
                 // 'session' => new SessionTokenService(),
-                default => new SanctumTokenService,
+                default => new SanctumTokenService(),
             };
         });
     }
