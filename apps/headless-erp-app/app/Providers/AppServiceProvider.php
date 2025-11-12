@@ -16,7 +16,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Bind UOM Repository
+        $this->app->bind(
+            \App\Contracts\UomRepositoryContract::class,
+            \App\Repositories\DatabaseUomRepository::class
+        );
     }
 
     /**
