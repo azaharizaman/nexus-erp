@@ -58,11 +58,35 @@ class TenantRepository implements TenantRepositoryContract
     }
 
     /**
-     * Archive (soft delete) a tenant
+     * Delete (soft delete) a tenant
      */
-    public function archive(Tenant $tenant): bool
+    public function delete(Tenant $tenant): bool
     {
         return $tenant->delete();
+    }
+
+    /**
+     * Get paginated tenants with optional filters
+     */
+    public function paginate(int $perPage = 15, array $filters = [])
+    {
+        $query = Tenant::query();
+
+        // Apply status filter
+        if (! empty($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+
+        // Apply search filter
+        if (! empty($filters['search'])) {
+            $search = $filters['search'];
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('domain', 'like', "%{$search}%");
+            });
+        }
+
+        return $query->latest()->paginate($perPage);
     }
 
     /**

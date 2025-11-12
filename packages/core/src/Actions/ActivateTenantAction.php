@@ -36,11 +36,12 @@ class ActivateTenantAction
      * Handle the action
      *
      * @param  Tenant  $tenant  The tenant to activate
+     * @param  string|null  $reason  The reason for activation
      * @return Tenant The activated tenant
      *
      * @throws \InvalidArgumentException If tenant is already active
      */
-    public function handle(Tenant $tenant): Tenant
+    public function handle(Tenant $tenant, ?string $reason = null): Tenant
     {
         // Check if tenant is not already active
         if ($tenant->isActive()) {
@@ -59,11 +60,16 @@ class ActivateTenantAction
         $tenant->refresh();
 
         // Log activity
+        $logProperties = ['previous_status' => $previousStatus->value];
+        if ($reason !== null) {
+            $logProperties['reason'] = $reason;
+        }
+
         $this->activityLogger->log(
             'Tenant activated',
             $tenant,
             auth()->check() ? auth()->user() : null,
-            ['previous_status' => $previousStatus->value]
+            $logProperties
         );
 
         // Dispatch event
@@ -76,10 +82,11 @@ class ActivateTenantAction
      * Make action available as a job
      *
      * @param  Tenant  $tenant  The tenant to activate
+     * @param  string|null  $reason  The reason for activation
      */
-    public function asJob(Tenant $tenant): void
+    public function asJob(Tenant $tenant, ?string $reason = null): void
     {
-        $this->handle($tenant);
+        $this->handle($tenant, $reason);
     }
 
     /**

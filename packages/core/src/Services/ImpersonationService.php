@@ -55,7 +55,7 @@ class ImpersonationService
         }
 
         // Get original tenant ID (may be null for system admins)
-        $originalTenantId = $user->tenant_id;
+        $originalTenantId = $user->tenant_id !== null ? (string) $user->tenant_id : null;
 
         // Store impersonation context in Redis
         $cacheKey = $this->getCacheKey($user->id);
@@ -63,7 +63,7 @@ class ImpersonationService
 
         $impersonationData = [
             'original_tenant_id' => $originalTenantId,
-            'target_tenant_id' => $tenant->id,
+            'target_tenant_id' => (string) $tenant->id,
             'reason' => $reason,
             'started_at' => now()->timestamp,
             'user_id' => $user->id,
@@ -108,17 +108,34 @@ class ImpersonationService
         $duration = now()->timestamp - $impersonationData['started_at'];
 
         // Get target tenant for event
-        $targetTenant = $this->tenantRepository->findById((string) $impersonationData['target_tenant_id']);
+        $targetTenant = $this->tenantRepository->findById($impersonationData['target_tenant_id']);
+
+        if ($targetTenant === null) {
+            // Log error - target tenant was deleted during impersonation
+            \Illuminate\Support\Facades\Log::error('Target tenant not found when ending impersonation', [
+                'tenant_id' => $impersonationData['target_tenant_id'],
+                'user_id' => $user->id,
+            ]);
+        }
 
         // Restore original tenant if it existed
         if ($impersonationData['original_tenant_id'] !== null) {
-            $originalTenant = $this->tenantRepository->findById((string) $impersonationData['original_tenant_id']);
+            $originalTenant = $this->tenantRepository->findById($impersonationData['original_tenant_id']);
             if ($originalTenant !== null) {
                 $this->tenantManager->setActive($originalTenant);
+            } else {
+                // Log warning: original tenant not found during restoration
+                \Illuminate\Support\Facades\Log::warning('Original tenant not found during impersonation end', [
+                    'tenant_id' => $impersonationData['original_tenant_id'],
+                    'user_id' => $user->id,
+                ]);
             }
         }
 
-        // Log activity
+        // Clear impersonation cache
+        Cache::forget($cacheKey);
+
+        // Log activity and dispatch event only if tenant still exists
         if ($targetTenant !== null) {
             $this->activityLogger->log(
                 'Tenant impersonation ended',
@@ -129,13 +146,7 @@ class ImpersonationService
                     'original_tenant_id' => $impersonationData['original_tenant_id'],
                 ]
             );
-        }
 
-        // Clear impersonation cache
-        Cache::forget($cacheKey);
-
-        // Dispatch event
-        if ($targetTenant !== null) {
             event(new TenantImpersonationEndedEvent($targetTenant, $user->id, $duration));
         }
     }
@@ -155,6 +166,11 @@ class ImpersonationService
     /**
      * Get the original tenant before impersonation
      *
+     * Returns null if:
+     * - There is no impersonation data (not impersonating)
+     * - The original tenant ID is null (system admin)
+     * - The original tenant has been deleted
+     *
      * @param  User  $user  The user
      */
     public function getOriginalTenant(User $user): ?Tenant
@@ -162,11 +178,27 @@ class ImpersonationService
         $cacheKey = $this->getCacheKey($user->id);
         $impersonationData = Cache::get($cacheKey);
 
-        if ($impersonationData === null || $impersonationData['original_tenant_id'] === null) {
+        if ($impersonationData === null) {
+            // Not impersonating
             return null;
         }
 
-        return $this->tenantRepository->findById((string) $impersonationData['original_tenant_id']);
+        if ($impersonationData['original_tenant_id'] === null) {
+            // No original tenant (system admin)
+            return null;
+        }
+
+        $originalTenant = $this->tenantRepository->findById($impersonationData['original_tenant_id']);
+
+        if ($originalTenant === null) {
+            // Original tenant has been deleted
+            \Illuminate\Support\Facades\Log::warning('Original tenant has been deleted during impersonation', [
+                'tenant_id' => $impersonationData['original_tenant_id'],
+                'user_id' => $user->id,
+            ]);
+        }
+
+        return $originalTenant;
     }
 
     /**

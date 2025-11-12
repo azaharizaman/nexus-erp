@@ -51,11 +51,20 @@ interface TenantRepositoryContract
     public function update(Tenant $tenant, array $data): bool;
 
     /**
-     * Archive (soft delete) a tenant
+     * Delete (soft delete) a tenant
      *
-     * @param  Tenant  $tenant  The tenant to archive
+     * @param  Tenant  $tenant  The tenant to delete
      */
-    public function archive(Tenant $tenant): bool;
+    public function delete(Tenant $tenant): bool;
+
+    /**
+     * Get paginated tenants with optional filters
+     *
+     * @param  int  $perPage  Number of items per page
+     * @param  array<string, mixed>  $filters  Filter criteria (status, search)
+     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
+     */
+    public function paginate(int $perPage = 15, array $filters = []);
 
     /**
      * Get a query builder for tenants

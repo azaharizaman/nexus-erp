@@ -23,11 +23,11 @@ class TenantImpersonationEndedEvent
      *
      * @param  Tenant  $tenant  The tenant that was being impersonated
      * @param  int  $userId  The user ending the impersonation
-     * @param  int|null  $duration  Duration of impersonation in seconds
+     * @param  int  $duration  Duration of impersonation in seconds
      */
     public function __construct(
         public readonly Tenant $tenant,
         public readonly int $userId,
-        public readonly ?int $duration = null
+        public readonly int $duration
     ) {}
 }

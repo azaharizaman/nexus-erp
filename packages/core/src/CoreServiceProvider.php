@@ -64,22 +64,44 @@ class CoreServiceProvider extends ServiceProvider
         $router = $this->app['router'];
         $router->aliasMiddleware('tenant', IdentifyTenant::class);
         $router->aliasMiddleware('tenant.active', EnsureTenantActive::class);
-        $router->aliasMiddleware('impersonation', \Azaharizaman\Erp\Core\Http\Middleware\ImpersonationMiddleware::class);
+
+        // Define Gates for tenant management
+        Gate::define('view-tenants', function ($user) {
+            return $user->hasRole('admin');
+        });
+
+        Gate::define('view-tenant', function ($user, Tenant $tenant) {
+            return $user->hasRole('admin');
+        });
+
+        Gate::define('create-tenant', function ($user) {
+            return $user->hasRole('admin');
+        });
+
+        Gate::define('update-tenant', function ($user, Tenant $tenant) {
+            return $user->hasRole('admin');
+        });
+
+        Gate::define('suspend-tenant', function ($user, Tenant $tenant) {
+            return $user->hasRole('admin');
+        });
+
+        Gate::define('activate-tenant', function ($user, Tenant $tenant) {
+            return $user->hasRole('admin');
+        });
+
+        Gate::define('archive-tenant', function ($user, Tenant $tenant) {
+            return $user->hasRole('admin');
+        });
+
+        Gate::define('delete-tenant', function ($user, Tenant $tenant) {
+            return $user->hasRole('admin');
+        });
 
         // Define Gate for tenant impersonation
         Gate::define('impersonate-tenant', function ($user, Tenant $tenant) {
             // Allow users with 'admin' or 'support' role to impersonate
             return $user->hasRole('admin') || $user->hasRole('support');
-        });
-
-        // Define Gate for creating tenants
-        Gate::define('create-tenant', function ($user) {
-            return $user->hasRole('admin');
-        });
-
-        // Define Gate for updating tenants
-        Gate::define('update-tenant', function ($user, Tenant $tenant) {
-            return $user->hasRole('admin');
         });
     }
 }

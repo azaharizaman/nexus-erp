@@ -62,6 +62,9 @@ class UpdateTenantAction
         // Update tenant using repository
         $this->repository->update($tenant, $validatedData);
 
+        // Clear tenant cache
+        $this->clearTenantCache($tenant);
+
         // Refresh the model to get updated values
         $tenant->refresh();
 
@@ -69,6 +72,23 @@ class UpdateTenantAction
         event(new TenantUpdatedEvent($tenant, $originalData));
 
         return $tenant;
+    }
+
+    /**
+     * Clear all caches related to the tenant
+     *
+     * @param  Tenant  $tenant  The tenant
+     */
+    protected function clearTenantCache(Tenant $tenant): void
+    {
+        // Clear tenant-specific cache keys
+        \Illuminate\Support\Facades\Cache::forget("tenant:{$tenant->id}");
+        \Illuminate\Support\Facades\Cache::forget("tenant:domain:{$tenant->domain}");
+
+        // Clear any other tenant-related cache tags if using cache tagging
+        if (config('cache.default') === 'redis') {
+            \Illuminate\Support\Facades\Cache::tags(['tenants', "tenant:{$tenant->id}"])->flush();
+        }
     }
 
     /**
