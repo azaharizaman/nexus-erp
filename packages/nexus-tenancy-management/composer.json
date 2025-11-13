@@ -18,9 +18,9 @@
     ],
     "require": {
         "php": "^8.2",
-        "illuminate/support": "^11.0|^12.0",
-        "illuminate/database": "^11.0|^12.0",
-        "illuminate/console": "^11.0|^12.0",
+        "illuminate/support": "^10.0 || ^11.0 || ^12.0 || 13.0.x-dev",
+        "illuminate/database": "^10.0 || ^11.0 || ^12.0 || 13.0.x-dev",
+        "illuminate/console": "^10.0 || ^11.0 || ^12.0 || 13.0.x-dev",
         "nexus/contracts": "dev-main",
         "lorisleiva/laravel-actions": "^2.0"
     },

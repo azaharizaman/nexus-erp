@@ -8,7 +8,7 @@ use App\Events\Auth\UserSuspendedEvent;
 use App\Models\User;
 use App\Support\Contracts\ActivityLoggerContract;
 use App\Support\Contracts\TokenServiceContract;
-use Nexus\Erp\Core\Enums\UserStatus;
+use Nexus\Core\Enums\UserStatus;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 /**

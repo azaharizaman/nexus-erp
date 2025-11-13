@@ -6,8 +6,8 @@
         "php": "^8.2",
         "brick/math": "^0.11|^0.12|^0.13|^0.14",
         "symfony/polyfill-mbstring": "^1.27",
-        "illuminate/support": "^10.24|^11.0|^12.0",
-        "nesbot/carbon": "^3.0@dev",
+        "illuminate/support": "^10.0 || ^11.0 || ^12.0 || 13.0.x-dev",
+        "nesbot/carbon": "^2.71 || ^3.0",
         "nexus/contracts": "dev-main"
     },
     "require-dev": {
@@ -49,7 +49,7 @@
     "extra": {
         "laravel": {
             "providers": [
-                "Azaharizaman\\LaravelUomManagement\\LaravelUomManagementServiceProvider"
+                "Nexus\\UomManagement\\UomManagementServiceProvider"
             ]
         }
     }

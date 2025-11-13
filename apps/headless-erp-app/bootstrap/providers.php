@@ -3,9 +3,10 @@
 return [
     App\Providers\AppServiceProvider::class,
     App\Providers\AuthServiceProvider::class,
-    Nexus\Erp\Core\CoreServiceProvider::class,
     App\Providers\EventServiceProvider::class,
     App\Providers\LoggingServiceProvider::class,
     App\Providers\PermissionServiceProvider::class,
     App\Providers\SearchServiceProvider::class,
+    Nexus\Core\CoreServiceProvider::class,
+    Nexus\TenancyManagement\TenancyManagementServiceProvider::class,
 ];

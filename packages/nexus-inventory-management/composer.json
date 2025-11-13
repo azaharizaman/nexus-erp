@@ -32,12 +32,12 @@
     "minimum-stability": "dev",
     "require": {
         "php": "^8.2",
-        "illuminate/support": "^10.0 || ^11.0 || 13.0.x-dev",
-        "illuminate/database": "^10.0 || ^11.0 || 13.0.x-dev",
-        "illuminate/contracts": "^10.0 || ^11.0 || 13.0.x-dev",
+        "illuminate/support": "^10.0 || ^11.0 || ^12.0 || 13.0.x-dev",
+        "illuminate/database": "^10.0 || ^11.0 || ^12.0 || 13.0.x-dev",
+        "illuminate/contracts": "^10.0 || ^11.0 || ^12.0 || 13.0.x-dev",
         "symfony/polyfill-mbstring": "^1.27",
         "composer/installers": "^2.2",
-        "nesbot/carbon": "^2.71",
+        "nesbot/carbon": "^2.71 || ^3.0",
         "nexus/contracts": "dev-main",
         "nexus/uom-management": "dev-main",
         "nexus/backoffice-management": "dev-main"

@@ -7,12 +7,20 @@
     "license": "MIT",
     "require": {
         "php": "^8.3",
-        "azaharizaman/erp-core": "dev-main",
         "laravel/framework": "^12.0",
         "laravel/sanctum": "^4.2",
         "laravel/scout": "^10.0",
         "laravel/tinker": "^2.10.1",
         "lorisleiva/laravel-actions": "^2.0",
+        "nexus/audit-log": "dev-main",
+        "nexus/backoffice-management": "dev-main",
+        "nexus/contracts": "dev-main",
+        "nexus/core": "dev-main",
+        "nexus/inventory-management": "dev-main",
+        "nexus/sequencing-management": "dev-main",
+        "nexus/settings-management": "dev-main",
+        "nexus/tenancy-management": "dev-main",
+        "nexus/uom-management": "dev-main",
         "predis/predis": "^3.2",
         "spatie/laravel-activitylog": "^4.0",
         "spatie/laravel-permission": "^6.0"
@@ -95,7 +103,8 @@
         "sort-packages": true,
         "allow-plugins": {
             "pestphp/pest-plugin": true,
-            "php-http/discovery": true
+            "php-http/discovery": true,
+            "composer/installers": true
         }
     },
     "minimum-stability": "stable",

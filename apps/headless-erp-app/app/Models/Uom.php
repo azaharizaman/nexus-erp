@@ -6,7 +6,7 @@ namespace App\Models;
 
 use App\Enums\UomCategory;
 use App\Support\Traits\HasActivityLogging;
-use Nexus\Erp\Core\Traits\BelongsToTenant;
+use Nexus\TenancyManagement\Traits\BelongsToTenant;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;

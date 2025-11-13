@@ -21,7 +21,7 @@ use Illuminate\Database\DatabaseManager;
 use Spatie\LaravelPackageTools\Package;
 use Spatie\LaravelPackageTools\PackageServiceProvider;
 
-class LaravelUomManagementServiceProvider extends PackageServiceProvider
+class UomManagementServiceProvider extends PackageServiceProvider
 {
     public function configurePackage(Package $package): void
     {

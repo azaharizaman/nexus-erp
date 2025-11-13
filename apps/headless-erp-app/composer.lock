@@ -4,58 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "fd447e60fcc05aed4b0c07a6bb33ce5f",
+    "content-hash": "4ea7cc871c35f418d5da15a64b5d13dc",
     "packages": [
-        {
-            "name": "azaharizaman/erp-core",
-            "version": "dev-main",
-            "dist": {
-                "type": "path",
-                "url": "../../packages/core",
-                "reference": "44fdbd090e0afec23dd2f5cc26c974a6e03b7730"
-            },
-            "require": {
-                "laravel/framework": "^12.0",
-                "laravel/sanctum": "^4.2",
-                "php": "^8.2",
-                "spatie/laravel-activitylog": "^4.8",
-                "spatie/laravel-permission": "^6.0"
-            },
-            "require-dev": {
-                "laravel/pint": "^1.18"
-            },
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "providers": [
-                        "Nexus\\Erp\\Core\\CoreServiceProvider"
-                    ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Nexus\\Erp\\Core\\": "src/"
-                }
-            },
-            "autoload-dev": {
-                "psr-4": {
-                    "Nexus\\Erp\\Core\\Tests\\": "tests/"
-                }
-            },
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Azahari Zaman",
-                    "email": "azahari@nexusenvision.com"
-                }
-            ],
-            "description": "Core ERP functionality including multi-tenancy, authentication, and audit logging",
-            "transport-options": {
-                "relative": true
-            }
-        },
         {
             "name": "brick/math",
             "version": "0.14.0",
@@ -184,6 +134,152 @@
                 }
             ],
             "time": "2024-02-09T16:56:22+00:00"
+        },
+        {
+            "name": "composer/installers",
+            "version": "v2.3.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/composer/installers.git",
+                "reference": "12fb2dfe5e16183de69e784a7b84046c43d97e8e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/composer/installers/zipball/12fb2dfe5e16183de69e784a7b84046c43d97e8e",
+                "reference": "12fb2dfe5e16183de69e784a7b84046c43d97e8e",
+                "shasum": ""
+            },
+            "require": {
+                "composer-plugin-api": "^1.0 || ^2.0",
+                "php": "^7.2 || ^8.0"
+            },
+            "require-dev": {
+                "composer/composer": "^1.10.27 || ^2.7",
+                "composer/semver": "^1.7.2 || ^3.4.0",
+                "phpstan/phpstan": "^1.11",
+                "phpstan/phpstan-phpunit": "^1",
+                "symfony/phpunit-bridge": "^7.1.1",
+                "symfony/process": "^5 || ^6 || ^7"
+            },
+            "type": "composer-plugin",
+            "extra": {
+                "class": "Composer\\Installers\\Plugin",
+                "branch-alias": {
+                    "dev-main": "2.x-dev"
+                },
+                "plugin-modifies-install-path": true
+            },
+            "autoload": {
+                "psr-4": {
+                    "Composer\\Installers\\": "src/Composer/Installers"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Kyle Robinson Young",
+                    "email": "kyle@dontkry.com",
+                    "homepage": "https://github.com/shama"
+                }
+            ],
+            "description": "A multi-framework Composer library installer",
+            "homepage": "https://composer.github.io/installers/",
+            "keywords": [
+                "Dolibarr",
+                "Eliasis",
+                "Hurad",
+                "ImageCMS",
+                "Kanboard",
+                "Lan Management System",
+                "MODX Evo",
+                "MantisBT",
+                "Mautic",
+                "Maya",
+                "OXID",
+                "Plentymarkets",
+                "Porto",
+                "RadPHP",
+                "SMF",
+                "Starbug",
+                "Thelia",
+                "Whmcs",
+                "WolfCMS",
+                "agl",
+                "annotatecms",
+                "attogram",
+                "bitrix",
+                "cakephp",
+                "chef",
+                "cockpit",
+                "codeigniter",
+                "concrete5",
+                "concreteCMS",
+                "croogo",
+                "dokuwiki",
+                "drupal",
+                "eZ Platform",
+                "elgg",
+                "expressionengine",
+                "fuelphp",
+                "grav",
+                "installer",
+                "itop",
+                "known",
+                "kohana",
+                "laravel",
+                "lavalite",
+                "lithium",
+                "magento",
+                "majima",
+                "mako",
+                "matomo",
+                "mediawiki",
+                "miaoxing",
+                "modulework",
+                "modx",
+                "moodle",
+                "osclass",
+                "pantheon",
+                "phpbb",
+                "piwik",
+                "ppi",
+                "processwire",
+                "puppet",
+                "pxcms",
+                "reindex",
+                "roundcube",
+                "shopware",
+                "silverstripe",
+                "sydes",
+                "sylius",
+                "tastyigniter",
+                "wordpress",
+                "yawik",
+                "zend",
+                "zikula"
+            ],
+            "support": {
+                "issues": "https://github.com/composer/installers/issues",
+                "source": "https://github.com/composer/installers/tree/v2.3.0"
+            },
+            "funding": [
+                {
+                    "url": "https://packagist.com",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/composer",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/composer/composer",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2024-06-24T20:46:46+00:00"
         },
         {
             "name": "dflydev/dot-access-data",
@@ -1842,6 +1938,97 @@
             "time": "2022-12-11T20:36:23+00:00"
         },
         {
+            "name": "league/csv",
+            "version": "9.27.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/thephpleague/csv.git",
+                "reference": "26de738b8fccf785397d05ee2fc07b6cd8749797"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/thephpleague/csv/zipball/26de738b8fccf785397d05ee2fc07b6cd8749797",
+                "reference": "26de738b8fccf785397d05ee2fc07b6cd8749797",
+                "shasum": ""
+            },
+            "require": {
+                "ext-filter": "*",
+                "php": "^8.1.2"
+            },
+            "require-dev": {
+                "ext-dom": "*",
+                "ext-xdebug": "*",
+                "friendsofphp/php-cs-fixer": "^3.75.0",
+                "phpbench/phpbench": "^1.4.1",
+                "phpstan/phpstan": "^1.12.27",
+                "phpstan/phpstan-deprecation-rules": "^1.2.1",
+                "phpstan/phpstan-phpunit": "^1.4.2",
+                "phpstan/phpstan-strict-rules": "^1.6.2",
+                "phpunit/phpunit": "^10.5.16 || ^11.5.22 || ^12.3.6",
+                "symfony/var-dumper": "^6.4.8 || ^7.3.0"
+            },
+            "suggest": {
+                "ext-dom": "Required to use the XMLConverter and the HTMLConverter classes",
+                "ext-iconv": "Needed to ease transcoding CSV using iconv stream filters",
+                "ext-mbstring": "Needed to ease transcoding CSV using mb stream filters",
+                "ext-mysqli": "Requiered to use the package with the MySQLi extension",
+                "ext-pdo": "Required to use the package with the PDO extension",
+                "ext-pgsql": "Requiered to use the package with the PgSQL extension",
+                "ext-sqlite3": "Required to use the package with the SQLite3 extension"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "9.x-dev"
+                }
+            },
+            "autoload": {
+                "files": [
+                    "src/functions_include.php"
+                ],
+                "psr-4": {
+                    "League\\Csv\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ignace Nyamagana Butera",
+                    "email": "nyamsprod@gmail.com",
+                    "homepage": "https://github.com/nyamsprod/",
+                    "role": "Developer"
+                }
+            ],
+            "description": "CSV data manipulation made easy in PHP",
+            "homepage": "https://csv.thephpleague.com",
+            "keywords": [
+                "convert",
+                "csv",
+                "export",
+                "filter",
+                "import",
+                "read",
+                "transform",
+                "write"
+            ],
+            "support": {
+                "docs": "https://csv.thephpleague.com",
+                "issues": "https://github.com/thephpleague/csv/issues",
+                "rss": "https://github.com/thephpleague/csv/releases.atom",
+                "source": "https://github.com/thephpleague/csv"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/sponsors/nyamsprod",
+                    "type": "github"
+                }
+            ],
+            "time": "2025-10-25T08:35:20+00:00"
+        },
+        {
             "name": "league/flysystem",
             "version": "3.30.2",
             "source": {
@@ -2712,6 +2899,506 @@
                 "source": "https://github.com/nette/utils/tree/v4.0.8"
             },
             "time": "2025-08-06T21:43:34+00:00"
+        },
+        {
+            "name": "nexus/audit-log",
+            "version": "dev-main",
+            "dist": {
+                "type": "path",
+                "url": "../../packages/nexus-audit-log",
+                "reference": "ca25a36a9f3a15534da5941b5eb4eb593806ebde"
+            },
+            "require": {
+                "laravel/framework": "^12.0",
+                "league/csv": "^9.0",
+                "nexus/contracts": "dev-main",
+                "php": "^8.2",
+                "spatie/laravel-activitylog": "^4.8"
+            },
+            "require-dev": {
+                "barryvdh/laravel-dompdf": "^2.0",
+                "laravel/pint": "^1.18"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Nexus\\AuditLog\\AuditLoggingServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Nexus\\AuditLog\\": "src/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "Nexus\\AuditLog\\Tests\\": "tests/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Azahari Zaman",
+                    "email": "azahari@nexusenvision.com"
+                }
+            ],
+            "description": "Comprehensive audit logging system for ERP with event-based recording, searchable audit trails, and compliance-ready immutable logs",
+            "transport-options": {
+                "relative": true
+            }
+        },
+        {
+            "name": "nexus/backoffice-management",
+            "version": "dev-main",
+            "dist": {
+                "type": "path",
+                "url": "../../packages/nexus-backoffice-management",
+                "reference": "e995437b66487ef0a96555a669410c15db38f52a"
+            },
+            "require": {
+                "illuminate/console": "^10.0 || ^11.0 || ^12.0 || 13.0.x-dev",
+                "illuminate/database": "^10.0 || ^11.0 || ^12.0 || 13.0.x-dev",
+                "illuminate/support": "^10.0 || ^11.0 || ^12.0 || 13.0.x-dev",
+                "nexus/contracts": "dev-main",
+                "php": "^8.2"
+            },
+            "require-dev": {
+                "mockery/mockery": "^1.6",
+                "orchestra/testbench": "^9.0|^10.0",
+                "php-coveralls/php-coveralls": "^0.1.0",
+                "phpstan/phpstan": "^1.10",
+                "phpunit/phpunit": "^10.0|^11.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Nexus\\BackofficeManagement\\BackOfficeServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Nexus\\BackofficeManagement\\": "src/",
+                    "Nexus\\BackofficeManagement\\Database\\Factories\\": "database/factories/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "Nexus\\BackofficeManagement\\Tests\\": "tests/"
+                }
+            },
+            "scripts": {
+                "test": [
+                    "vendor/bin/phpunit"
+                ],
+                "test-coverage": [
+                    "vendor/bin/phpunit --coverage-html coverage"
+                ],
+                "analyse": [
+                    "vendor/bin/phpstan analyse"
+                ]
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Azahari Zaman",
+                    "email": "azaharizaman@gmail.com"
+                }
+            ],
+            "description": "A Laravel package for managing hierarchical company structures, offices, departments, staff, and units",
+            "keywords": [
+                "backoffice",
+                "company",
+                "department",
+                "hierarchy",
+                "laravel",
+                "office",
+                "organization",
+                "package",
+                "staff"
+            ],
+            "transport-options": {
+                "relative": true
+            }
+        },
+        {
+            "name": "nexus/contracts",
+            "version": "dev-main",
+            "dist": {
+                "type": "path",
+                "url": "../../packages/nexus-contracts",
+                "reference": "3228adf23f1da9c4b59a3eb1b6386468b3ee7be1"
+            },
+            "require": {
+                "illuminate/contracts": "^10.0 || ^11.0 || ^12.0 || 13.0.x-dev",
+                "illuminate/database": "^10.0 || ^11.0 || ^12.0 || 13.0.x-dev",
+                "php": "^8.3"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Nexus\\Contracts\\Providers\\ContractsServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Nexus\\Contracts\\": "src/"
+                }
+            },
+            "license": [
+                "proprietary"
+            ],
+            "authors": [
+                {
+                    "name": "Azahari Zaman",
+                    "email": "azaharizaman@gmail.com"
+                }
+            ],
+            "description": "Core contract interfaces for the Nexus ERP system",
+            "transport-options": {
+                "relative": true
+            }
+        },
+        {
+            "name": "nexus/core",
+            "version": "dev-main",
+            "dist": {
+                "type": "path",
+                "url": "../../packages/core",
+                "reference": "577a23112d105707f1f3381c7f23fa351e4d5c13"
+            },
+            "require": {
+                "laravel/framework": "^12.0",
+                "laravel/sanctum": "^4.2",
+                "nexus/contracts": "dev-main",
+                "php": "^8.2",
+                "spatie/laravel-activitylog": "^4.8",
+                "spatie/laravel-permission": "^6.0"
+            },
+            "require-dev": {
+                "laravel/pint": "^1.18"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Nexus\\Core\\CoreServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Nexus\\Core\\": "src/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "Nexus\\Core\\Tests\\": "tests/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Azahari Zaman",
+                    "email": "azahari@nexusenvision.com"
+                }
+            ],
+            "description": "Core ERP functionality including multi-tenancy, authentication, and audit logging",
+            "transport-options": {
+                "relative": true
+            }
+        },
+        {
+            "name": "nexus/inventory-management",
+            "version": "dev-main",
+            "dist": {
+                "type": "path",
+                "url": "../../packages/nexus-inventory-management",
+                "reference": "a5a610cefb22ac1a3aa9d5260de0c4731f054746"
+            },
+            "require": {
+                "composer/installers": "^2.2",
+                "illuminate/contracts": "^10.0 || ^11.0 || ^12.0 || 13.0.x-dev",
+                "illuminate/database": "^10.0 || ^11.0 || ^12.0 || 13.0.x-dev",
+                "illuminate/support": "^10.0 || ^11.0 || ^12.0 || 13.0.x-dev",
+                "nesbot/carbon": "^2.71 || ^3.0",
+                "nexus/backoffice-management": "dev-main",
+                "nexus/contracts": "dev-main",
+                "nexus/uom-management": "dev-main",
+                "php": "^8.2",
+                "symfony/polyfill-mbstring": "^1.27"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "12.5.x-dev"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Nexus\\InventoryManagement\\InventoryManagementServiceProvider"
+                    ],
+                    "aliases": {
+                        "Inventory": "Nexus\\InventoryManagement\\Facades\\Inventory"
+                    }
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Nexus\\InventoryManagement\\": "src/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "Nexus\\InventoryManagement\\Database\\Factories\\": "database/factories/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Azahari Zaman",
+                    "email": "azaharizaman@gmail.com"
+                }
+            ],
+            "description": "A headless, contract-driven Laravel package for managing inventory. It provides a robust backend for tracking stock levels, movements, and valuation without imposing any UI constraints.",
+            "transport-options": {
+                "relative": true
+            }
+        },
+        {
+            "name": "nexus/sequencing-management",
+            "version": "dev-main",
+            "dist": {
+                "type": "path",
+                "url": "../../packages/nexus-sequencing-management",
+                "reference": "81294cfbea26ca01adb5bdd5c8392431483bc8f0"
+            },
+            "require": {
+                "laravel/framework": "^12.0",
+                "lorisleiva/laravel-actions": "^2.0",
+                "nexus/contracts": "dev-main",
+                "php": "^8.2"
+            },
+            "require-dev": {
+                "laravel/pint": "^1.18"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Nexus\\SequencingManagement\\SerialNumberingServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Nexus\\SequencingManagement\\": "src/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "Nexus\\SequencingManagement\\Tests\\": "tests/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Azahari Zaman",
+                    "email": "azahari@nexusenvision.com"
+                }
+            ],
+            "description": "Automated serial number generation system with configurable patterns, atomic generation, and tenant isolation",
+            "transport-options": {
+                "relative": true
+            }
+        },
+        {
+            "name": "nexus/settings-management",
+            "version": "dev-main",
+            "dist": {
+                "type": "path",
+                "url": "../../packages/nexus-settings-management",
+                "reference": "97b59fc2b61fb3cafda2d5c75b48afa82c5cf64b"
+            },
+            "require": {
+                "laravel/framework": "^12.0",
+                "laravel/scout": "^10.0",
+                "nexus/contracts": "dev-main",
+                "nexus/core": "dev-main",
+                "php": "^8.2"
+            },
+            "require-dev": {
+                "laravel/pint": "^1.18"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Nexus\\SettingsManagement\\SettingsManagementServiceProvider"
+                    ],
+                    "aliases": {
+                        "Settings": "Nexus\\SettingsManagement\\Facades\\Settings"
+                    }
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Nexus\\SettingsManagement\\": "src/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "Nexus\\SettingsManagement\\Tests\\": "tests/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Azahari Zaman",
+                    "email": "azahari@nexusenvision.com"
+                }
+            ],
+            "description": "Hierarchical Settings Management System for ERP with multi-level scopes, encryption, and caching",
+            "transport-options": {
+                "relative": true
+            }
+        },
+        {
+            "name": "nexus/tenancy-management",
+            "version": "dev-main",
+            "dist": {
+                "type": "path",
+                "url": "../../packages/nexus-tenancy-management",
+                "reference": "57801f2c8857ee539539051500ac0eda240a1737"
+            },
+            "require": {
+                "illuminate/console": "^10.0 || ^11.0 || ^12.0 || 13.0.x-dev",
+                "illuminate/database": "^10.0 || ^11.0 || ^12.0 || 13.0.x-dev",
+                "illuminate/support": "^10.0 || ^11.0 || ^12.0 || 13.0.x-dev",
+                "lorisleiva/laravel-actions": "^2.0",
+                "nexus/contracts": "dev-main",
+                "php": "^8.2"
+            },
+            "require-dev": {
+                "mockery/mockery": "^1.6",
+                "orchestra/testbench": "^9.0|^10.0",
+                "phpunit/phpunit": "^10.0|^11.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Nexus\\TenancyManagement\\TenancyManagementServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Nexus\\TenancyManagement\\": "src/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "Nexus\\TenancyManagement\\Tests\\": "tests/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Azahari Zaman",
+                    "email": "azaharizaman@gmail.com"
+                }
+            ],
+            "description": "Multi-tenancy management package for Nexus ERP - Provides tenant isolation, context management, and impersonation",
+            "keywords": [
+                "isolation",
+                "laravel",
+                "multi-tenancy",
+                "saas",
+                "tenant"
+            ],
+            "transport-options": {
+                "relative": true
+            }
+        },
+        {
+            "name": "nexus/uom-management",
+            "version": "dev-main",
+            "dist": {
+                "type": "path",
+                "url": "../../packages/nexus-uom-management",
+                "reference": "4fd3b5edec5ce65229b18effcb207a364ef32e2d"
+            },
+            "require": {
+                "brick/math": "^0.11|^0.12|^0.13|^0.14",
+                "illuminate/support": "^10.0 || ^11.0 || ^12.0 || 13.0.x-dev",
+                "nesbot/carbon": "^2.71 || ^3.0",
+                "nexus/contracts": "dev-main",
+                "php": "^8.2",
+                "symfony/polyfill-mbstring": "^1.27"
+            },
+            "require-dev": {
+                "composer/installers": "^2.2",
+                "doctrine/dbal": "^3.7",
+                "fakerphp/faker": "^1.21",
+                "league/fractal": "^1.0",
+                "mockery/mockery": "^1.6",
+                "orchestra/testbench": "*",
+                "phpunit/phpunit": "^10.5 || ^12.0",
+                "ramsey/uuid": "^4.7",
+                "spatie/laravel-package-tools": "dev-main"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Nexus\\UomManagement\\UomManagementServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Nexus\\UomManagement\\": "src/",
+                    "Nexus\\UomManagement\\Database\\Seeders\\": "database/seeders/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "Nexus\\UomManagement\\Database\\Factories\\": "database/factories/",
+                    "Nexus\\UomManagement\\Tests\\": "tests/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Azahari Zaman",
+                    "email": "azaharizaman@gmail.com"
+                }
+            ],
+            "description": "Sophisticated UOM Management for Laravel",
+            "transport-options": {
+                "relative": true
+            }
         },
         {
             "name": "nikic/php-parser",
@@ -9909,7 +10596,15 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
-        "azaharizaman/erp-core": 20
+        "nexus/audit-log": 20,
+        "nexus/backoffice-management": 20,
+        "nexus/contracts": 20,
+        "nexus/core": 20,
+        "nexus/inventory-management": 20,
+        "nexus/sequencing-management": 20,
+        "nexus/settings-management": 20,
+        "nexus/tenancy-management": 20,
+        "nexus/uom-management": 20
     },
     "prefer-stable": true,
     "prefer-lowest": false,
