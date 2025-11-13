@@ -1,0 +1,213 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Nexus\Tenancy\Services;
+
+use App\Models\User;
+use App\Support\Contracts\ActivityLoggerContract;
+use Nexus\Tenancy\Contracts\TenantManagerContract;
+use Nexus\Tenancy\Contracts\TenantRepositoryContract;
+use Nexus\Tenancy\Events\TenantImpersonationEndedEvent;
+use Nexus\Tenancy\Events\TenantImpersonationStartedEvent;
+use Nexus\Tenancy\Models\Tenant;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Gate;
+
+/**
+ * Impersonation Service
+ *
+ * Manages tenant impersonation for administrative and support purposes.
+ * Stores impersonation state in Redis with configurable timeout.
+ */
+class ImpersonationService
+{
+    /**
+     * Redis key prefix for impersonation data
+     */
+    protected const CACHE_PREFIX = 'impersonation:';
+
+    /**
+     * Create a new impersonation service instance
+     */
+    public function __construct(
+        protected readonly TenantManagerContract $tenantManager,
+        protected readonly TenantRepositoryContract $tenantRepository,
+        protected readonly ActivityLoggerContract $activityLogger
+    ) {}
+
+    /**
+     * Start impersonation of a tenant
+     *
+     * @param  User  $user  The user starting impersonation
+     * @param  Tenant  $tenant  The tenant to impersonate
+     * @param  string  $reason  The reason for impersonation
+     *
+     * @throws AuthorizationException If user is not authorized
+     * @throws \RuntimeException If user is not authenticated
+     */
+    public function startImpersonation(User $user, Tenant $tenant, string $reason): void
+    {
+        // Check authorization using Gate
+        if (! Gate::forUser($user)->allows('impersonate-tenant', $tenant)) {
+            throw new AuthorizationException('Unauthorized to impersonate this tenant');
+        }
+
+        // Get original tenant ID (may be null for system admins)
+        $originalTenantId = $user->tenant_id !== null ? (string) $user->tenant_id : null;
+
+        // Store impersonation context in Redis
+        $cacheKey = $this->getCacheKey($user->id);
+        $timeout = config('erp-core.impersonation_timeout', 3600);
+
+        $impersonationData = [
+            'original_tenant_id' => $originalTenantId,
+            'target_tenant_id' => (string) $tenant->id,
+            'reason' => $reason,
+            'started_at' => now()->timestamp,
+            'user_id' => $user->id,
+        ];
+
+        Cache::put($cacheKey, $impersonationData, $timeout);
+
+        // Set new tenant as active
+        $this->tenantManager->setActive($tenant);
+
+        // Log activity
+        $this->activityLogger->log(
+            'Tenant impersonation started',
+            $tenant,
+            $user,
+            [
+                'reason' => $reason,
+                'original_tenant_id' => $originalTenantId,
+            ]
+        );
+
+        // Dispatch event
+        event(new TenantImpersonationStartedEvent($tenant, $user->id, $reason));
+    }
+
+    /**
+     * End impersonation and restore original tenant
+     *
+     * @param  User  $user  The user ending impersonation
+     */
+    public function endImpersonation(User $user): void
+    {
+        $cacheKey = $this->getCacheKey($user->id);
+        $impersonationData = Cache::get($cacheKey);
+
+        if ($impersonationData === null) {
+            // No active impersonation
+            return;
+        }
+
+        // Calculate duration
+        $duration = now()->timestamp - $impersonationData['started_at'];
+
+        // Get target tenant for event
+        $targetTenant = $this->tenantRepository->findById($impersonationData['target_tenant_id']);
+
+        if ($targetTenant === null) {
+            // Log error - target tenant was deleted during impersonation
+            \Illuminate\Support\Facades\Log::error('Target tenant not found when ending impersonation', [
+                'tenant_id' => $impersonationData['target_tenant_id'],
+                'user_id' => $user->id,
+            ]);
+        }
+
+        // Restore original tenant if it existed
+        if ($impersonationData['original_tenant_id'] !== null) {
+            $originalTenant = $this->tenantRepository->findById($impersonationData['original_tenant_id']);
+            if ($originalTenant !== null) {
+                $this->tenantManager->setActive($originalTenant);
+            } else {
+                // Log warning: original tenant not found during restoration
+                \Illuminate\Support\Facades\Log::warning('Original tenant not found during impersonation end', [
+                    'tenant_id' => $impersonationData['original_tenant_id'],
+                    'user_id' => $user->id,
+                ]);
+            }
+        }
+
+        // Clear impersonation cache
+        Cache::forget($cacheKey);
+
+        // Log activity and dispatch event only if tenant still exists
+        if ($targetTenant !== null) {
+            $this->activityLogger->log(
+                'Tenant impersonation ended',
+                $targetTenant,
+                $user,
+                [
+                    'duration' => $duration,
+                    'original_tenant_id' => $impersonationData['original_tenant_id'],
+                ]
+            );
+
+            event(new TenantImpersonationEndedEvent($targetTenant, $user->id, $duration));
+        }
+    }
+
+    /**
+     * Check if user is currently impersonating a tenant
+     *
+     * @param  User  $user  The user to check
+     */
+    public function isImpersonating(User $user): bool
+    {
+        $cacheKey = $this->getCacheKey($user->id);
+
+        return Cache::has($cacheKey);
+    }
+
+    /**
+     * Get the original tenant before impersonation
+     *
+     * Returns null if:
+     * - There is no impersonation data (not impersonating)
+     * - The original tenant ID is null (system admin)
+     * - The original tenant has been deleted
+     *
+     * @param  User  $user  The user
+     */
+    public function getOriginalTenant(User $user): ?Tenant
+    {
+        $cacheKey = $this->getCacheKey($user->id);
+        $impersonationData = Cache::get($cacheKey);
+
+        if ($impersonationData === null) {
+            // Not impersonating
+            return null;
+        }
+
+        if ($impersonationData['original_tenant_id'] === null) {
+            // No original tenant (system admin)
+            return null;
+        }
+
+        $originalTenant = $this->tenantRepository->findById($impersonationData['original_tenant_id']);
+
+        if ($originalTenant === null) {
+            // Original tenant has been deleted
+            \Illuminate\Support\Facades\Log::warning('Original tenant has been deleted during impersonation', [
+                'tenant_id' => $impersonationData['original_tenant_id'],
+                'user_id' => $user->id,
+            ]);
+        }
+
+        return $originalTenant;
+    }
+
+    /**
+     * Get the Redis cache key for a user's impersonation
+     *
+     * @param  int  $userId  The user ID
+     */
+    protected function getCacheKey(int $userId): string
+    {
+        return self::CACHE_PREFIX.$userId;
+    }
+}
