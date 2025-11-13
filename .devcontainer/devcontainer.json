@@ -12,13 +12,19 @@
 	// For use with PHP or Apache (e.g.php -S localhost:8080 or apache2ctl start)
 	"forwardPorts": [
 		8080,
-		5432
+		9003,
+    5432
 	],
 	"features": {
-		"ghcr.io/devcontainers/features/docker-in-docker:2": {
+		"ghcr.io/devcontainers/features/github-cli:1": {},
+		"ghcr.io/devcontainers-extra/features/composer:1": {},
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
 			"moby": false
 		}
-	}
+	},
+	"mounts": [
+		"source=${localWorkspaceFolder}/.devcontainer/php/conf.d/20-xdebug.ini,target=/usr/local/etc/php/conf.d/20-xdebug.ini,type=bind,consistency=cached"
+	]
 
 	// Use 'postCreateCommand' to run commands after the container is created.
 	// "postCreateCommand": "sudo chmod a+x \"$(pwd)\" && sudo rm -rf /var/www/html && sudo ln -s \"$(pwd)\" /var/www/html"
