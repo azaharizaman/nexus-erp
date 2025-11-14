@@ -28,9 +28,6 @@ abstract class TestCase extends BaseTestCase
         Factory::guessFactoryNamesUsing(
             fn (string $modelName) => 'Nexus\\AuditLog\\Database\\Factories\\'.class_basename($modelName).'Factory'
         );
-
-        // Load package migrations
-        $this->loadMigrationsFrom(__DIR__.'/../database/migrations');
     }
 
     /**

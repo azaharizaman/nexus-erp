@@ -45,7 +45,7 @@ class GetAuditLogStatisticsAction
      */
     public function asController(Request $request): JsonResponse
     {
-        Gate::authorize('viewAny', Activity::class);
+        Gate::authorize('view-audit-logs');
 
         $validated = $request->validate([
             'date_from' => ['nullable', 'date'],

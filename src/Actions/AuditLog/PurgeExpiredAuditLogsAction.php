@@ -85,12 +85,11 @@ class PurgeExpiredAuditLogsAction
      */
     protected function countExpiredLogs(Carbon $cutoffDate, ?string $tenantId): int
     {
-        $query = \Spatie\Activitylog\Models\Activity::where('created_at', '<', $cutoffDate);
-
+        $filters = ['date_to' => $cutoffDate];
         if ($tenantId !== null) {
-            $query->where('tenant_id', $tenantId);
+            $filters['tenant_id'] = $tenantId;
         }
-
-        return $query->count();
+        
+        return $this->repository->search($filters, 1)->total();
     }
 }

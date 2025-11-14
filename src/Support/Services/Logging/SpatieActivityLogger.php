@@ -155,14 +155,25 @@ class SpatieActivityLogger implements ActivityLoggerContract
      */
     private function getCurrentTenantId(): ?string
     {
-        // Try to get from authenticated user first
-        if (auth()->check() && isset(auth()->user()->tenant_id)) {
+        // Try to get from authenticated user's method first
+        if (auth()->check() && method_exists(auth()->user(), 'getTenantId')) {
+            return auth()->user()->getTenantId();
+        }
+        
+        // Try to get from authenticated user's property
+        if (auth()->check() && property_exists(auth()->user(), 'tenant_id')) {
             return auth()->user()->tenant_id;
         }
 
         // Try to get from current tenant context
-        if (function_exists('currentTenant') && currentTenant()) {
-            return currentTenant()->id;
+        if (function_exists('currentTenant')) {
+            $tenant = currentTenant();
+            if ($tenant && method_exists($tenant, 'getId')) {
+                return $tenant->getId();
+            }
+            if ($tenant && isset($tenant->id)) {
+                return $tenant->id;
+            }
         }
 
         // Try to get from session/request

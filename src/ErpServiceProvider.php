@@ -14,6 +14,7 @@ use Nexus\Erp\Support\Services\Logging\SpatieActivityLogger;
 use Nexus\AuditLog\Contracts\AuditLogRepositoryContract;
 use Nexus\Erp\Support\Services\Logging\SpatieActivityLoggerAdapter;
 use Nexus\Erp\Support\Services\Permission\SpatiePermissionService;
+use Nexus\Erp\Support\Services\Search\ScoutSearchService;
 
 /**
  * ERP Service Provider

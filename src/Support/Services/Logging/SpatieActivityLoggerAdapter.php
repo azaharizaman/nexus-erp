@@ -59,8 +59,12 @@ class SpatieActivityLoggerAdapter
      */
     public function convertToSpatieActivity(InternalAuditLog $internalLog): Activity
     {
-        // Create a new Activity instance with the same data
+        // Create a new Activity instance
         $activity = new Activity();
+        
+        // Set the connection and table to match the internal model
+        $activity->setConnection($internalLog->getConnectionName());
+        $activity->setTable($internalLog->getTable());
         
         // Copy all attributes
         $activity->id = $internalLog->id;

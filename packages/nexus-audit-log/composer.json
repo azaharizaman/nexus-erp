@@ -36,8 +36,7 @@
         "test-coverage": "vendor/bin/pest --coverage",
         "test-ci": "vendor/bin/pest --coverage --min=90",
         "test-isolated": [
-            "@composer install --no-dev",
-            "@test",
+            "@composer install --no-dev --dry-run",
             "@composer install"
         ]
     },

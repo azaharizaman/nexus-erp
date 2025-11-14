@@ -6,6 +6,7 @@ namespace Nexus\Erp\Actions\AuditLog;
 
 use Lorisleiva\Actions\Concerns\AsAction;
 use Nexus\AuditLog\Contracts\AuditLogRepositoryContract;
+use Nexus\Erp\Support\Services\Logging\SpatieActivityLoggerAdapter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -21,7 +22,8 @@ class ShowAuditLogAction
     use AsAction;
 
     public function __construct(
-        protected AuditLogRepositoryContract $repository
+        protected AuditLogRepositoryContract $repository,
+        protected SpatieActivityLoggerAdapter $adapter
     ) {}
 
     /**
@@ -32,7 +34,13 @@ class ShowAuditLogAction
      */
     public function handle(int $id): ?Activity
     {
-        return $this->repository->find($id);
+        $log = $this->repository->find($id);
+        
+        if (!$log) {
+            return null;
+        }
+        
+        return $this->adapter->convertToSpatieActivity($log);
     }
 
     /**
@@ -48,7 +56,7 @@ class ShowAuditLogAction
             ], 404);
         }
 
-        Gate::authorize('view', $log);
+        Gate::authorize('view-audit-logs');
 
         return response()->json([
             'data' => [

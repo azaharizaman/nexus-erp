@@ -26,12 +26,9 @@ Artisan::command('audit-log:purge-expired {--days=30 : Days to keep audit logs}'
         $result = app(PurgeExpiredAuditLogsAction::class)->handle($days);
         
         $this->info("Purged {$result['purged_count']} audit log entries.");
-        
-        if ($result['error_count'] > 0) {
-            $this->warn("Encountered {$result['error_count']} errors during purge.");
-        }
-        
-        $this->line("Total processed: {$result['total_processed']}");
+        $this->line("Cutoff date: {$result['cutoff_date']}");
+        $this->line("Tenant ID: " . ($result['tenant_id'] ?? 'All tenants'));
+        $this->line("Dry run: " . ($result['dry_run'] ? 'Yes' : 'No'));
         
     } catch (\Exception $e) {
         $this->error("Failed to purge audit logs: {$e->getMessage()}");

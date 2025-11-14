@@ -130,8 +130,11 @@ composer show --installed --direct
 find src -name "*Controller*" -o -name "*Command*" -o -name "routes" | wc -l
 # Should return 0
 
-# 4. Run without dev dependencies  
-composer install --no-dev
+# 4. Verify package can be installed without dev dependencies (dry run)
+composer install --no-dev --dry-run
+
+# 5. Re-install with dev dependencies and run tests
+composer install
 composer test
 ```
 

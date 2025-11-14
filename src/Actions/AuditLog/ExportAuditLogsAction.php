@@ -56,16 +56,19 @@ class ExportAuditLogsAction
             default => throw new \InvalidArgumentException('Invalid export format'),
         };
 
-        // Log the export action itself
-        if (function_exists('activity')) {
-            activity()
-                ->causedBy(auth()->user())
-                ->withProperties([
+        // Log the export action itself using the internal audit log repository
+        if (auth()->check()) {
+            $this->repository->create([
+                'log_name' => 'default',
+                'description' => 'Exported audit logs',
+                'causer_type' => get_class(auth()->user()),
+                'causer_id' => auth()->id(),
+                'properties' => [
                     'format' => $format,
                     'filters' => $filters,
                     'record_count' => $logs->count(),
-                ])
-                ->log('Exported audit logs');
+                ],
+            ]);
         }
 
         return $filePath;
@@ -76,7 +79,7 @@ class ExportAuditLogsAction
      */
     public function asController(Request $request): BinaryFileResponse
     {
-        Gate::authorize('export', Activity::class);
+        Gate::authorize('audit-log.export');
 
         $validated = $request->validate([
             'format' => ['required', 'string', Rule::in(['csv', 'json', 'pdf'])],

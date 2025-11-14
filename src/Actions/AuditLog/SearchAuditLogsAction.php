@@ -6,6 +6,7 @@ namespace Nexus\Erp\Actions\AuditLog;
 
 use Lorisleiva\Actions\Concerns\AsAction;
 use Nexus\AuditLog\Contracts\AuditLogRepositoryContract;
+use Nexus\Erp\Support\Services\Logging\SpatieActivityLoggerAdapter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -23,7 +24,8 @@ class SearchAuditLogsAction
     use AsAction;
 
     public function __construct(
-        protected AuditLogRepositoryContract $repository
+        protected AuditLogRepositoryContract $repository,
+        protected SpatieActivityLoggerAdapter $adapter
     ) {}
 
     /**
@@ -48,7 +50,7 @@ class SearchAuditLogsAction
      */
     public function asController(Request $request): JsonResponse
     {
-        Gate::authorize('viewAny', Activity::class);
+        Gate::authorize('view-audit-logs');
 
         $validated = $request->validate([
             'causer_id' => ['nullable', 'integer'],
@@ -67,8 +69,13 @@ class SearchAuditLogsAction
 
         $logs = $this->handle($validated, $perPage);
 
+        // Convert items to ensure backward compatibility with Spatie Activity models
+        $items = $logs->getCollection()->map(function ($log) {
+            return $this->adapter->convertToSpatieActivity($log);
+        });
+
         return response()->json([
-            'data' => $logs->items(),
+            'data' => $items,
             'meta' => [
                 'current_page' => $logs->currentPage(),
                 'last_page' => $logs->lastPage(),
