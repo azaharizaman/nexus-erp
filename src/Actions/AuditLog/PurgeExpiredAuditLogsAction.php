@@ -79,17 +79,24 @@ class PurgeExpiredAuditLogsAction
     /**
      * Count expired logs without deleting
      *
+     * Uses the same logic as purgeExpired to ensure accurate count.
+     * Note: The search method uses <= for date_to, but purge uses <,
+     * so we directly query the model to match the purge behavior.
+     *
      * @param Carbon $cutoffDate Cutoff date
      * @param string|null $tenantId Optional tenant ID
-     * @return int Number of logs
+     * @return int Number of logs that will be purged
      */
     protected function countExpiredLogs(Carbon $cutoffDate, ?string $tenantId): int
     {
-        $filters = ['date_to' => $cutoffDate];
+        // Query the model directly to use the same < comparison as purgeExpired
+        // This ensures the count accurately reflects what will be deleted
+        $query = \Nexus\AuditLog\Models\AuditLog::where('created_at', '<', $cutoffDate);
+        
         if ($tenantId !== null) {
-            $filters['tenant_id'] = $tenantId;
+            $query->where('tenant_id', $tenantId);
         }
         
-        return $this->repository->search($filters, 1)->total();
+        return $query->count();
     }
 }

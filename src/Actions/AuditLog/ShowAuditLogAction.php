@@ -48,6 +48,8 @@ class ShowAuditLogAction
      */
     public function asController(int $id): JsonResponse
     {
+        Gate::authorize('view-audit-logs');
+
         $log = $this->handle($id);
 
         if (! $log) {
@@ -55,8 +57,6 @@ class ShowAuditLogAction
                 'message' => 'Audit log not found',
             ], 404);
         }
-
-        Gate::authorize('view-audit-logs');
 
         return response()->json([
             'data' => [
