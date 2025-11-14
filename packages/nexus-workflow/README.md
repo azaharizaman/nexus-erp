@@ -4,6 +4,8 @@
 
 From 5-minute blog post state machines to enterprise-grade ERP approval automation—all in one atomic package.
 
+**Status:** ✅ Phase 1 Complete | ✅ Phase 2 Complete (Database-Driven Workflows & Multi-Approver Engine)
+
 ---
 
 ## 🎯 The Story
@@ -18,6 +20,17 @@ Most workflow packages force an impossible choice:
 What if you could start with a **5-minute state machine** on your Eloquent model, and then—as your needs grow—progressively add approval workflows, multi-user tasks, SLA tracking, escalation rules, and delegation... **without refactoring any code**?
 
 That's **nexus-workflow**.
+
+---
+
+## 🚀 What's New in Phase 2
+
+✨ **Database-Driven Workflows** - Store workflow definitions in PostgreSQL with caching  
+✨ **Multi-Approver Engine** - 5 approval strategies (Sequential, Parallel, Quorum, Any, Weighted)  
+✨ **User Task Management** - Complete task inbox with priority, SLA, and assignment  
+✨ **Eloquent Trait Integration** - Add workflows to any model with `HasDatabaseWorkflow`  
+✨ **CLI Management** - 6 Artisan commands for workflow CRUD operations  
+✨ **Edward Demo** - Terminal-based ERP demo showcasing all features
 
 ---
 
@@ -228,6 +241,193 @@ WorkflowDelegation::create([
 
 ---
 
+## 🆕 Phase 2: Database-Driven Workflows (Complete)
+
+Phase 2 brings enterprise-grade workflow management with database persistence, multi-approver strategies, and complete task management.
+
+### Database Workflow Engine
+
+Store workflow definitions in PostgreSQL with automatic caching:
+
+```php
+use Nexus\Workflow\Traits\HasDatabaseWorkflow;
+
+class PurchaseOrder extends Model
+{
+    use HasDatabaseWorkflow;
+}
+
+// Initialize workflow from database
+$po->initializeWorkflow('purchase-order-approval', [
+    'amount' => 5000,
+    'department' => 'IT'
+]);
+
+// Check if transition is allowed
+if ($po->canTransition('submit')) {
+    $po->applyTransition('submit', [
+        'user_id' => auth()->id(),
+        'notes' => 'Ready for approval'
+    ]);
+}
+
+// Query by workflow state
+$pending = PurchaseOrder::inWorkflowState('pending_approval')->get();
+$inAnyState = PurchaseOrder::inAnyWorkflowState(['approved', 'completed'])->get();
+```
+
+### Multi-Approver Strategies
+
+Five built-in approval strategies for complex approval workflows:
+
+**1. Sequential Approval** - Approvers must approve in order (1→2→3)
+```php
+$group = ApproverGroup::create([
+    'name' => 'Finance Chain',
+    'strategy' => 'sequential',
+]);
+
+// Add members with sequence
+$group->addMember($analyst, ['sequence' => 1]);
+$group->addMember($manager, ['sequence' => 2]);
+$group->addMember($director, ['sequence' => 3]);
+```
+
+**2. Parallel Approval** - All approvers must approve (unanimous)
+```php
+$group = ApproverGroup::create([
+    'name' => 'Executive Board',
+    'strategy' => 'parallel',
+]);
+
+// All must approve
+$group->addMember($ceo);
+$group->addMember($cfo);
+$group->addMember($coo);
+```
+
+**3. Quorum Approval** - N of M approvals required
+```php
+$group = ApproverGroup::create([
+    'name' => 'Board Majority',
+    'strategy' => 'quorum',
+    'config' => ['quorum_count' => 3], // 3 of 5 required
+]);
+
+$group->addMember($director1);
+$group->addMember($director2);
+$group->addMember($director3);
+$group->addMember($director4);
+$group->addMember($director5);
+```
+
+**4. Any Approval** - First approval wins (fast-track)
+```php
+$group = ApproverGroup::create([
+    'name' => 'Senior Managers',
+    'strategy' => 'any',
+]);
+
+// Any one can approve
+$group->addMember($manager1);
+$group->addMember($manager2);
+$group->addMember($manager3);
+```
+
+**5. Weighted Approval** - Sum of weights must reach threshold
+```php
+$group = ApproverGroup::create([
+    'name' => 'Leadership',
+    'strategy' => 'weighted',
+    'config' => ['min_weight' => 75], // Need 75 points
+]);
+
+$group->addMember($ceo, ['weight' => 100]);     // CEO alone can approve
+$group->addMember($cfo, ['weight' => 50]);      // CFO needs 1 more
+$group->addMember($manager, ['weight' => 25]);  // Manager needs 2 more
+```
+
+### User Task Management
+
+Complete task inbox with priority, SLA tracking, and assignment:
+
+```php
+use Nexus\Workflow\Services\UserTaskService;
+
+$taskService = app(UserTaskService::class);
+
+// Create task
+$task = $taskService->create([
+    'title' => 'Approve Purchase Order #12345',
+    'description' => 'Review and approve $5,000 PO',
+    'assigned_to' => $manager->id,
+    'priority' => 10, // HIGH
+    'due_at' => now()->addDays(2),
+    'status' => 'pending',
+]);
+
+// Reassign task
+$taskService->reassign($task->id, $director->id, [
+    'reason' => 'Manager on vacation'
+]);
+
+// Complete task
+$taskService->completeTask($task->id, [
+    'notes' => 'Approved for payment',
+    'outcome' => 'approved',
+]);
+
+// Query user's tasks
+$myTasks = UserTask::where('assigned_to', auth()->id())
+    ->where('status', 'pending')
+    ->orderBy('priority', 'desc')
+    ->get();
+```
+
+### Artisan Commands
+
+Six CLI commands for workflow management:
+
+```bash
+# List all workflows
+php artisan workflow:list
+php artisan workflow:list --active --format=json
+
+# Import workflow from JSON
+php artisan workflow:import definitions/po-approval.json --activate
+
+# Export workflow to JSON
+php artisan workflow:export purchase-order-approval --output=backup.json
+
+# Activate/deactivate workflows
+php artisan workflow:activate purchase-order-approval
+php artisan workflow:deactivate old-workflow
+
+# Show workflow details
+php artisan workflow:show purchase-order-approval
+php artisan workflow:show --id=a1b2c3d4-... --json
+```
+
+### Edward CLI Demo
+
+Terminal-based ERP demo showcasing all Phase 2 features:
+
+```bash
+# Launch Edward
+php artisan edward:menu
+
+# Select "Workflow & Tasks" from main menu
+# Features:
+# - Task inbox with priority display
+# - Active workflow instances
+# - Workflow definition management
+# - Approver group management
+# - Sample workflow imports
+# - Approval strategy demos
+```
+
+---
+
 ## 🚀 Why nexus-workflow Wins
 
 ### For the Mass Market (80% of Developers)
@@ -255,7 +455,9 @@ WorkflowDelegation::create([
 composer require nexus/workflow
 ```
 
-That's it. Start using Level 1 immediately:
+### Phase 1 (In-Memory State Machine)
+
+Start using immediately with no migrations:
 
 ```php
 use Nexus\Workflow\Traits\HasWorkflow;
@@ -273,6 +475,42 @@ class YourModel extends Model
         ];
     }
 }
+```
+
+### Phase 2 (Database-Driven Workflows)
+
+For database workflows, publish and run migrations:
+
+```bash
+# Publish migrations
+php artisan vendor:publish --tag=workflow-migrations
+
+# Run migrations (creates 6 tables)
+php artisan migrate
+
+# Publish configuration (optional)
+php artisan vendor:publish --tag=workflow-config
+```
+
+**Tables Created:**
+- `workflow_definitions` - Workflow schemas
+- `workflow_instances` - Active workflow instances
+- `workflow_transitions` - Transition history
+- `approver_groups` - Approval group definitions
+- `approver_group_members` - Group membership
+- `user_tasks` - Task inbox
+
+Then use the database trait:
+
+```php
+use Nexus\Workflow\Traits\HasDatabaseWorkflow;
+
+class PurchaseOrder extends Model
+{
+    use HasDatabaseWorkflow;
+}
+
+$po->initializeWorkflow('purchase-order-approval');
 ```
 
 ---
