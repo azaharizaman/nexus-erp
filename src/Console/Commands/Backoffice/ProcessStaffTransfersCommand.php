@@ -184,12 +184,12 @@ class ProcessStaffTransfersCommand extends Command
     protected function getSystemProcessor(): ?Staff
     {
         // Only allow staff with explicit HR department or specific authorized positions
-        $allowedPositions = [
+        $allowedPositions = config('nexus.backoffice.authorized_processor_positions', [
             'HR Manager',
             'System Administrator',
             'Backoffice Admin',
             'HR Officer',
-        ];
+        ]);
         
         return Staff::query()
             ->active()
