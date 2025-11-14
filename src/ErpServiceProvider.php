@@ -33,8 +33,17 @@ class ErpServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        // Merge Nexus ERP configuration FIRST
+        $this->mergeConfigFrom(
+            __DIR__.'/../config/nexus.php',
+            'nexus'
+        );
+
         // Register service contracts
         $this->registerContracts();
+
+        // Register atomic package orchestration providers
+        $this->registerOrchestrationProviders();
 
         // Merge package configuration (if exists)
         if (file_exists(__DIR__.'/../apps/edward/config/app.php')) {
@@ -117,5 +126,33 @@ class ErpServiceProvider extends ServiceProvider
         $this->app->singleton(PermissionServiceContract::class, function ($app) {
             return new SpatiePermissionService();
         });
+    }
+
+    /**
+     * Register atomic package orchestration providers.
+     *
+     * @return void
+     */
+    protected function registerOrchestrationProviders(): void
+    {
+        // Check if auto-registration is enabled
+        if (!config('nexus.packages.auto_register', true)) {
+            return;
+        }
+
+        // Register orchestration providers for atomic packages
+        $providers = [];
+
+        // Backoffice orchestration provider
+        if (config('nexus.packages.enabled.backoffice', true)) {
+            $providers[] = \Nexus\Erp\Providers\BackofficeServiceProvider::class;
+        }
+
+        // Register all orchestration providers
+        foreach ($providers as $provider) {
+            if (class_exists($provider)) {
+                $this->app->register($provider);
+            }
+        }
     }
 }
