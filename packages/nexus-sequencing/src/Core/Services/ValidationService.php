@@ -370,7 +370,9 @@ class ValidationService
             'DAY' => in_array(strtoupper($parameter), ['ST', 'ND', 'RD', 'TH']),
             'YEAR' => in_array(strtoupper($parameter), ['YY', 'YYYY']),
             'MONTH' => in_array(strtoupper($parameter), ['MM', 'MON', 'MONTH']),
-            'HOUR', 'MINUTE', 'SECOND' => in_array(strtoupper($parameter), ['H', 'HH', 'M', 'MM', 'S', 'SS']),
+            'HOUR' => in_array(strtoupper($parameter), ['H', 'HH']),
+            'MINUTE' => in_array(strtoupper($parameter), ['M', 'MM']),
+            'SECOND' => in_array(strtoupper($parameter), ['S', 'SS']),
             'TIMESTAMP' => in_array(strtoupper($parameter), ['S', 'MS', 'US']),
             default => false,
         };
