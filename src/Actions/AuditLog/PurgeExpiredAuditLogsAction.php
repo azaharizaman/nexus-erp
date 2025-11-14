@@ -32,8 +32,9 @@ class PurgeExpiredAuditLogsAction
      * @param bool $dryRun Whether to perform a dry run
      * @return array Purge results
      */
-    public function handle(int $retentionDays = 2555, ?string $tenantId = null, bool $dryRun = false): array
+    public function handle(int $retentionDays = null, ?string $tenantId = null, bool $dryRun = false): array
     {
+        $retentionDays = $retentionDays ?? config('audit-logging.retention_days', 90);
         // Calculate cutoff date
         $cutoffDate = now()->subDays($retentionDays);
 
