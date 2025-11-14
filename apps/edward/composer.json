@@ -8,6 +8,7 @@
     "require": {
         "php": "^8.3",
         "laravel/sanctum": "*",
+        "laravel/tinker": "^2.10",
         "nexus/erp": "dev-main"
     },
     "require-dev": {

@@ -6,6 +6,27 @@ namespace Nexus\Sequencing;
 
 use Nexus\Sequencing\Contracts\PatternParserContract;
 use Nexus\Sequencing\Contracts\SequenceRepositoryContract;
+use Nexus\Sequencing\Core\Contracts\CounterRepositoryInterface;
+use Nexus\Sequencing\Core\Contracts\PatternEvaluatorInterface;
+use Nexus\Sequencing\Core\Contracts\ResetStrategyInterface;
+use Nexus\Sequencing\Core\Contracts\VariableRegistryInterface;
+use Nexus\Sequencing\Core\Contracts\ConditionalProcessorInterface;
+use Nexus\Sequencing\Core\Services\GenerationService;
+use Nexus\Sequencing\Core\Services\ValidationService;
+use Nexus\Sequencing\Core\Engine\RegexPatternEvaluator;
+use Nexus\Sequencing\Core\Engine\VariableRegistry;
+use Nexus\Sequencing\Core\Engine\BasicConditionalProcessor;
+use Nexus\Sequencing\Core\Engine\TemplateRegistry;
+use Nexus\Sequencing\Core\Templates\Financial\InvoiceTemplate;
+use Nexus\Sequencing\Core\Templates\Financial\QuoteTemplate;
+use Nexus\Sequencing\Core\Templates\Procurement\PurchaseOrderTemplate;
+use Nexus\Sequencing\Core\Templates\HR\EmployeeIdTemplate;
+use Nexus\Sequencing\Core\Templates\Inventory\StockTransferTemplate;
+use Nexus\Sequencing\Core\Variables\DepartmentVariable;
+use Nexus\Sequencing\Core\Variables\ProjectCodeVariable;
+use Nexus\Sequencing\Core\Variables\CustomerTierVariable;
+use Nexus\Sequencing\Core\Services\DefaultResetStrategy;
+use Nexus\Sequencing\Adapters\Laravel\EloquentCounterRepository;
 use Nexus\Sequencing\Http\Middleware\InjectTenantContext;
 use Nexus\Sequencing\Models\Sequence;
 use Nexus\Sequencing\Policies\SequencePolicy;
@@ -45,6 +66,60 @@ class SequencingServiceProvider extends ServiceProvider
             PatternParserContract::class,
             PatternParserService::class
         );
+
+        // Bind Core service contracts to implementations
+        $this->app->singleton(
+            CounterRepositoryInterface::class,
+            EloquentCounterRepository::class
+        );
+
+        // Bind Variable Registry
+        $this->app->singleton(
+            VariableRegistryInterface::class,
+            VariableRegistry::class
+        );
+
+        // Bind Conditional Processor
+        $this->app->singleton(
+            ConditionalProcessorInterface::class,
+            BasicConditionalProcessor::class
+        );
+
+        // Bind Template Registry and register built-in templates
+        $this->app->singleton(TemplateRegistry::class, function () {
+            $registry = new TemplateRegistry();
+            
+            // Register built-in templates (Phase 2.3)
+            $registry->register(new InvoiceTemplate());
+            $registry->register(new QuoteTemplate());
+            $registry->register(new PurchaseOrderTemplate());
+            $registry->register(new EmployeeIdTemplate());
+            $registry->register(new StockTransferTemplate());
+            
+            return $registry;
+        });
+
+        // Bind PatternEvaluator with dependencies
+        $this->app->singleton(
+            PatternEvaluatorInterface::class,
+            function ($app) {
+                return new RegexPatternEvaluator(
+                    $app->make(VariableRegistryInterface::class),
+                    $app->make(ConditionalProcessorInterface::class)
+                );
+            }
+        );
+
+        $this->app->singleton(
+            ResetStrategyInterface::class,
+            DefaultResetStrategy::class
+        );
+
+        // Register Core GenerationService (depends on Core contracts)
+        $this->app->singleton(GenerationService::class);
+
+        // Register Core ValidationService
+        $this->app->singleton(ValidationService::class);
     }
 
     /**
@@ -65,6 +140,9 @@ class SequencingServiceProvider extends ServiceProvider
         // Load routes
         $this->loadRoutesFrom(__DIR__.'/../routes/api.php');
 
+        // Register custom variables (Phase 2.3)
+        $this->registerCustomVariables();
+
         // Register middleware
         $router = $this->app['router'];
         $router->aliasMiddleware('tenant.context', InjectTenantContext::class);
@@ -84,5 +162,18 @@ class SequencingServiceProvider extends ServiceProvider
         Gate::define('override-sequence-number', function ($user) {
             return $user->hasPermissionTo('override-sequence-number');
         });
+    }
+
+    /**
+     * Register custom variables with the variable registry.
+     */
+    private function registerCustomVariables(): void
+    {
+        $variableRegistry = $this->app->make(VariableRegistryInterface::class);
+
+        // Register Phase 2.3 example custom variables
+        $variableRegistry->register(new DepartmentVariable());
+        $variableRegistry->register(new ProjectCodeVariable());
+        $variableRegistry->register(new CustomerTierVariable());
     }
 }

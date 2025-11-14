@@ -1,0 +1,9 @@
+parameters:
+    level: 8
+    paths:
+        - src/Core
+    excludePaths:
+        - vendor
+        - tests
+    checkMissingIterableValueType: true
+    checkGenericClassInNonGenericObjectType: true

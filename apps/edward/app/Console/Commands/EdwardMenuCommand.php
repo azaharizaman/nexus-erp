@@ -565,6 +565,7 @@ class EdwardMenuCommand extends Command
                     '6' => '🎛️  Feature flags',
                     '7' => '🔍 Search settings',
                     '8' => '💾 Export settings',
+                    '9' => '🎯 Sequencing Demo (Phase 2.3)',
                     '0' => '⬅️  Back to main menu',
                 ],
                 default: '1',
@@ -597,6 +598,7 @@ class EdwardMenuCommand extends Command
             '6' => $this->featureFlags(),
             '7' => $this->searchSettings(),
             '8' => $this->exportSettings(),
+            '9' => $this->sequencingDemo(),
             default => error('Invalid action'),
         };
     }
@@ -655,6 +657,21 @@ class EdwardMenuCommand extends Command
         info('💾 Export Settings');
         $this->comment('📌 Coming soon: Export settings to JSON/CSV');
         $this->newLine();
+    }
+    
+    /**
+     * Launch interactive sequencing demo showcasing Phase 2.3 features
+     *
+     * @return void
+     */
+    protected function sequencingDemo(): void
+    {
+        info('🎯 Nexus Sequencing Demo (Phase 2.3)');
+        $this->info('Launching interactive demonstration of advanced sequence generation features...');
+        $this->newLine();
+        
+        // Call the sequencing demo command
+        $this->call('edward:sequencing-demo');
     }
     
     /**

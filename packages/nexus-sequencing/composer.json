@@ -15,7 +15,18 @@
         "lorisleiva/laravel-actions": "^2.0"
     },
     "require-dev": {
-        "laravel/pint": "^1.18"
+        "laravel/pint": "^1.18",
+        "phpstan/phpstan": "^1.12",
+        "rector/rector": "^1.0",
+        "infection/infection": "^0.27"
+    },
+    "scripts": {
+        "analyse:core": "phpstan analyse --configuration=phpstan-core-purity.neon --memory-limit=1G",
+        "refactor:core": "rector process --config=rector-core.php --dry-run",
+        "refactor:core:fix": "rector process --config=rector-core.php",
+        "test:core-purity": "phpstan analyse --configuration=phpstan-core-purity.neon --no-progress --error-format=table",
+        "test:mutation": "infection --threads=4 --min-msi=95 --min-covered-msi=95",
+        "format": "pint"
     },
     "autoload": {
         "psr-4": {
@@ -35,5 +46,10 @@
         }
     },
     "minimum-stability": "dev",
-    "prefer-stable": true
+    "prefer-stable": true,
+    "config": {
+        "allow-plugins": {
+            "infection/extension-installer": false
+        }
+    }
 }

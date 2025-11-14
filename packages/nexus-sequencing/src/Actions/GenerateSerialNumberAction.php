@@ -4,18 +4,21 @@ declare(strict_types=1);
 
 namespace Nexus\Sequencing\Actions;
 
-use Nexus\Sequencing\Contracts\PatternParserContract;
-use Nexus\Sequencing\Contracts\SequenceRepositoryContract;
+use Nexus\Sequencing\Core\Services\GenerationService;
+use Nexus\Sequencing\Core\ValueObjects\SequenceConfig;
+use Nexus\Sequencing\Core\ValueObjects\GenerationContext;
+use Nexus\Sequencing\Core\ValueObjects\ResetPeriod as CoreResetPeriod;
 use Nexus\Sequencing\Events\SequenceGeneratedEvent;
 use Nexus\Sequencing\Models\SerialNumberLog;
-use Illuminate\Support\Facades\DB;
+use Nexus\Sequencing\Models\Sequence;
 use Lorisleiva\Actions\Concerns\AsAction;
 
 /**
  * Generate Serial Number Action
  *
- * Generates a new serial number with atomic counter increment and
- * transaction-safe pattern evaluation.
+ * Generates a new serial number using Core services with atomic counter increment
+ * and transaction-safe pattern evaluation. Acts as a Laravel adapter for the
+ * framework-agnostic Core business logic.
  */
 class GenerateSerialNumberAction
 {
@@ -24,12 +27,10 @@ class GenerateSerialNumberAction
     /**
      * Create a new action instance.
      *
-     * @param  SequenceRepositoryContract  $repository  The sequence repository
-     * @param  PatternParserContract  $parser  The pattern parser
+     * @param  GenerationService  $generationService  The core generation service
      */
     public function __construct(
-        private readonly SequenceRepositoryContract $repository,
-        private readonly PatternParserContract $parser
+        private readonly GenerationService $generationService
     ) {}
 
     /**
@@ -40,58 +41,58 @@ class GenerateSerialNumberAction
      * @param  array<string, mixed>  $context  Additional context for pattern variables
      * @return string The generated serial number
      *
-     * @throws \Nexus\SequencingManagement\Exceptions\SequenceNotFoundException
-     * @throws \Nexus\SequencingManagement\Exceptions\InvalidPatternException
+     * @throws \InvalidArgumentException When sequence configuration is invalid
+     * @throws \RuntimeException When sequence generation fails
      */
     public function handle(string $tenantId, string $sequenceName, array $context = []): string
     {
-        return DB::transaction(function () use ($tenantId, $sequenceName, $context) {
-            // Find sequence configuration
-            $sequence = $this->repository->find($tenantId, $sequenceName);
+        // Find sequence configuration from database
+        $sequenceModel = Sequence::where('tenant_id', $tenantId)
+            ->where('sequence_name', $sequenceName)
+            ->first();
 
-            if ($sequence === null) {
-                throw new \Nexus\SequencingManagement\Exceptions\SequenceNotFoundException(
-                    "Sequence '{$sequenceName}' not found for tenant '{$tenantId}'"
-                );
-            }
+        if ($sequenceModel === null) {
+            throw new \InvalidArgumentException(
+                "Sequence '{$sequenceName}' not found for tenant '{$tenantId}'"
+            );
+        }
 
-            // Check if sequence should reset
-            if ($sequence->shouldReset()) {
-                $this->repository->reset($tenantId, $sequenceName);
-                // Reload sequence after reset
-                $sequence = $this->repository->find($tenantId, $sequenceName);
-            }
+        // Create Core SequenceConfig from Laravel model
+        $config = new SequenceConfig(
+            scopeIdentifier: $tenantId,
+            sequenceName: $sequenceName,
+            pattern: $sequenceModel->pattern,
+            resetPeriod: CoreResetPeriod::from($sequenceModel->reset_period->value),
+            padding: $sequenceModel->padding,
+            stepSize: $sequenceModel->step_size,
+            resetLimit: $sequenceModel->reset_limit,
+            evaluatorType: 'regex'
+        );
 
-            // Lock and increment counter atomically
-            $newCounter = $this->repository->lockAndIncrement($tenantId, $sequenceName);
+        // Create Core GenerationContext
+        $generationContext = new GenerationContext(array_merge([
+            'tenant_code' => $context['tenant_code'] ?? '',
+            'prefix' => $context['prefix'] ?? '',
+            'department_code' => $context['department_code'] ?? '',
+        ], $context));
 
-            // Build context for pattern evaluation
-            $patternContext = array_merge([
-                'counter' => $newCounter,
-                'padding' => $sequence->padding,
-                'tenant_code' => $context['tenant_code'] ?? '',
-                'prefix' => $context['prefix'] ?? '',
-                'department_code' => $context['department_code'] ?? '',
-            ], $context);
+        // Delegate to Core service for generation
+        $result = $this->generationService->generate($config, $generationContext);
 
-            // Parse pattern to generate serial number
-            $generatedNumber = $this->parser->parse($sequence->pattern, $patternContext);
+        // Log generation (Laravel-specific concern)
+        if (config('serial-numbering.log_generations', true)) {
+            $this->logGeneration($tenantId, $sequenceName, $result->value, $context);
+        }
 
-            // Log generation
-            if (config('serial-numbering.log_generations', true)) {
-                $this->logGeneration($tenantId, $sequenceName, $generatedNumber, $context);
-            }
+        // Dispatch Laravel event
+        event(new SequenceGeneratedEvent(
+            $tenantId,
+            $sequenceName,
+            $result->value,
+            $result->counter
+        ));
 
-            // Dispatch event
-            event(new SequenceGeneratedEvent(
-                $tenantId,
-                $sequenceName,
-                $generatedNumber,
-                $newCounter
-            ));
-
-            return $generatedNumber;
-        });
+        return $result->value;
     }
 
     /**
