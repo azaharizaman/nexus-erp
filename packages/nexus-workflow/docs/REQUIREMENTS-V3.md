@@ -859,11 +859,6 @@ packages/nexus-workflow/
 
 ### Phase 3: Level 3 Automation (Weeks 9-12)
 - Event-driven timer system
-- Escalation engine
-- SLA tracking and monitoring
-- Delegation management
-- Compensation logic
-- Weighted voting strategy
 - Integration tests
 
 ### Phase 4: Extensibility (Weeks 13-14)
