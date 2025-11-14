@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Nexus\Workflow\Contracts;
 
 use Illuminate\Support\Collection;

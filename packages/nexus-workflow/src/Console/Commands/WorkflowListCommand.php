@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Nexus\Workflow\Console\Commands;
 
 use Illuminate\Console\Command;

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Nexus\Workflow\Engines;
 
 use Illuminate\Support\Facades\Cache;
