@@ -26,7 +26,7 @@ Artisan::command('audit-log:purge-expired {--days=30 : Days to keep audit logs}'
         $result = app(PurgeExpiredAuditLogsAction::class)->handle($days);
         
         $this->info("Purged {$result['purged_count']} audit log entries.");
-        $this->line("Cutoff date: {$result['cutoff_date']}");
+        $this->line("Cutoff date: " . ($result['cutoff_date'] instanceof \Carbon\Carbon ? $result['cutoff_date']->toDateTimeString() : $result['cutoff_date']));
         $this->line("Tenant ID: " . ($result['tenant_id'] ?? 'All tenants'));
         $this->line("Dry run: " . ($result['dry_run'] ? 'Yes' : 'No'));
         
