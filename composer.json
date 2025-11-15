@@ -30,6 +30,7 @@
     },
     "require-dev": {
         "infection/infection": "^0.31.9",
+        "laravel/legacy-factories": "^1.0",
         "laravel/pint": "^1.18",
         "pestphp/pest": "^4.0",
         "pestphp/pest-plugin-laravel": "^4.0",
