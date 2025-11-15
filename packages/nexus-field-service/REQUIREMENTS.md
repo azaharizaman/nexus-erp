@@ -693,9 +693,14 @@ Events:
 - Checklist pass/fail logic
 
 ### Integration Tests
+**Note:** Integration tests involving cross-package interactions should be orchestrated through the Nexus\Erp core package and implemented in the Edward demo application's test suite, per the architectural guidelines on independent testability.
+
+The following integration scenarios are documented here for reference but will be tested at the orchestration layer:
 - nexus-inventory integration: verify parts deduction and reorder triggers
 - nexus-accounting integration: verify billing posts to AR
 - nexus-crm integration: verify customer and location data sync
+
+Package-level integration tests (testing within nexus-field-service boundaries):
 - Map API integration: verify route optimization accuracy
 - Mobile app sync: verify offline changes sync correctly
 
@@ -730,7 +735,9 @@ packages/nexus-field-service/
 │   │   ├── ServiceContract.php
 │   │   ├── MaintenanceSchedule.php
 │   │   ├── ChecklistTemplate.php
+│   │   ├── ChecklistItem.php
 │   │   ├── ServiceChecklist.php
+│   │   ├── ChecklistResponse.php
 │   │   ├── TechnicianSchedule.php
 │   │   ├── TechnicianSkill.php
 │   │   └── WorkOrderAssignment.php
