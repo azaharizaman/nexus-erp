@@ -95,7 +95,7 @@ $this->app->bind(WorkflowServiceContract::class, WorkflowEngineService::class);
 | **FR-HRM-EMP-001** | Manage **employee master data** with personal information, emergency contacts, and dependents | High |
 | **FR-HRM-EMP-002** | Track **employment contracts** with start date, probation period, position, and employment type | High |
 | **FR-HRM-EMP-003** | Implement **employee lifecycle states** (prospect → active → probation → permanent → notice → terminated) | High |
-| **FR-HRM-EMP-004** | Support **automatic org hierarchy** integration via nexus-backoffice (manager, subordinates, department queries) | High |
+| **FR-HRM-EMP-004** | Support **automatic org hierarchy** integration via OrganizationServiceContract (manager, subordinates, department queries) | High |
 | **FR-HRM-EMP-005** | Track **employment history** with position changes, transfers, and promotions | Medium |
 | **FR-HRM-EMP-006** | Manage **employee documents** with secure storage, version control, and expiry tracking | Medium |
 
