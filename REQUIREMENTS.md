@@ -55,6 +55,7 @@ Unlike atomic packages that focus on single domains, the ERP orchestrator must:
 |---------------------|----------|
 | ❌ Vendor master data management | nexus-procurement |
 | ❌ Work order execution logic | nexus-manufacturing |
+| ❌ Field service dispatching logic | nexus-field-service |
 | ❌ Project costing algorithms | nexus-project-management |
 | ❌ General ledger posting rules | nexus-accounting |
 | ❌ Inventory valuation methods | nexus-inventory |
@@ -392,6 +393,7 @@ Transitions:
 | **nexus-procurement** | Action Orchestration | CreatePurchaseOrderAction coordinates multiple packages |
 | **nexus-project-management** | Action Orchestration | CompleteProjectAction triggers invoicing and accounting |
 | **nexus-manufacturing** | Action Orchestration | CreateWorkOrderAction reserves inventory and posts costs |
+| **nexus-field-service** | Action Orchestration | CreateServiceOrderAction assigns technicians, reserves parts, tracks SLA |
 | **nexus-accounting** | Action Orchestration | All financial postings orchestrated through actions |
 | **nexus-inventory** | Action Orchestration | Stock movements triggered by procurement, manufacturing, sales |
 
@@ -454,6 +456,12 @@ src/  (Nexus\Erp namespace)
 │   │   ├── CreateWorkOrderAction.php
 │   │   ├── ReleaseWorkOrderAction.php
 │   │   └── CompleteProductionAction.php
+│   ├── FieldService/
+│   │   ├── CreateServiceOrderAction.php
+│   │   ├── AssignTechnicianAction.php
+│   │   ├── StartJobAction.php
+│   │   ├── CompleteJobAction.php
+│   │   └── GenerateServiceReportAction.php
 │   └── Inventory/
 │       ├── AdjustStockAction.php
 │       └── TransferStockAction.php
@@ -481,6 +489,11 @@ src/  (Nexus\Erp namespace)
 │   │   ├── Manufacturing/
 │   │   │   ├── WorkOrderController.php
 │   │   │   └── ProductionReportController.php
+│   │   ├── FieldService/
+│   │   │   ├── ServiceOrderController.php
+│   │   │   ├── TechnicianScheduleController.php
+│   │   │   ├── ServiceReportController.php
+│   │   │   └── AssetController.php
 │   │   └── System/
 │   │       ├── FeatureToggleController.php
 │   │       ├── LicenseController.php
@@ -544,6 +557,10 @@ src/  (Nexus\Erp namespace)
 │   └── Manufacturing/
 │       ├── WorkOrderCompletedListener.php    # Triggers inventory receipt
 │       └── MaterialConsumedListener.php      # Triggers cost allocation
+│   └── FieldService/
+│       ├── JobCompletedListener.php          # Triggers service report generation
+│       ├── PartsConsumedListener.php         # Triggers inventory deduction
+│       └── SLABreachListener.php             # Triggers escalation workflow
 │
 ├── Providers/
 │   ├── ErpServiceProvider.php        # Main orchestrator provider
@@ -642,6 +659,10 @@ return [
             'enabled' => env('ENABLE_MANUFACTURING', true),
             'priority' => 11,
         ],
+        'nexus-field-service' => [
+            'enabled' => env('ENABLE_FIELD_SERVICE', true),
+            'priority' => 12,
+        ],
         'nexus-project-management' => [
             'enabled' => env('ENABLE_PROJECT', true),
             'priority' => 12,
@@ -676,6 +697,11 @@ return [
         ],
         'manufacturing' => [
             'name' => 'Manufacturing Execution',
+            'default_enabled' => false,
+            'license_required' => 'professional',
+        ],
+        'field-service' => [
+            'name' => 'Field Service Management',
             'default_enabled' => false,
             'license_required' => 'professional',
         ],
@@ -731,7 +757,7 @@ return [
             'max_users' => 100,
             'max_api_calls_per_month' => 1000000,
             'max_storage_gb' => 100,
-            'enabled_modules' => ['procurement', 'manufacturing', 'project-management', 'accounting'],
+            'enabled_modules' => ['procurement', 'manufacturing', 'field-service', 'project-management', 'accounting'],
             'enabled_features' => ['webhooks', 'bulk-operations'],
             'price_per_month' => 499,
         ],
@@ -882,6 +908,7 @@ return [
 ### Optional (Business Domain Packages)
 - nexus-procurement (procurement management)
 - nexus-manufacturing (production execution)
+- nexus-field-service (field service operations)
 - nexus-project-management (project tracking)
 - nexus-accounting (financial management)
 - nexus-inventory (stock management)
