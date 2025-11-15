@@ -11,6 +11,17 @@ class OrgStructureServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->mergeConfigFrom(__DIR__.'/../config/org-structure.php', 'org-structure');
+
+        // Bind the organization service contract
+        $this->app->bind(
+            \Nexus\OrgStructure\Contracts\OrganizationServiceContract::class,
+            \Nexus\OrgStructure\Services\DefaultOrganizationService::class
+        );
+
+        // Bind directory sync adapters
+        $this->app->bind('org-structure.sync.ldap', function ($app) {
+            return new \Nexus\OrgStructure\Services\DirectorySync\LdapDirectorySyncAdapter();
+        });
     }
 
     public function boot(): void
