@@ -1,0 +1,206 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Nexus\Manufacturing\Services;
+
+use Nexus\Manufacturing\Contracts\Services\QualityManagementServiceContract;
+use Nexus\Manufacturing\Contracts\Repositories\QualityInspectionRepositoryContract;
+use Nexus\Manufacturing\Contracts\Repositories\WorkOrderRepositoryContract;
+use Nexus\Manufacturing\Models\QualityInspection;
+use Nexus\Manufacturing\Models\InspectionMeasurement;
+use Nexus\Manufacturing\Enums\InspectionResult;
+use Nexus\Manufacturing\Enums\DispositionType;
+use InvalidArgumentException;
+
+class QualityManagementService implements QualityManagementServiceContract
+{
+    public function __construct(
+        private readonly QualityInspectionRepositoryContract $inspectionRepository,
+        private readonly WorkOrderRepositoryContract $workOrderRepository
+    ) {}
+
+    public function performInspection(
+        string $workOrderId,
+        string $lotNumber,
+        array $measurements
+    ): QualityInspection {
+        $workOrder = $this->workOrderRepository->find($workOrderId);
+        if (!$workOrder) {
+            throw new InvalidArgumentException("Work order not found: {$workOrderId}");
+        }
+
+        // Create inspection record
+        $inspection = QualityInspection::create([
+            'work_order_id' => $workOrderId,
+            'lot_number' => $lotNumber,
+            'inspection_plan_id' => $workOrder->product->inspectionPlans()->first()?->id,
+            'inspector_id' => auth()->id(),
+            'inspection_date' => now(),
+            'result' => InspectionResult::Passed, // Will be updated based on measurements
+        ]);
+
+        $allPassed = true;
+
+        // Record measurements
+        foreach ($measurements as $measurement) {
+            $characteristic = $inspection->inspectionPlan->characteristics()
+                ->find($measurement['characteristic_id']);
+
+            if (!$characteristic) {
+                continue;
+            }
+
+            // Determine if measurement passes
+            $passes = $this->checkMeasurementPasses(
+                $measurement['measured_value'],
+                $characteristic->lower_limit,
+                $characteristic->upper_limit,
+                $characteristic->target_value
+            );
+
+            if (!$passes) {
+                $allPassed = false;
+            }
+
+            InspectionMeasurement::create([
+                'quality_inspection_id' => $inspection->id,
+                'inspection_characteristic_id' => $characteristic->id,
+                'measured_value' => $measurement['measured_value'],
+                'passes' => $passes,
+                'notes' => $measurement['notes'] ?? null,
+            ]);
+        }
+
+        // Update overall inspection result
+        $inspection->update([
+            'result' => $allPassed ? InspectionResult::Passed : InspectionResult::Failed,
+        ]);
+
+        return $inspection->fresh('measurements');
+    }
+
+    public function setDisposition(
+        string $inspectionId,
+        DispositionType $disposition,
+        ?string $notes = null
+    ): void {
+        $inspection = $this->inspectionRepository->find($inspectionId);
+        if (!$inspection) {
+            throw new InvalidArgumentException("Inspection not found: {$inspectionId}");
+        }
+
+        if ($inspection->result === InspectionResult::Passed && $disposition !== DispositionType::Accept) {
+            throw new InvalidArgumentException("Passed inspections can only have Accept disposition");
+        }
+
+        $inspection->update([
+            'disposition' => $disposition,
+            'disposition_date' => now(),
+            'disposition_notes' => $notes,
+        ]);
+
+        // If disposition is quarantine, mark lot as quarantined
+        if ($disposition === DispositionType::Quarantine) {
+            $this->quarantineLot($inspection->lot_number, $notes);
+        }
+    }
+
+    public function quarantineLot(string $lotNumber, ?string $reason = null): void
+    {
+        // Update all inspections for this lot
+        $inspections = $this->inspectionRepository->getByLotNumber($lotNumber);
+        
+        foreach ($inspections as $inspection) {
+            if (!$inspection->isQuarantined()) {
+                $inspection->update([
+                    'disposition' => DispositionType::Quarantine,
+                    'disposition_date' => now(),
+                    'disposition_notes' => $reason,
+                ]);
+            }
+        }
+
+        // In production, would also:
+        // - Update inventory status to quarantined
+        // - Block lot from being used/shipped
+        // - Create quarantine notification/alert
+    }
+
+    public function releaseQuarantine(string $lotNumber, ?string $notes = null): void
+    {
+        $inspections = $this->inspectionRepository->getByLotNumber($lotNumber);
+        
+        foreach ($inspections as $inspection) {
+            if ($inspection->isQuarantined()) {
+                // Only release if there's a valid non-quarantine disposition
+                if ($inspection->result === InspectionResult::Passed) {
+                    $inspection->update([
+                        'disposition' => DispositionType::Accept,
+                        'disposition_date' => now(),
+                        'disposition_notes' => $notes,
+                    ]);
+                } else {
+                    throw new InvalidArgumentException("Cannot release failed inspection without proper disposition");
+                }
+            }
+        }
+
+        // In production, would also:
+        // - Update inventory status to available
+        // - Create release notification
+    }
+
+    public function getQualityMetrics(?string $productId = null, ?array $dateRange = null): array
+    {
+        // Get all inspections (would be filtered by product/date in production)
+        $inspections = QualityInspection::query()
+            ->when($productId, function ($query, $productId) {
+                $query->whereHas('workOrder', function ($q) use ($productId) {
+                    $q->where('product_id', $productId);
+                });
+            })
+            ->when($dateRange, function ($query, $dateRange) {
+                $query->whereBetween('inspection_date', $dateRange);
+            })
+            ->get();
+
+        $totalInspections = $inspections->count();
+        $passedInspections = $inspections->where('result', InspectionResult::Passed)->count();
+        $failedInspections = $inspections->where('result', InspectionResult::Failed)->count();
+
+        $quarantined = $inspections->where('disposition', DispositionType::Quarantine)->count();
+        $rejected = $inspections->where('disposition', DispositionType::Reject)->count();
+        $rework = $inspections->where('disposition', DispositionType::Rework)->count();
+
+        return [
+            'total_inspections' => $totalInspections,
+            'passed' => $passedInspections,
+            'failed' => $failedInspections,
+            'pass_rate' => $totalInspections > 0 ? round(($passedInspections / $totalInspections) * 100, 2) : 0,
+            'quarantined' => $quarantined,
+            'rejected' => $rejected,
+            'rework' => $rework,
+            'first_pass_yield' => $totalInspections > 0 
+                ? round((($passedInspections - $rework) / $totalInspections) * 100, 2) 
+                : 0,
+        ];
+    }
+
+    private function checkMeasurementPasses(
+        float $measuredValue,
+        ?float $lowerLimit,
+        ?float $upperLimit,
+        ?float $targetValue
+    ): bool {
+        if ($lowerLimit !== null && $measuredValue < $lowerLimit) {
+            return false;
+        }
+
+        if ($upperLimit !== null && $measuredValue > $upperLimit) {
+            return false;
+        }
+
+        return true;
+    }
+}
