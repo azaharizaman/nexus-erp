@@ -129,8 +129,8 @@ class OrganizationServiceTest extends TestCase
             $tenantId,
             $managerId,
             $employeeId,
-            $employeePositionId,
-            '2025-01-01'
+            '2025-01-01',
+            $employeePositionId
         );
 
         $manager = $service->getManager($employeeId);
@@ -168,9 +168,9 @@ class OrganizationServiceTest extends TestCase
         $service->createAssignment($tenantId, $employeeId, $devPosId, $orgUnitId, '2025-01-01', null, true);
 
         // Create reporting chain: CEO -> VP -> Manager -> Employee
-        $service->createReportingLine($tenantId, $ceoId, $vpId, $vpPosId, '2025-01-01');
-        $service->createReportingLine($tenantId, $vpId, $managerId, $mgrPosId, '2025-01-01');
-        $service->createReportingLine($tenantId, $managerId, $employeeId, $devPosId, '2025-01-01');
+        $service->createReportingLine($tenantId, $ceoId, $vpId, '2025-01-01', $vpPosId);
+        $service->createReportingLine($tenantId, $vpId, $managerId, '2025-01-01', $mgrPosId);
+        $service->createReportingLine($tenantId, $managerId, $employeeId, '2025-01-01', $devPosId);
 
         $chain = $service->resolveReportingChain($employeeId);
 
