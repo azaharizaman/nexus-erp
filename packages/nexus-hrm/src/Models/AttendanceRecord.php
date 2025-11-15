@@ -13,8 +13,6 @@ class AttendanceRecord extends Model
 {
     use HasFactory, HasUuids;
 
-    protected $connection = 'testing';
-
     protected $table = 'hrm_attendance_records';
 
     protected $fillable = [

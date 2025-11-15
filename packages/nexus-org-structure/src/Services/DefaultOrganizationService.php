@@ -291,8 +291,8 @@ class DefaultOrganizationService implements OrganizationServiceContract
         string $tenantId,
         string $managerId,
         string $subordinateId,
-        ?string $positionId = null,
         string $effectiveFrom,
+        ?string $positionId = null,
         ?string $effectiveTo = null,
         ?array $metadata = null
     ): string {
