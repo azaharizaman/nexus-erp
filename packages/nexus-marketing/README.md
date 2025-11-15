@@ -206,15 +206,15 @@ Comprehensive testing strategy:
 
 ### Required
 
-- PHP >= 8.2
+- PHP >= 8.3
 - Database: MySQL >= 8.0, PostgreSQL >= 12, or SQLite >= 3.35
 
 ### Optional
 
-- Laravel >= 11.x (for framework integration)
+- Laravel >= 12.x (for framework integration)
 - Redis >= 7.0 (for caching and queues)
-- nexus-tenancy (for multi-tenancy support)
-- nexus-audit-log (for audit trail integration)
+
+**Note**: Integration with nexus-tenancy and nexus-audit-log is handled via contracts and events in the nexus/erp orchestration layer, not as direct package dependencies.
 
 ---
 
@@ -226,7 +226,7 @@ To contribute:
 
 1. Read [REQUIREMENTS.md](./REQUIREMENTS.md) to understand specifications
 2. Follow [Nexus ERP Coding Guidelines](../../CODING_GUIDELINES.md)
-3. Adhere to architectural principles in [System Architecture Document](../../docs/SYSTEM%20ARCHITECHTURAL%20DOCUMENT.md)
+3. Adhere to architectural principles in [System Architecture Document](../../docs/SYSTEM%20ARCHITECTURAL%20DOCUMENT.md)
 4. Write tests (Pest framework)
 5. Submit PR to main repository
 

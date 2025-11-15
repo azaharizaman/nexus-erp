@@ -93,6 +93,40 @@ Following Nexus ERP's **Maximum Atomicity** principle:
 - **Custom metrics** for business-specific KPIs
 - **Webhook integrations** for third-party systems
 
+#### Channel Plugin Registration
+
+Custom channels are registered through the marketing engine's plugin system:
+
+1. **Implement ChannelContract**: Create a class implementing `ChannelContract` interface
+2. **Register in Service Provider**: Bind to the marketing engine via service provider
+3. **Discovery Pattern**: The engine discovers channels through Laravel's service container
+4. **Validation**: Channels are validated during engine initialization
+
+```php
+// Example: Custom Slack Channel Plugin
+class SlackChannel implements ChannelContract
+{
+    public function execute(Campaign $campaign, array $config): bool
+    {
+        // Send campaign via Slack API
+        return $this->slackClient->sendMessage($config);
+    }
+    
+    public function validate(array $config): bool
+    {
+        return isset($config['webhook_url']) && isset($config['channel']);
+    }
+}
+
+// Register in MarketingServiceProvider
+public function register(): void
+{
+    $this->app->bind('marketing.channels.slack', SlackChannel::class);
+}
+```
+
+The engine automatically discovers registered channels prefixed with `marketing.channels.*` and makes them available for campaign execution.
+
 ### 5. Compliance & Privacy
 
 - **GDPR-ready**: Consent tracking, data portability, right to deletion
@@ -888,9 +922,9 @@ test('US-003: developer can launch campaign via marketing() method', function ()
 
 **Test Categories**:
 - Laravel framework integration (Eloquent, Queue, Cache)
-- Multi-tenancy integration (if nexus-tenancy present)
-- Audit logging integration (if nexus-audit-log present)
 - External services (email providers, SMS gateways)
+
+**Note**: Integration tests with other Nexus packages (nexus-tenancy, nexus-audit-log) belong in the `nexus/erp` orchestration layer or Edward demo application, not in the atomic package. This ensures the package remains independently testable without dependencies on other Nexus packages.
 
 **Example Test Structure**:
 ```php
@@ -935,17 +969,17 @@ test('campaign launches trigger queued channel execution', function () {
 
 | Package | Version | Purpose |
 |---------|---------|---------|
-| PHP | >= 8.2 | Modern PHP features (enums, readonly, etc.) |
-| Laravel | >= 11.x | Framework integration (optional for core) |
+| PHP | >= 8.3 | Modern PHP features (enums, readonly, etc.) |
+| Laravel | >= 12.x | Framework integration (optional for core) |
 
 ### Optional Dependencies
 
 | Package | Version | Purpose |
 |---------|---------|---------|
-| nexus-tenancy | ^1.0 | Multi-tenancy support |
-| nexus-audit-log | ^1.0 | Audit trail integration |
 | Redis | ^7.0 | Caching and queue backend |
 | MySQL | >= 8.0 | Primary database (or PostgreSQL >= 12, SQLite >= 3.35) |
+
+**Note**: Integration with other Nexus packages (nexus-tenancy, nexus-audit-log) is handled via contracts and events in the `nexus/erp` orchestration layer, not as direct dependencies. This maintains the atomic package's independence and zero cross-package coupling principle.
 
 ### Development Dependencies
 
@@ -1024,6 +1058,8 @@ test('campaign launches trigger queued channel execution', function () {
 
 ## Package Structure
 
+**Architectural Note**: This package follows Nexus ERP's atomic package principles. Controllers and Commands in `src/Http/` and `src/Adapters/Laravel/Commands/` are for **package-internal testing and maintenance only**. Production API endpoints are orchestrated through the `nexus/erp` core using Laravel Actions, ensuring the package remains headless and independently testable.
+
 ```
 packages/nexus-marketing/
 ├── src/
@@ -1070,9 +1106,9 @@ packages/nexus-marketing/
 │   ├── Timers/
 │   │   ├── TimerQueue.php
 │   │   ├── TimerProcessor.php
-│   ├── Http/
-│   │   ├── Controllers/
-│   │   │   ├── CampaignController.php
+│   ├── Http/                          # NOTE: For package-internal API testing only
+│   │   ├── Controllers/               # Public API endpoints belong in nexus/erp orchestration layer
+│   │   │   ├── CampaignController.php # Internal testing/development use only
 │   │   │   ├── LeadController.php
 │   │   │   ├── SegmentController.php
 │   │   │   ├── AnalyticsController.php
@@ -1099,10 +1135,10 @@ packages/nexus-marketing/
 │   │       │   ├── SegmentRepository.php
 │   │       ├── Services/
 │   │       │   ├── MarketingDashboard.php
-│   │       ├── Commands/
-│   │       │   ├── ProcessTimersCommand.php
-│   │       │   ├── RecalculateSegmentsCommand.php
-│   │       │   ├── ProcessEscalationsCommand.php
+│   │       ├── Commands/              # NOTE: For package-internal maintenance only
+│   │       │   ├── ProcessTimersCommand.php      # Scheduled task processing
+│   │       │   ├── RecalculateSegmentsCommand.php # Maintenance command
+│   │       │   ├── ProcessEscalationsCommand.php  # Background processing
 │   │       └── MarketingServiceProvider.php
 │   └── Events/
 │       ├── CampaignLaunched.php
