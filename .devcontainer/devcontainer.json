@@ -1,0 +1,26 @@
+// .devcontainer/devcontainer.json
+{
+  "name": "PHP 8.3 Development Container",
+  "image": "mcr.microsoft.com/devcontainers/php:1-8.3",
+  
+  "features": {
+    // Optionally add Node.js if your project has front-end dependencies
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "latest"
+    }
+  },
+
+  "forwardPorts": [8080],
+
+  "postCreateCommand": "composer install",
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "felixfbecker.php-intellisense",
+        "felixfbecker.php-debug",
+        "bmewburn.vscode-intelephense-client"
+      ]
+    }
+  }
+}
