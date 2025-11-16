@@ -1,42 +1,11 @@
-# Composer dependencies
 /vendor/
-composer.phar
-
-# PHPUnit and testing
-/.phpunit.result.cache
-/.phpunit.cache
-/.pest
-/build/
-/coverage/
-coverage.xml
-clover.xml
+composer.lock
+.phpunit.result.cache
+.phpunit.cache
+.php-cs-fixer.cache
+.phpstan.cache
+phpstan.neon
 phpunit.xml
-
-# PHP
-*.log
-.env
-.env.backup
-.env.production
-
-# IDEs
-/.idea/
-/.vscode/
-*.sublime-project
-*.sublime-workspace
-*.swp
-*.swo
-*~
-
-# OS Files
+/coverage/
 .DS_Store
 Thumbs.db
-Desktop.ini
-
-# Build artifacts
-/dist/
-/docs/build/
-
-# Database
-*.sqlite
-*.sqlite3
-*.db
