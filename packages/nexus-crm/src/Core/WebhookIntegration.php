@@ -24,6 +24,7 @@ class WebhookIntegration implements IntegrationContract
         $url = $config['url'] ?? '';
         $method = $config['method'] ?? 'POST';
         $headers = $config['headers'] ?? [];
+        $retries = $config['retries'] ?? 3;
 
         if (!$url) {
             throw new \InvalidArgumentException('Webhook URL is required');
@@ -44,17 +45,73 @@ class WebhookIntegration implements IntegrationContract
             $headers['X-Webhook-Signature'] = $this->signPayload($payload, $config['secret']);
         }
 
-        try {
-            Http::withHeaders($headers)
-                ->timeout(10) // Add timeout
-                ->send($method, $url, ['json' => $payload]);
-        } catch (\Exception $e) {
-            Log::error('CRM Webhook Integration Failed', [
-                'entity_id' => $entity->id,
-                'url' => $url,
-                'error' => $e->getMessage(),
-            ]);
+        $lastException = null;
+        
+        for ($attempt = 1; $attempt <= $retries; $attempt++) {
+            try {
+                $response = Http::withHeaders($headers)
+                    ->timeout(10)
+                    ->retry($retries, 100) // Built-in retry with exponential backoff
+                    ->send($method, $url, ['json' => $payload]);
+
+                if ($response->successful()) {
+                    // Success - emit success event
+                    event(new \Nexus\Crm\Events\WebhookDeliveredEvent($entity, $url, $payload));
+                    return;
+                }
+
+                // Non-successful HTTP status
+                Log::warning('CRM Webhook returned non-success status', [
+                    'entity_id' => $entity->id,
+                    'url' => $url,
+                    'status' => $response->status(),
+                    'attempt' => $attempt,
+                ]);
+                
+                $lastException = new \RuntimeException("Webhook returned status {$response->status()}");
+                
+            } catch (\Illuminate\Http\Client\ConnectionException $e) {
+                // Transient network error - retry
+                $lastException = $e;
+                Log::warning('CRM Webhook connection failed (will retry)', [
+                    'entity_id' => $entity->id,
+                    'url' => $url,
+                    'error' => $e->getMessage(),
+                    'attempt' => $attempt,
+                ]);
+                
+                if ($attempt < $retries) {
+                    usleep(100000 * $attempt); // Exponential backoff
+                }
+                
+            } catch (\Exception $e) {
+                // Configuration error or other critical failure - don't retry
+                Log::error('CRM Webhook Integration Failed (critical)', [
+                    'entity_id' => $entity->id,
+                    'url' => $url,
+                    'error' => $e->getMessage(),
+                    'attempt' => $attempt,
+                ]);
+                
+                // Emit failure event for monitoring
+                event(new \Nexus\Crm\Events\WebhookFailedEvent($entity, $url, $e->getMessage()));
+                
+                throw $e; // Re-throw critical errors
+            }
         }
+
+        // All retries exhausted - store for later retry
+        Log::error('CRM Webhook Integration Failed after retries', [
+            'entity_id' => $entity->id,
+            'url' => $url,
+            'error' => $lastException?->getMessage(),
+            'attempts' => $retries,
+        ]);
+
+        // Emit failure event for monitoring
+        event(new \Nexus\Crm\Events\WebhookFailedEvent($entity, $url, $lastException?->getMessage() ?? 'Unknown error'));
+        
+        // TODO: Store in failed_webhooks table for manual retry/investigation
     }
 
     /**
@@ -64,8 +121,9 @@ class WebhookIntegration implements IntegrationContract
     {
         $whitelist = config('crm.webhook_whitelist', []);
 
-        if (empty($whitelist)) {
-            return; // No whitelist configured, allow all
+        // Validate URL format first
+        if (filter_var($url, FILTER_VALIDATE_URL) === false) {
+            throw new \RuntimeException("Invalid webhook URL format: {$url}");
         }
 
         $parsedUrl = parse_url($url);
@@ -77,6 +135,14 @@ class WebhookIntegration implements IntegrationContract
             throw new \RuntimeException("Webhook URL '{$url}' does not contain a valid host");
         }
 
+        if (empty($whitelist)) {
+            // Still block private IPs and localhost for security
+            if ($this->isPrivateOrLocalhost($host)) {
+                throw new \RuntimeException("Webhook to private/local addresses not allowed: {$host}");
+            }
+            return;
+        }
+
         foreach ($whitelist as $allowedPattern) {
             if (fnmatch($allowedPattern, $host)) {
                 return; // URL is whitelisted
@@ -84,6 +150,32 @@ class WebhookIntegration implements IntegrationContract
         }
 
         throw new \RuntimeException("Webhook URL '{$url}' is not whitelisted");
+    }
+
+    /**
+     * Check if host is private or localhost.
+     */
+    private function isPrivateOrLocalhost(string $host): bool
+    {
+        // Check for localhost
+        if (in_array($host, ['localhost', '127.0.0.1', '::1', '0.0.0.0'], true)) {
+            return true;
+        }
+
+        // Resolve hostname to IP if needed
+        $ip = filter_var($host, FILTER_VALIDATE_IP) ? $host : gethostbyname($host);
+        
+        // Check if it's a valid IP
+        if (!filter_var($ip, FILTER_VALIDATE_IP)) {
+            return false;
+        }
+
+        // Check for private IP ranges
+        return !filter_var(
+            $ip,
+            FILTER_VALIDATE_IP,
+            FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE
+        );
     }
 
     /**
@@ -131,7 +223,8 @@ class WebhookIntegration implements IntegrationContract
      */
     private function signPayload(array $payload, string $secret): string
     {
-        return hash_hmac('sha256', json_encode($payload), $secret);
+        $json = json_encode($payload, JSON_THROW_ON_ERROR);
+        return hash_hmac('sha256', $json, $secret);
     }
 
     /**

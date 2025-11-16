@@ -4971,7 +4971,7 @@ class RoundRobinAssignmentStrategy
         $availableUsers = $config['users'] ?? [];
         
         // GOOD: Hash ULID to integer for modulo operation
-        $userIndex = crc32($entity->id) % count($availableUsers);
+        $userIndex = abs(crc32($entity->id)) % count($availableUsers);
         
         return [$availableUsers[$userIndex] => 'assignee'];
     }
@@ -5001,11 +5001,24 @@ private function validateWebhookUrl(string $url): void
 {
     $whitelist = config('crm.webhook_whitelist', []);
     
+    // Validate URL format first
+    if (filter_var($url, FILTER_VALIDATE_URL) === false) {
+        throw new \RuntimeException("Invalid webhook URL format: {$url}");
+    }
+    
     if (empty($whitelist)) {
-        return; // No whitelist = allow all (dev only!)
+        // Still block private IPs and localhost for security
+        if ($this->isPrivateOrLocalhost($url)) {
+            throw new \RuntimeException("Webhook to private/local addresses not allowed");
+        }
+        return; // No whitelist = allow all public URLs (dev only!)
     }
     
     $host = parse_url($url, PHP_URL_HOST);
+    
+    if (empty($host)) {
+        throw new \RuntimeException("Webhook URL must have a valid host");
+    }
     
     foreach ($whitelist as $allowedPattern) {
         if (fnmatch($allowedPattern, $host)) {
