@@ -11,6 +11,7 @@ use App\Traits\HasHierarchy;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Nexus\Backoffice\Contracts\CompanyInterface;
 
 /**
  * Company Model
@@ -36,7 +37,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class Company extends Model implements CompanyInterface
 {
     use HasFactory, SoftDeletes, HasHierarchy;
-use Nexus\Backoffice\Contracts\CompanyInterface;
 
     /**
      * The table associated with the model.
