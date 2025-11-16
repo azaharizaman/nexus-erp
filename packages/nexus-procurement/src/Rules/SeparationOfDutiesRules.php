@@ -255,6 +255,12 @@ class SeparationOfDutiesRules
      */
     public function logViolationAttempt(string $action, array $violations, int $userId, ?int $entityId = null): void
     {
+        // Check if nexus-audit-log package is available before logging
+        if (!class_exists('\Nexus\AuditLog\Facades\AuditLog')) {
+            // Silently skip logging if audit log package is not installed
+            return;
+        }
+        
         // Log to audit system
         \Nexus\AuditLog\Facades\AuditLog::create([
             'action' => 'sod_violation_attempt',

@@ -10,6 +10,7 @@ use Nexus\Procurement\Models\VendorQuote;
 use Nexus\Procurement\Models\VendorQuoteItem;
 use Nexus\Procurement\Models\Vendor;
 use Nexus\Procurement\Models\PurchaseOrder;
+use Nexus\Procurement\Models\PurchaseRequisition;
 use Nexus\Procurement\Enums\RFQStatus;
 use Nexus\Sequencing\Services\SequencingService;
 use Illuminate\Support\Facades\DB;
