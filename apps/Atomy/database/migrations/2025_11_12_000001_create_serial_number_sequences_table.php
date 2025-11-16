@@ -66,9 +66,6 @@ return new class extends Migration
             // Unique constraint: One sequence per tenant
             $table->unique(['tenant_id', 'sequence_name'], 'uq_sequences_tenant_name');
 
-            // Index for fast tenant-scoped lookups
-            $table->index(['tenant_id', 'sequence_name'], 'idx_sequences_tenant_name');
-
             // Index for automated reset queries
             $table->index('reset_period', 'idx_sequences_reset_period');
         });
