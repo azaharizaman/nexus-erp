@@ -148,3 +148,656 @@ Below are the exact numbered user stories and requirements from the original `pa
 | `Nexus\Crm` | `BR-008` | Parallel branches must all complete before proceeding | `packages/Crm/src/Core/PipelineEngine.php` | Completed | Parallel branches must all complete before proceeding. | 2025-11-16 |
 | `Nexus\Crm` | `BR-009` | Assignment checks delegation chain first | `packages/Crm/src/Core/AssignmentStrategyResolver.php` | Completed | Assignment checks delegation chain first. | 2025-11-16 |
 | `Testing` (`Package` and `App`) | N/A | Unit & Feature tests added for ProjectManagement & API flows | `packages/ProjectManagement/tests/Unit/*` and `apps/Atomy/tests/Feature/*` | Completed | Unit tests for managers and feature tests for controllers and repos added. Coverage: target 90%+, run tests to verify. | 2025-11-16 |
+
+### Nexus\Accounting — Detailed Numbered Requirements
+
+#### Functional Requirements
+
+| Package/App (Namespace) | Requirement # | Description | Implemented in (Class / File / Method) | Status | Notes | Date |
+| --- | --- | --- | --- | --- | --- | --- |
+| `Nexus\Accounting` | `FR-ACC-COA-001` | Maintain hierarchical chart of accounts with unlimited depth using nested set model | | | | |
+| `Nexus\Accounting` | `FR-ACC-COA-002` | Support 5 standard account types (Asset, Liability, Equity, Revenue, Expense) with type inheritance | | | | |
+| `Nexus\Accounting` | `FR-ACC-COA-003` | Allow tagging accounts by category and reporting group for financial statement organization | | | | |
+| `Nexus\Accounting` | `FR-ACC-COA-004` | Support flexible account code format (e.g., 1000-00, 1.1.1) per tenant configuration | | | | |
+| `Nexus\Accounting` | `FR-ACC-COA-005` | Provide account activation/deactivation without deletion to preserve history | | | | |
+| `Nexus\Accounting` | `FR-ACC-COA-006` | Support account templates for quick COA setup (manufacturing, retail, services) | | | | |
+#### Performance Requirements
+
+| Package/App (Namespace) | Requirement # | Description | Implemented in (Class / File / Method) | Status | Notes | Date |
+| --- | --- | --- | --- | --- | --- | --- |
+| `Nexus\Accounting` | `PR-ACC-001` | Trial balance generation for 100K transactions | | | | |
+| `Nexus\Accounting` | `PR-ACC-002` | Account balance inquiry with drill-down | | | | |
+| `Nexus\Accounting` | `PR-ACC-003` | Bank reconciliation for 10K transactions | | | | |
+| `Nexus\Accounting` | `PR-ACC-004` | Aging report generation (30/60/90 days) | | | | |
+| `Nexus\Accounting` | `PR-ACC-005` | Chart of accounts hierarchical query performance | | | | |
+#### Security Requirements
+
+| Package/App (Namespace) | Requirement # | Description | Implemented in (Class / File / Method) | Status | Notes | Date |
+| --- | --- | --- | --- | --- | --- | --- |
+| `Nexus\Accounting` | `SR-ACC-001` | Implement audit logging for all GL postings using ActivityLoggerContract | | | | |
+| `Nexus\Accounting` | `SR-ACC-002` | Enforce tenant isolation for all accounting data via tenant scoping | | | | |
+| `Nexus\Accounting` | `SR-ACC-003` | Support authorization policies through contract-based permission system | | | | |
+| `Nexus\Accounting` | `SR-ACC-004` | Validate business rules at domain layer (before orchestration) | | | | |
+| `Nexus\Accounting` | `SR-ACC-005` | Implement immutable posting (entries cannot be modified once posted) | | | | |
+#### Business Rules
+
+| Package/App (Namespace) | Requirement # | Description | Implemented in (Class / File / Method) | Status | Notes | Date |
+| --- | --- | --- | --- | --- | --- | --- |
+| `Nexus\Accounting` | `BR-ACC-001` | All journal entries MUST be balanced (debit = credit) before posting | | | | |
+| `Nexus\Accounting` | `BR-ACC-002` | Posted entries cannot be modified; only reversed with offsetting entries | | | | |
+| `Nexus\Accounting` | `BR-ACC-003` | Prevent deletion of accounts with associated transactions or child accounts | | | | |
+| `Nexus\Accounting` | `BR-ACC-004` | Account codes MUST be unique within tenant scope | | | | |
+| `Nexus\Accounting` | `BR-ACC-005` | Only leaf accounts (no children) can have transactions posted to them | | | | |
+| `Nexus\Accounting` | `BR-ACC-006` | Entries can only be posted to active fiscal periods; closed periods reject entries | | | | |
+| `Nexus\Accounting` | `BR-ACC-007` | Foreign currency transactions MUST record both base and foreign amounts with exchange rate | | | | |
+| `Nexus\Accounting` | `BR-ACC-008` | Three-way matching required for vendor invoice posting (PO, GR, Invoice) | | | | |
+| `Nexus\Accounting` | `BR-ACC-009` | Customer payments MUST be allocated to specific invoices for proper aging tracking | | | | |
+### Nexus\Analytics — Detailed Numbered Requirements
+
+#### Functional Requirements
+
+| Package/App (Namespace) | Requirement # | Description | Implemented in (Class / File / Method) | Status | Notes | Date |
+| --- | --- | --- | --- | --- | --- | --- |
+| `Nexus\Analytics` | `FR-L1-001` | Provide HasAnalytics trait for models | | | | |
+| `Nexus\Analytics` | `FR-L1-002` | Support in-model query definitions | | | | |
+| `Nexus\Analytics` | `FR-L1-003` | Implement analytics()->runQuery($name) method | | | | |
+| `Nexus\Analytics` | `FR-L1-004` | Implement analytics()->can($action) method | | | | |
+| `Nexus\Analytics` | `FR-L1-005` | Implement analytics()->history() method | | | | |
+| `Nexus\Analytics` | `FR-L1-006` | Support guard conditions on queries | | | | |
+| `Nexus\Analytics` | `FR-L1-007` | Provide before/after hooks | | | | |
+#### Performance Requirements
+
+| Package/App (Namespace) | Requirement # | Description | Implemented in (Class / File / Method) | Status | Notes | Date |
+| --- | --- | --- | --- | --- | --- | --- |
+| `Nexus\Analytics` | `PR-ANA-001` | Query execution time | | | | |
+| `Nexus\Analytics` | `PR-ANA-002` | Dashboard load (1,000 metrics) | | | | |
+| `Nexus\Analytics` | `PR-ANA-003` | ML prediction (10,000 records) | | | | |
+| `Nexus\Analytics` | `PR-ANA-004` | Analytics initialization | | | | |
+| `Nexus\Analytics` | `PR-ANA-005` | Parallel data merge (10 sources) | | | | |
+#### Security Requirements
+
+| Package/App (Namespace) | Requirement # | Description | Implemented in (Class / File / Method) | Status | Notes | Date |
+| --- | --- | --- | --- | --- | --- | --- |
+| `Nexus\Analytics` | `SR-ANA-001` | Prevent unauthorized query execution | | | | |
+| `Nexus\Analytics` | `SR-ANA-002` | Sanitize all filter expressions | | | | |
+| `Nexus\Analytics` | `SR-ANA-003` | Enforce tenant isolation | | | | |
+| `Nexus\Analytics` | `SR-ANA-004` | Sandbox plugin execution | | | | |
+| `Nexus\Analytics` | `SR-ANA-005` | Immutable audit trail | | | | |
+| `Nexus\Analytics` | `SR-ANA-006` | RBAC integration | | | | |
+#### Reliability Requirements
+
+| Package/App (Namespace) | Requirement # | Description | Implemented in (Class / File / Method) | Status | Notes | Date |
+| --- | --- | --- | --- | --- | --- | --- |
+| `Nexus\Analytics` | `REL-ANA-001` | ACID compliance for queries | | | | |
+| `Nexus\Analytics` | `REL-ANA-002` | Failed data sources don't block | | | | |
+| `Nexus\Analytics` | `REL-ANA-003` | Concurrency control | | | | |
+| `Nexus\Analytics` | `REL-ANA-004` | Data corruption protection | | | | |
+| `Nexus\Analytics` | `REL-ANA-005` | Retry transient failures | | | | |
+#### Scalability Requirements
+
+| Package/App (Namespace) | Requirement # | Description | Implemented in (Class / File / Method) | Status | Notes | Date |
+| --- | --- | --- | --- | --- | --- | --- |
+| `Nexus\Analytics` | `SCL-ANA-001` | Async aggregations | | | | |
+| `Nexus\Analytics` | `SCL-ANA-002` | Horizontal scaling for timers | | | | |
+| `Nexus\Analytics` | `SCL-ANA-003` | Efficient database queries | | | | |
+| `Nexus\Analytics` | `SCL-ANA-004` | Support 100,000+ reports | | | | |
+#### Business Rules
+
+| Package/App (Namespace) | Requirement # | Description | Implemented in (Class / File / Method) | Status | Notes | Date |
+| --- | --- | --- | --- | --- | --- | --- |
+| `Nexus\Analytics` | `BR-ANA-001` | Users cannot view sensitive data about themselves | | | | |
+| `Nexus\Analytics` | `BR-ANA-002` | All query executions MUST use ACID transactions | | | | |
+| `Nexus\Analytics` | `BR-ANA-003` | Predictive model drift MUST trigger automatic alerts | | | | |
+| `Nexus\Analytics` | `BR-ANA-004` | Failed queries MUST use compensation actions for reversal | | | | |
+| `Nexus\Analytics` | `BR-ANA-005` | Delegation chains limited to maximum 3 levels depth | | | | |
+| `Nexus\Analytics` | `BR-ANA-006` | Level 1 definitions MUST remain compatible after L2/3 upgrade | | | | |
+| `Nexus\Analytics` | `BR-ANA-007` | Each model instance has one analytics instance | | | | |
+| `Nexus\Analytics` | `BR-ANA-008` | Parallel data sources MUST complete all before returning results | | | | |
+| `Nexus\Analytics` | `BR-ANA-009` | Delegated access MUST check delegation chain for permissions | | | | |
+| `Nexus\Analytics` | `BR-ANA-010` | Multi-role sharing follows configured strategy (unison/selective) | | | | |
+### Nexus\FieldService — Detailed Numbered Requirements
+
+#### User Stories
+
+| Package/App (Namespace) | Requirement # | Description | Implemented in (Class / File / Method) | Status | Notes | Date |
+| --- | --- | --- | --- | --- | --- | --- |
+| `Nexus\FieldService` | `US-001` | P1 | | | | |
+| `Nexus\FieldService` | `US-002` | P2 | | | | |
+| `Nexus\FieldService` | `US-003` | P3 | | | | |
+| `Nexus\FieldService` | `US-004` | P3 | | | | |
+| `Nexus\FieldService` | `US-005` | P3 | | | | |
+| `Nexus\FieldService` | `US-006` | P3 | | | | |
+| `Nexus\FieldService` | `US-007` | P3 | | | | |
+| `Nexus\FieldService` | `US-008` | P4 | | | | |
+| `Nexus\FieldService` | `US-009` | P1 | | | | |
+#### Functional Requirements
+
+| Package/App (Namespace) | Requirement # | Description | Implemented in (Class / File / Method) | Status | Notes | Date |
+| --- | --- | --- | --- | --- | --- | --- |
+| `Nexus\FieldService` | `FR-L1-001` | Create work order | | | | |
+| `Nexus\FieldService` | `FR-L1-002` | Technician assignment | | | | |
+| `Nexus\FieldService` | `FR-L1-003` | Technician daily schedule | | | | |
+| `Nexus\FieldService` | `FR-L1-004` | Mobile job execution | | | | |
+| `Nexus\FieldService` | `FR-L1-005` | Parts/materials consumption | | | | |
+| `Nexus\FieldService` | `FR-L1-006` | Customer signature capture | | | | |
+| `Nexus\FieldService` | `FR-L1-007` | Auto-generate service report | | | | |
+| `Nexus\FieldService` | `FR-L1-008` | Work order status tracking | | | | |
+| `Nexus\FieldService` | `PR-001` | Mobile app startup time | | | | |
+| `Nexus\FieldService` | `PR-002` | Work order list loading (100 jobs) | | | | |
+| `Nexus\FieldService` | `PR-003` | Service report generation (with photos) | | | | |
+| `Nexus\FieldService` | `PR-004` | Route optimization (20 jobs, 5 technicians) | | | | |
+| `Nexus\FieldService` | `PR-005` | Auto-assignment algorithm | | | | |
+| `Nexus\FieldService` | `PR-006` | Offline mobile capability | | | | |
+#### Performance Requirements
+
+| Package/App (Namespace) | Requirement # | Description | Implemented in (Class / File / Method) | Status | Notes | Date |
+| --- | --- | --- | --- | --- | --- | --- |
+| `Nexus\FieldService` | `PR-001` | Mobile app startup time | | | | |
+| `Nexus\FieldService` | `PR-002` | Work order list loading (100 jobs) | | | | |
+| `Nexus\FieldService` | `PR-003` | Service report generation (with photos) | | | | |
+| `Nexus\FieldService` | `PR-004` | Route optimization (20 jobs, 5 technicians) | | | | |
+| `Nexus\FieldService` | `PR-005` | Auto-assignment algorithm | | | | |
+| `Nexus\FieldService` | `PR-006` | Offline mobile capability | | | | |
+#### Security Requirements
+
+| Package/App (Namespace) | Requirement # | Description | Implemented in (Class / File / Method) | Status | Notes | Date |
+| --- | --- | --- | --- | --- | --- | --- |
+| `Nexus\FieldService` | `SR-001` | Tenant data isolation | | | | |
+| `Nexus\FieldService` | `SR-002` | Role-based access control | | | | |
+| `Nexus\FieldService` | `SR-003` | Mobile app authentication | | | | |
+| `Nexus\FieldService` | `SR-004` | Customer signature security | | | | |
+| `Nexus\FieldService` | `SR-005` | GPS data privacy | | | | |
+| `Nexus\FieldService` | `SR-006` | Service report integrity | | | | |
+| `Nexus\FieldService` | `SR-007` | Customer portal access control | | | | |
+#### Reliability Requirements
+
+| Package/App (Namespace) | Requirement # | Description | Implemented in (Class / File / Method) | Status | Notes | Date |
+| --- | --- | --- | --- | --- | --- | --- |
+| `Nexus\FieldService` | `REL-001` | Mobile app offline mode | | | | |
+| `Nexus\FieldService` | `REL-002` | Data sync conflict resolution | | | | |
+| `Nexus\FieldService` | `REL-003` | Service report generation resilience | | | | |
+| `Nexus\FieldService` | `REL-004` | GPS tracking fault tolerance | | | | |
+| `Nexus\FieldService` | `REL-005` | Notification delivery guarantee | | | | |
+#### Business Rules
+
+| Package/App (Namespace) | Requirement # | Description | Implemented in (Class / File / Method) | Status | Notes | Date |
+| --- | --- | --- | --- | --- | --- | --- |
+| `Nexus\FieldService` | `BR-001` | Work order must have a customer and service location | | | | |
+| `Nexus\FieldService` | `BR-002` | Cannot assign work order to technician without required skills | | | | |
+| `Nexus\FieldService` | `BR-003` | Cannot start work order without assignment to technician | | | | |
+| `Nexus\FieldService` | `BR-004` | Work order can only be completed if all critical checklist items pass | | | | |
+| `Nexus\FieldService` | `BR-005` | Parts consumption auto-deducts from technician van stock first, then warehouse | | | | |
+| `Nexus\FieldService` | `BR-006` | Service report can only be generated after work order is completed | | | | |
+| `Nexus\FieldService` | `BR-007` | Customer signature is required before work order can be marked verified | | | | |
+| `Nexus\FieldService` | `BR-008` | SLA deadlines calculated from service contract terms | | | | |
+| `Nexus\FieldService` | `BR-009` | SLA breach triggers escalation workflow (notify manager, auto-reassign) | | | | |
+| `Nexus\FieldService` | `BR-010` | Preventive maintenance work orders auto-generated 7 days before due date | | | | |
+| `Nexus\FieldService` | `BR-011` | Cannot schedule technician beyond their daily capacity (8 hours default) | | | | |
+| `Nexus\FieldService` | `BR-012` | GPS location capture required when starting/ending job | | | | |
+| `Nexus\FieldService` | `BR-013` | Asset must have maintenance schedule if covered by service contract | | | | |
+| `Nexus\FieldService` | `BR-014` | Expired service contracts prevent new work order creation (unless emergency) | | | | |
+| `Nexus\FieldService` | `BR-015` | Route optimization respects job time windows (scheduled start/end times) | | | | |
+### Nexus\Hrm — Detailed Numbered Requirements
+
+#### Functional Requirements
+
+| Package/App (Namespace) | Requirement # | Description | Implemented in (Class / File / Method) | Status | Notes | Date |
+| --- | --- | --- | --- | --- | --- | --- |
+| `Nexus\Hrm` | `FR-HRM-EMP-001` | Manage employee master data with personal information, emergency contacts, and dependents | | | | |
+| `Nexus\Hrm` | `FR-HRM-EMP-002` | Track employment contracts with start date, probation period, position, and employment type | | | | |
+| `Nexus\Hrm` | `FR-HRM-EMP-003` | Implement employee lifecycle states (prospect → active → probation → permanent → notice → terminated) | | | | |
+| `Nexus\Hrm` | `FR-HRM-EMP-004` | Support automatic org hierarchy integration via OrganizationServiceContract (manager, subordinates, department queries) | | | | |
+| `Nexus\Hrm` | `FR-HRM-EMP-005` | Track employment history with position changes, transfers, and promotions | | | | |
+| `Nexus\Hrm` | `FR-HRM-EMP-006` | Manage employee documents with secure storage, version control, and expiry tracking | | | | |
+#### Performance Requirements
+
+| Package/App (Namespace) | Requirement # | Description | Implemented in (Class / File / Method) | Status | Notes | Date |
+| --- | --- | --- | --- | --- | --- | --- |
+| `Nexus\Hrm` | `PR-HRM-001` | Employee search across 100K records | | | | |
+| `Nexus\Hrm` | `PR-HRM-002` | Leave balance calculation with complex rules | | | | |
+| `Nexus\Hrm` | `PR-HRM-003` | Monthly attendance report generation (1000 employees) | | | | |
+| `Nexus\Hrm` | `PR-HRM-004` | Performance review data aggregation (department-level) | | | | |
+| `Nexus\Hrm` | `PR-HRM-005` | Real-time leave balance check during request submission | | | | |
+#### Security Requirements
+
+| Package/App (Namespace) | Requirement # | Description | Implemented in (Class / File / Method) | Status | Notes | Date |
+| --- | --- | --- | --- | --- | --- | --- |
+| `Nexus\Hrm` | `SR-HRM-001` | Implement audit logging for all employee data changes using ActivityLoggerContract | | | | |
+| `Nexus\Hrm` | `SR-HRM-002` | Enforce tenant isolation for all HR data via tenant scoping | | | | |
+| `Nexus\Hrm` | `SR-HRM-003` | Support authorization policies through contract-based permission system | | | | |
+| `Nexus\Hrm` | `SR-HRM-004` | Encrypt sensitive employee data (personal information, salary details) at rest | | | | |
+| `Nexus\Hrm` | `SR-HRM-005` | Implement field-level access control (HR managers see salary, line managers don't) | | | | |
+#### Business Rules
+
+| Package/App (Namespace) | Requirement # | Description | Implemented in (Class / File / Method) | Status | Notes | Date |
+| --- | --- | --- | --- | --- | --- | --- |
+| `Nexus\Hrm` | `BR-HRM-001` | Employees MUST have active contract before leave accrual begins | | | | |
+| `Nexus\Hrm` | `BR-HRM-002` | Leave requests CANNOT exceed available balance unless negative balance policy enabled | | | | |
+| `Nexus\Hrm` | `BR-HRM-003` | Probation completion required before permanent leave entitlements activate | | | | |
+| `Nexus\Hrm` | `BR-HRM-004` | Attendance records MUST NOT overlap for same employee (prevent duplicate clock-ins) | | | | |
+| `Nexus\Hrm` | `BR-HRM-005` | Performance reviews MUST be conducted by employee's direct manager or authorized delegate | | | | |
+| `Nexus\Hrm` | `BR-HRM-006` | Disciplinary actions require documented evidence and approval workflow completion | | | | |
+| `Nexus\Hrm` | `BR-HRM-007` | Training certifications with expiry dates trigger automatic reminders 30 days before expiry | | | | |
+| `Nexus\Hrm` | `BR-HRM-008` | Employee termination MUST trigger automatic leave balance calculation and final settlement | | | | |
+### Nexus\Manufacturing — Detailed Numbered Requirements
+
+#### User Stories
+
+| Package/App (Namespace) | Requirement # | Description | Implemented in (Class / File / Method) | Status | Notes | Date |
+| --- | --- | --- | --- | --- | --- | --- |
+| `Nexus\Manufacturing` | `US-001` | P1 | | | | |
+| `Nexus\Manufacturing` | `US-002` | P1 | | | | |
+| `Nexus\Manufacturing` | `US-003` | P2 | | | | |
+| `Nexus\Manufacturing` | `US-004` | P3 | | | | |
+| `Nexus\Manufacturing` | `US-005` | P3 | | | | |
+| `Nexus\Manufacturing` | `US-006` | P2 | | | | |
+| `Nexus\Manufacturing` | `US-007` | P5 | | | | |
+#### Functional Requirements
+
+| Package/App (Namespace) | Requirement # | Description | Implemented in (Class / File / Method) | Status | Notes | Date |
+| --- | --- | --- | --- | --- | --- | --- |
+| `Nexus\Manufacturing` | `FR-L1-001` | Define Bill of Materials (BOM) | | | | |
+| `Nexus\Manufacturing` | `FR-L1-002` | Multi-level BOM support | | | | |
+| `Nexus\Manufacturing` | `FR-L1-003` | Create work order | | | | |
+| `Nexus\Manufacturing` | `FR-L1-004` | Material issue (backflush vs manual) | | | | |
+| `Nexus\Manufacturing` | `FR-L1-005` | Production reporting | | | | |
+| `Nexus\Manufacturing` | `FR-L1-006` | Work order completion | | | | |
+| `Nexus\Manufacturing` | `FR-L1-007` | Work order tracking dashboard | | | | |
+| `Nexus\Manufacturing` | `PR-001` | BOM explosion (10-level deep, 500 components) | | | | |
+| `Nexus\Manufacturing` | `PR-002` | Work order creation and material allocation | | | | |
+| `Nexus\Manufacturing` | `PR-003` | Production reporting (backflush 50 components) | | | | |
+| `Nexus\Manufacturing` | `PR-004` | MRP calculation (1000 SKUs, 10,000 transactions) | | | | |
+| `Nexus\Manufacturing` | `PR-005` | Shop floor dashboard (100 active work orders) | | | | |
+#### Performance Requirements
+
+| Package/App (Namespace) | Requirement # | Description | Implemented in (Class / File / Method) | Status | Notes | Date |
+| --- | --- | --- | --- | --- | --- | --- |
+| `Nexus\Manufacturing` | `PR-001` | BOM explosion (10-level deep, 500 components) | | | | |
+| `Nexus\Manufacturing` | `PR-002` | Work order creation and material allocation | | | | |
+| `Nexus\Manufacturing` | `PR-003` | Production reporting (backflush 50 components) | | | | |
+| `Nexus\Manufacturing` | `PR-004` | MRP calculation (1000 SKUs, 10,000 transactions) | | | | |
+| `Nexus\Manufacturing` | `PR-005` | Shop floor dashboard (100 active work orders) | | | | |
+#### Security Requirements
+
+| Package/App (Namespace) | Requirement # | Description | Implemented in (Class / File / Method) | Status | Notes | Date |
+| --- | --- | --- | --- | --- | --- | --- |
+| `Nexus\Manufacturing` | `SR-001` | Tenant data isolation | | | | |
+| `Nexus\Manufacturing` | `SR-002` | Role-based access control | | | | |
+| `Nexus\Manufacturing` | `SR-003` | Production data integrity | | | | |
+| `Nexus\Manufacturing` | `SR-004` | Traceability compliance | | | | |
+| `Nexus\Manufacturing` | `SR-005` | Quality data protection | | | | |
+#### Reliability Requirements
+
+| Package/App (Namespace) | Requirement # | Description | Implemented in (Class / File / Method) | Status | Notes | Date |
+| --- | --- | --- | --- | --- | --- | --- |
+| `Nexus\Manufacturing` | `REL-001` | All inventory transactions MUST be ACID-compliant | | | | |
+| `Nexus\Manufacturing` | `REL-002` | Production reporting MUST prevent double-counting | | | | |
+| `Nexus\Manufacturing` | `REL-003` | Work order state changes MUST be resumable after failure | | | | |
+| `Nexus\Manufacturing` | `REL-004` | BOM explosion MUST handle circular references | | | | |
+#### Business Rules
+
+| Package/App (Namespace) | Requirement # | Description | Implemented in (Class / File / Method) | Status | Notes | Date |
+| --- | --- | --- | --- | --- | --- | --- |
+| `Nexus\Manufacturing` | `BR-001` | A BOM must have at least one component | | | | |
+| `Nexus\Manufacturing` | `BR-002` | BOM components cannot reference the parent product (circular BOM prevention) | | | | |
+| `Nexus\Manufacturing` | `BR-003` | Only one BOM per product can be active at a time | | | | |
+| `Nexus\Manufacturing` | `BR-004` | Work order quantity completed + quantity scrapped cannot exceed quantity ordered | | | | |
+| `Nexus\Manufacturing` | `BR-005` | Materials can only be issued to work orders in "released" or "in_production" status | | | | |
+| `Nexus\Manufacturing` | `BR-006` | Work order cannot be completed if material allocations are not fulfilled | | | | |
+| `Nexus\Manufacturing` | `BR-007` | Operation sequence must be sequential (operation 10 before operation 20) | | | | |
+| `Nexus\Manufacturing` | `BR-008` | Inspection must pass before work order can be completed | | | | |
+| `Nexus\Manufacturing` | `BR-009` | Quarantined batches cannot be used in production or sold | | | | |
+| `Nexus\Manufacturing` | `BR-010` | Standard cost must be calculated before work order release | | | | |
+| `Nexus\Manufacturing` | `BR-011` | MRP must consider safety stock levels when calculating net requirements | | | | |
+| `Nexus\Manufacturing` | `BR-012` | Batch genealogy must be captured for all regulated products (pharma, food) | | | | |
+| `Nexus\Manufacturing` | `BR-013` | Lot/serial numbers must be unique across all tenants (globally unique) | | | | |
+| `Nexus\Manufacturing` | `BR-014` | Work center capacity cannot be exceeded without approval | | | | |
+| `Nexus\Manufacturing` | `BR-015` | Routing operations must reference active work centers | | | | |
+### Nexus\Marketing — Detailed Numbered Requirements
+
+#### User Stories
+
+| Package/App (Namespace) | Requirement # | Description | Implemented in (Class / File / Method) | Status | Notes | Date |
+| --- | --- | --- | --- | --- | --- | --- |
+| `Nexus\Marketing` | `US-001` | P1 | | | | |
+| `Nexus\Marketing` | `US-002` | P1 | | | | |
+| `Nexus\Marketing` | `US-003` | P1 | | | | |
+| `Nexus\Marketing` | `US-004` | P1 | | | | |
+| `Nexus\Marketing` | `US-005` | P1 | | | | |
+| `Nexus\Marketing` | `US-006` | P1 | | | | |
+| `Nexus\Marketing` | `US-007` | P1 | | | | |
+#### Functional Requirements
+
+| Package/App (Namespace) | Requirement # | Description | Implemented in (Class / File / Method) | Status | Notes | Date |
+| --- | --- | --- | --- | --- | --- | --- |
+| `Nexus\Marketing` | `FR-P1-001` | HasMarketing trait for models | | | | |
+| `Nexus\Marketing` | `FR-P1-002` | In-model campaign definitions | | | | |
+| `Nexus\Marketing` | `FR-P1-003` | marketing()->launchCampaign($data) method | | | | |
+| `Nexus\Marketing` | `FR-P1-004` | marketing()->can($action) permission check | | | | |
+| `Nexus\Marketing` | `FR-P1-005` | marketing()->history() audit trail | | | | |
+| `Nexus\Marketing` | `FR-P1-006` | Guard conditions on actions | | | | |
+| `Nexus\Marketing` | `FR-P1-007` | Lifecycle hooks (before/after) | | | | |
+| `Nexus\Marketing` | `FR-P1-008` | Basic validation rules | | | | |
+| `Nexus\Marketing` | `PR-001` | Campaign launch time | | | | |
+| `Nexus\Marketing` | `PR-002` | Dashboard query (1,000 active campaigns) | | | | |
+| `Nexus\Marketing` | `PR-003` | ROI calculation (10,000 campaigns) | | | | |
+| `Nexus\Marketing` | `PR-004` | Campaign initialization | | | | |
+| `Nexus\Marketing` | `PR-005` | Parallel channel synchronization (10 channels) | | | | |
+| `Nexus\Marketing` | `PR-006` | Lead scoring update | | | | |
+| `Nexus\Marketing` | `PR-007` | Segment recalculation (100,000 leads) | | | | |
+#### Performance Requirements
+
+| Package/App (Namespace) | Requirement # | Description | Implemented in (Class / File / Method) | Status | Notes | Date |
+| --- | --- | --- | --- | --- | --- | --- |
+| `Nexus\Marketing` | `PR-001` | Campaign launch time | | | | |
+| `Nexus\Marketing` | `PR-002` | Dashboard query (1,000 active campaigns) | | | | |
+| `Nexus\Marketing` | `PR-003` | ROI calculation (10,000 campaigns) | | | | |
+| `Nexus\Marketing` | `PR-004` | Campaign initialization | | | | |
+| `Nexus\Marketing` | `PR-005` | Parallel channel synchronization (10 channels) | | | | |
+| `Nexus\Marketing` | `PR-006` | Lead scoring update | | | | |
+| `Nexus\Marketing` | `PR-007` | Segment recalculation (100,000 leads) | | | | |
+#### Security Requirements
+
+| Package/App (Namespace) | Requirement # | Description | Implemented in (Class / File / Method) | Status | Notes | Date |
+| --- | --- | --- | --- | --- | --- | --- |
+| `Nexus\Marketing` | `SR-001` | Prevent unauthorized campaign actions | | | | |
+| `Nexus\Marketing` | `SR-002` | Sanitize user expressions | | | | |
+| `Nexus\Marketing` | `SR-003` | Multi-tenant data isolation | | | | |
+| `Nexus\Marketing` | `SR-004` | Sandbox plugin execution | | | | |
+| `Nexus\Marketing` | `SR-005` | Audit all campaign changes | | | | |
+| `Nexus\Marketing` | `SR-006` | RBAC integration | | | | |
+| `Nexus\Marketing` | `SR-007` | API authentication | | | | |
+| `Nexus\Marketing` | `SR-008` | Rate limiting per tenant | | | | |
+#### Reliability Requirements
+
+| Package/App (Namespace) | Requirement # | Description | Implemented in (Class / File / Method) | Status | Notes | Date |
+| --- | --- | --- | --- | --- | --- | --- |
+| `Nexus\Marketing` | `REL-001` | ACID transactions for state changes | | | | |
+| `Nexus\Marketing` | `REL-002` | Failed channels don't block campaign | | | | |
+| `Nexus\Marketing` | `REL-003` | Concurrency control | | | | |
+| `Nexus\Marketing` | `REL-004` | Data corruption protection | | | | |
+| `Nexus\Marketing` | `REL-005` | Retry transient failures | | | | |
+| `Nexus\Marketing` | `REL-006` | Idempotent operations | | | | |
+| `Nexus\Marketing` | `REL-007` | Dead letter queue | | | | |
+#### Scalability Requirements
+
+| Package/App (Namespace) | Requirement # | Description | Implemented in (Class / File / Method) | Status | Notes | Date |
+| --- | --- | --- | --- | --- | --- | --- |
+| `Nexus\Marketing` | `SCL-001` | Horizontal scaling | | | | |
+| `Nexus\Marketing` | `SCL-002` | Handle 100,000+ active campaigns | | | | |
+| `Nexus\Marketing` | `SCL-003` | Handle 1,000,000+ leads | | | | |
+| `Nexus\Marketing` | `SCL-004` | Concurrent campaign processing | | | | |
+| `Nexus\Marketing` | `SCL-005` | Efficient query performance | | | | |
+| `Nexus\Marketing` | `SCL-006` | Caching strategy | | | | |
+#### Maintainability Requirements
+
+| Package/App (Namespace) | Requirement # | Description | Implemented in (Class / File / Method) | Status | Notes | Date |
+| --- | --- | --- | --- | --- | --- | --- |
+| `Nexus\Marketing` | `MAINT-001` | Framework-agnostic core | | | | |
+| `Nexus\Marketing` | `MAINT-002` | Laravel adapter separation | | | | |
+| `Nexus\Marketing` | `MAINT-003` | Test coverage | | | | |
+| `Nexus\Marketing` | `MAINT-004` | Module independence | | | | |
+| `Nexus\Marketing` | `MAINT-005` | Documentation | | | | |
+| `Nexus\Marketing` | `MAINT-006` | Code style | | | | |
+#### Business Rules
+
+| Package/App (Namespace) | Requirement # | Description | Implemented in (Class / File / Method) | Status | Notes | Date |
+| --- | --- | --- | --- | --- | --- | --- |
+| `Nexus\Marketing` | `BR-001` | Campaigns cannot target same lead more than once per day (configurable) | | | | |
+| `Nexus\Marketing` | `BR-002` | All state changes must be ACID transactions | | | | |
+| `Nexus\Marketing` | `BR-003` | Low ROI campaigns auto-escalate after configured threshold | | | | |
+| `Nexus\Marketing` | `BR-004` | Compensation actions execute in reverse order of original actions | | | | |
+| `Nexus\Marketing` | `BR-005` | Delegation chain maximum depth: 3 levels | | | | |
+| `Nexus\Marketing` | `BR-006` | Phase 1 configurations remain compatible with Phase 2/3 | | | | |
+| `Nexus\Marketing` | `BR-007` | One marketing instance per model/entity | | | | |
+| `Nexus\Marketing` | `BR-008` | Parallel channels must all complete before proceeding | | | | |
+| `Nexus\Marketing` | `BR-009` | Campaign assignment checks delegation chain first | | | | |
+| `Nexus\Marketing` | `BR-010` | Multi-team approval uses configured strategy | | | | |
+| `Nexus\Marketing` | `BR-011` | GDPR consent required for EU leads | | | | |
+| `Nexus\Marketing` | `BR-012` | Unsubscribe respected across all campaigns | | | | |
+| `Nexus\Marketing` | `BR-013` | Lead scoring updates trigger segment recalculation | | | | |
+| `Nexus\Marketing` | `BR-014` | A/B test traffic distribution must total 100% | | | | |
+### Nexus\OrgStructure — Detailed Numbered Requirements
+
+#### User Stories
+
+| Package/App (Namespace) | Requirement # | Description | Implemented in (Class / File / Method) | Status | Notes | Date |
+| --- | --- | --- | --- | --- | --- | --- |
+| `Nexus\OrgStructure` | `US-001` | P1 | | | | |
+| `Nexus\OrgStructure` | `US-002` | P1 | | | | |
+| `Nexus\OrgStructure` | `US-003` | P1 | | | | |
+| `Nexus\OrgStructure` | `US-004` | P1 | | | | |
+| `Nexus\OrgStructure` | `US-005` | P3 | | | | |
+| `Nexus\OrgStructure` | `US-006` | P5 | | | | |
+| `Nexus\OrgStructure` | `US-007` | P2 | | | | |
+### Nexus\Payroll — Detailed Numbered Requirements
+
+#### Functional Requirements
+
+| Package/App (Namespace) | Requirement # | Description | Implemented in (Class / File / Method) | Status | Notes | Date |
+| --- | --- | --- | --- | --- | --- | --- |
+| `Nexus\Payroll` | `FR-PAY-ENG-001` | Execute monthly payroll runs for all active employees with automatic component calculation | | | | |
+| `Nexus\Payroll` | `FR-PAY-ENG-002` | Support recurring payroll components (fixed allowances, deductions, employer contributions) | | | | |
+| `Nexus\Payroll` | `FR-PAY-ENG-003` | Process variable payroll items (overtime, claims, bonuses, commissions, unpaid leave deductions) | | | | |
+| `Nexus\Payroll` | `FR-PAY-ENG-004` | Calculate Year-to-Date (YTD) tracking for all earnings, deductions, and statutory contributions | | | | |
+| `Nexus\Payroll` | `FR-PAY-ENG-005` | Implement pay run locking to prevent duplicate processing and enable rollback on errors | | | | |
+| `Nexus\Payroll` | `FR-PAY-ENG-006` | Support multi-frequency payroll (monthly, semi-monthly, weekly, bonus-only runs) | | | | |
+| `Nexus\Payroll` | `FR-PAY-ENG-007` | Post automatic GL journal entries to nexus-accounting for salary expense and liabilities | | | | |
+#### Performance Requirements
+
+| Package/App (Namespace) | Requirement # | Description | Implemented in (Class / File / Method) | Status | Notes | Date |
+| --- | --- | --- | --- | --- | --- | --- |
+| `Nexus\Payroll` | `PR-PAY-001` | Process monthly payroll for 5,000 employees | | | | |
+| `Nexus\Payroll` | `PR-PAY-002` | Generate single payslip PDF | | | | |
+| `Nexus\Payroll` | `PR-PAY-003` | Retroactive recalculation (12 months, 1,000 employees) | | | | |
+| `Nexus\Payroll` | `PR-PAY-004` | PCB calculation with all reliefs | | | | |
+| `Nexus\Payroll` | `PR-PAY-005` | EA Form generation for 5,000 employees | | | | |
+#### Security Requirements
+
+| Package/App (Namespace) | Requirement # | Description | Implemented in (Class / File / Method) | Status | Notes | Date |
+| --- | --- | --- | --- | --- | --- | --- |
+| `Nexus\Payroll` | `SR-PAY-001` | Encrypt all payroll data (salary, tax reliefs) at rest using Laravel encryption | | | | |
+| `Nexus\Payroll` | `SR-PAY-002` | Implement immutable payslip records with cryptographic hash verification | | | | |
+| `Nexus\Payroll` | `SR-PAY-003` | Enforce role-based access control for payroll processing operations | | | | |
+| `Nexus\Payroll` | `SR-PAY-004` | Audit all payroll changes using ActivityLoggerContract | | | | |
+| `Nexus\Payroll` | `SR-PAY-005` | Support tenant isolation via automatic scoping | | | | |
+| `Nexus\Payroll` | `SR-PAY-006` | Implement secure payslip access with employee-level authorization | | | | |
+#### Business Rules
+
+| Package/App (Namespace) | Requirement # | Description | Implemented in (Class / File / Method) | Status | Notes | Date |
+| --- | --- | --- | --- | --- | --- | --- |
+| `Nexus\Payroll` | `BR-PAY-001` | PCB calculations MUST use exact LHDN rounding rules (to nearest sen) to match tax department calculations | | | | |
+| `Nexus\Payroll` | `BR-PAY-002` | Pay runs MUST be locked after completion to prevent accidental modifications | | | | |
+| `Nexus\Payroll` | `BR-PAY-003` | Only locked pay runs can generate payslips and post to accounting | | | | |
+| `Nexus\Payroll` | `BR-PAY-004` | Retroactive recalculations MUST recalculate all months from change date forward | | | | |
+| `Nexus\Payroll` | `BR-PAY-005` | EPF contributions CANNOT exceed statutory ceiling (RM5,000 salary base as of 2025) | | | | |
+| `Nexus\Payroll` | `BR-PAY-006` | SOCSO eligibility ends at age 60 for new contributors (existing contributors continue) | | | | |
+| `Nexus\Payroll` | `BR-PAY-007` | EIS contributions required for employees earning below RM4,000 per month | | | | |
+| `Nexus\Payroll` | `BR-PAY-008` | Payslip data MUST be immutable once generated (regeneration creates new record) | | | | |
+| `Nexus\Payroll` | `BR-PAY-009` | Additional remuneration MUST use special PCB calculation tables from LHDN | | | | |
+### Nexus\Procurement — Detailed Numbered Requirements
+
+#### User Stories
+
+| Package/App (Namespace) | Requirement # | Description | Implemented in (Class / File / Method) | Status | Notes | Date |
+| --- | --- | --- | --- | --- | --- | --- |
+| `Nexus\Procurement` | `US-001` | P1 | | | | |
+| `Nexus\Procurement` | `US-002` | P2 | | | | |
+| `Nexus\Procurement` | `US-003` | P3 | | | | |
+| `Nexus\Procurement` | `US-004` | P3 | | | | |
+| `Nexus\Procurement` | `US-005` | P4 | | | | |
+| `Nexus\Procurement` | `US-006` | P5 | | | | |
+| `Nexus\Procurement` | `US-007` | P1 | | | | |
+#### Functional Requirements
+
+| Package/App (Namespace) | Requirement # | Description | Implemented in (Class / File / Method) | Status | Notes | Date |
+| --- | --- | --- | --- | --- | --- | --- |
+| `Nexus\Procurement` | `FR-L1-001` | Create purchase requisition with line items | | | | |
+| `Nexus\Procurement` | `FR-L1-002` | Requisition approval workflow | | | | |
+| `Nexus\Procurement` | `FR-L1-003` | Convert requisition to purchase order | | | | |
+| `Nexus\Procurement` | `FR-L1-004` | Direct purchase order creation | | | | |
+| `Nexus\Procurement` | `FR-L1-005` | Goods receipt note (GRN) creation | | | | |
+| `Nexus\Procurement` | `FR-L1-006` | 3-way matching (PO-GRN-Invoice) | | | | |
+| `Nexus\Procurement` | `FR-L1-007` | Purchase requisition status tracking | | | | |
+| `Nexus\Procurement` | `PR-001` | Requisition creation and save | | | | |
+| `Nexus\Procurement` | `PR-002` | PO generation from requisition | | | | |
+| `Nexus\Procurement` | `PR-003` | 3-way match processing | | | | |
+| `Nexus\Procurement` | `PR-004` | Vendor quote comparison loading | | | | |
+| `Nexus\Procurement` | `PR-005` | Procurement analytics dashboard | | | | |
+#### Performance Requirements
+
+| Package/App (Namespace) | Requirement # | Description | Implemented in (Class / File / Method) | Status | Notes | Date |
+| --- | --- | --- | --- | --- | --- | --- |
+| `Nexus\Procurement` | `PR-001` | Requisition creation and save | | | | |
+| `Nexus\Procurement` | `PR-002` | PO generation from requisition | | | | |
+| `Nexus\Procurement` | `PR-003` | 3-way match processing | | | | |
+| `Nexus\Procurement` | `PR-004` | Vendor quote comparison loading | | | | |
+| `Nexus\Procurement` | `PR-005` | Procurement analytics dashboard | | | | |
+#### Security Requirements
+
+| Package/App (Namespace) | Requirement # | Description | Implemented in (Class / File / Method) | Status | Notes | Date |
+| --- | --- | --- | --- | --- | --- | --- |
+| `Nexus\Procurement` | `SR-001` | Tenant data isolation | | | | |
+| `Nexus\Procurement` | `SR-002` | Role-based access control | | | | |
+| `Nexus\Procurement` | `SR-003` | Vendor data encryption | | | | |
+| `Nexus\Procurement` | `SR-004` | Audit trail completeness | | | | |
+| `Nexus\Procurement` | `SR-005` | Separation of duties | | | | |
+| `Nexus\Procurement` | `SR-006` | Document access control | | | | |
+#### Reliability Requirements
+
+| Package/App (Namespace) | Requirement # | Description | Implemented in (Class / File / Method) | Status | Notes | Date |
+| --- | --- | --- | --- | --- | --- | --- |
+| `Nexus\Procurement` | `REL-001` | All financial transactions MUST be ACID-compliant | | | | |
+| `Nexus\Procurement` | `REL-002` | 3-way match MUST prevent payment authorization if discrepancies exceed tolerance | | | | |
+| `Nexus\Procurement` | `REL-003` | Approval workflows MUST be resumable after system failure | | | | |
+| `Nexus\Procurement` | `REL-004` | Concurrency control for PO approval | | | | |
+#### Business Rules
+
+| Package/App (Namespace) | Requirement # | Description | Implemented in (Class / File / Method) | Status | Notes | Date |
+| --- | --- | --- | --- | --- | --- | --- |
+| `Nexus\Procurement` | `BR-001` | A requisition MUST have at least one line item | | | | |
+| `Nexus\Procurement` | `BR-002` | Requisition total estimate MUST equal sum of line item estimates | | | | |
+| `Nexus\Procurement` | `BR-003` | Approved requisitions cannot be edited (only cancelled) | | | | |
+| `Nexus\Procurement` | `BR-004` | A purchase order MUST reference an approved requisition OR be explicitly marked as direct PO | | | | |
+| `Nexus\Procurement` | `BR-005` | PO total amount MUST NOT exceed requisition approved amount by more than 10% without re-approval | | | | |
+| `Nexus\Procurement` | `BR-006` | GRN quantity cannot exceed PO quantity for any line item | | | | |
+| `Nexus\Procurement` | `BR-007` | 3-way match tolerance rules are configurable per tenant | | | | |
+| `Nexus\Procurement` | `BR-008` | Payment authorization requires successful 3-way match OR manual override by authorized user | | | | |
+| `Nexus\Procurement` | `BR-009` | Requester cannot approve their own requisition | | | | |
+| `Nexus\Procurement` | `BR-010` | PO creator cannot create GRN for the same PO | | | | |
+| `Nexus\Procurement` | `BR-011` | GRN creator cannot authorize payment for the same PO | | | | |
+| `Nexus\Procurement` | `BR-012` | Blanket PO releases cannot exceed blanket PO total committed value | | | | |
+| `Nexus\Procurement` | `BR-013` | Vendor quote must be submitted before RFQ deadline to be considered valid | | | | |
+| `Nexus\Procurement` | `BR-014` | Tax calculation based on vendor jurisdiction and tax codes from nexus-tax-management | | | | |
+| `Nexus\Procurement` | `BR-015` | All procurement amounts must be in tenant's base currency OR converted at transaction date exchange rate | | | | |
+### Nexus\ProjectManagement — Detailed Numbered Requirements
+
+#### User Stories
+
+| Package/App (Namespace) | Requirement # | Description | Implemented in (Class / File / Method) | Status | Notes | Date |
+| --- | --- | --- | --- | --- | --- | --- |
+| `Nexus\ProjectManagement` | `US-001` | P1 | | | | |
+| `Nexus\ProjectManagement` | `US-002` | P1 | | | | |
+| `Nexus\ProjectManagement` | `US-003` | P2 | | | | |
+| `Nexus\ProjectManagement` | `US-004` | P2 | | | | |
+| `Nexus\ProjectManagement` | `US-005` | P1 | | | | |
+| `Nexus\ProjectManagement` | `US-006` | P1 | | | | |
+| `Nexus\ProjectManagement` | `US-007` | P2 | | | | |
+#### Functional Requirements
+
+| Package/App (Namespace) | Requirement # | Description | Implemented in (Class / File / Method) | Status | Notes | Date |
+| --- | --- | --- | --- | --- | --- | --- |
+| `Nexus\ProjectManagement` | `FR-L1-001` | Create project with basic details | | | | |
+| `Nexus\ProjectManagement` | `FR-L1-002` | Create and manage tasks | | | | |
+| `Nexus\ProjectManagement` | `FR-L1-003` | Task assignment and notifications | | | | |
+| `Nexus\ProjectManagement` | `FR-L1-004` | Time tracking and timesheet entry | | | | |
+| `Nexus\ProjectManagement` | `FR-L1-005` | My Tasks view | | | | |
+| `Nexus\ProjectManagement` | `FR-L1-006` | Project dashboard | | | | |
+| `Nexus\ProjectManagement` | `FR-L1-007` | Time report by project | | | | |
+| `Nexus\ProjectManagement` | `PR-001` | Project creation and save | | | | |
+| `Nexus\ProjectManagement` | `PR-002` | Task creation and assignment | | | | |
+| `Nexus\ProjectManagement` | `PR-003` | Timesheet entry and save | | | | |
+| `Nexus\ProjectManagement` | `PR-004` | Gantt chart rendering (100 tasks) | | | | |
+| `Nexus\ProjectManagement` | `PR-005` | Portfolio dashboard loading | | | | |
+| `Nexus\ProjectManagement` | `PR-006` | Resource allocation view | | | | |
+#### Performance Requirements
+
+| Package/App (Namespace) | Requirement # | Description | Implemented in (Class / File / Method) | Status | Notes | Date |
+| --- | --- | --- | --- | --- | --- | --- |
+| `Nexus\ProjectManagement` | `PR-001` | Project creation and save | | | | |
+| `Nexus\ProjectManagement` | `PR-002` | Task creation and assignment | | | | |
+| `Nexus\ProjectManagement` | `PR-003` | Timesheet entry and save | | | | |
+| `Nexus\ProjectManagement` | `PR-004` | Gantt chart rendering (100 tasks) | | | | |
+| `Nexus\ProjectManagement` | `PR-005` | Portfolio dashboard loading | | | | |
+| `Nexus\ProjectManagement` | `PR-006` | Resource allocation view | | | | |
+#### Security Requirements
+
+| Package/App (Namespace) | Requirement # | Description | Implemented in (Class / File / Method) | Status | Notes | Date |
+| --- | --- | --- | --- | --- | --- | --- |
+| `Nexus\ProjectManagement` | `SR-001` | Tenant data isolation | | | | |
+| `Nexus\ProjectManagement` | `SR-002` | Role-based access control | | | | |
+| `Nexus\ProjectManagement` | `SR-003` | Client portal access | | | | |
+| `Nexus\ProjectManagement` | `SR-004` | Timesheet integrity | | | | |
+| `Nexus\ProjectManagement` | `SR-005` | Financial data protection | | | | |
+| `Nexus\ProjectManagement` | `SR-006` | Audit trail completeness | | | | |
+#### Reliability Requirements
+
+| Package/App (Namespace) | Requirement # | Description | Implemented in (Class / File / Method) | Status | Notes | Date |
+| --- | --- | --- | --- | --- | --- | --- |
+| `Nexus\ProjectManagement` | `REL-001` | All financial calculations MUST be ACID-compliant | | | | |
+| `Nexus\ProjectManagement` | `REL-002` | Timesheet approval MUST prevent double-billing | | | | |
+| `Nexus\ProjectManagement` | `REL-003` | Resource allocation MUST prevent double-booking | | | | |
+| `Nexus\ProjectManagement` | `REL-004` | Milestone approval workflow MUST be resumable after failure | | | | |
+#### Business Rules
+
+| Package/App (Namespace) | Requirement # | Description | Implemented in (Class / File / Method) | Status | Notes | Date |
+| --- | --- | --- | --- | --- | --- | --- |
+| `Nexus\ProjectManagement` | `BR-001` | A project MUST have a project manager assigned | | | | |
+| `Nexus\ProjectManagement` | `BR-002` | A task MUST belong to a project | | | | |
+| `Nexus\ProjectManagement` | `BR-003` | Timesheet hours cannot be negative or exceed 24 hours per day per user | | | | |
+| `Nexus\ProjectManagement` | `BR-004` | Approved timesheets are immutable (cannot be edited or deleted) | | | | |
+| `Nexus\ProjectManagement` | `BR-005` | A task's actual hours MUST equal the sum of all approved timesheet hours for that task | | | | |
+| `Nexus\ProjectManagement` | `BR-006` | Milestone billing amount cannot exceed remaining project budget (for fixed-price projects) | | | | |
+| `Nexus\ProjectManagement` | `BR-007` | Resource allocation percentage cannot exceed 100% per user per day | | | | |
+| `Nexus\ProjectManagement` | `BR-008` | Task dependencies must not create circular references | | | | |
+| `Nexus\ProjectManagement` | `BR-009` | Project status cannot be "completed" if there are incomplete tasks | | | | |
+| `Nexus\ProjectManagement` | `BR-010` | Timesheet billing rate defaults to resource allocation rate for the project | | | | |
+| `Nexus\ProjectManagement` | `BR-011` | Client stakeholders can view only their own projects | | | | |
+| `Nexus\ProjectManagement` | `BR-012` | Revenue recognition for fixed-price projects based on % completion or milestone approval | | | | |
+| `Nexus\ProjectManagement` | `BR-013` | Earned value calculations require baseline (planned) values to be set | | | | |
+| `Nexus\ProjectManagement` | `BR-014` | Lessons learned can only be created after project status = completed or cancelled | | | | |
+| `Nexus\ProjectManagement` | `BR-015` | Timesheet approval requires user to have approve-timesheet permission for the project | | | | |
+### Nexus\Sequencing — Detailed Numbered Requirements
+
+#### Functional Requirements
+
+| Package/App (Namespace) | Requirement # | Description | Implemented in (Class / File / Method) | Status | Notes | Date |
+| --- | --- | --- | --- | --- | --- | --- |
+| `Nexus\Sequencing` | `FR-CORE-001` | Provide a framework-agnostic core (Nexus\Sequencing\Core) containing all generation and counter logic | | | | |
+| `Nexus\Sequencing` | `FR-CORE-002` | Implement atomic number generation using database-level locking (SELECT FOR UPDATE) | | | | |
+| `Nexus\Sequencing` | `FR-CORE-003` | Ensure generation is transaction-safe and rolls back counter increment if calling transaction fails | | | | |
+| `Nexus\Sequencing` | `FR-CORE-004` | Support built-in pattern variables (e.g., {YEAR}, {MONTH}, {COUNTER}) and custom context variables (e.g., {DEPARTMENT}) | | | | |
+| `Nexus\Sequencing` | `FR-CORE-005` | Implement the ability to preview the next number without consuming the counter | | | | |
+| `Nexus\Sequencing` | `FR-CORE-006` | Implement logic for Daily, Monthly, Yearly, and Never counter resets | | | | |
+| `Nexus\Sequencing` | `FR-CORE-007` | Implement a ValidateSerialNumberService to check if a given number matches a pattern's Regex and inherent variable formats | | | | |
+| `Nexus\Sequencing` | `FR-CORE-008` | Sequence definition must allow configuring a step_size (defaulting to 1) for custom counter increments | | | | |
+| `Nexus\Sequencing` | `FR-CORE-009` | Sequence definition must support a reset_limit (integer) for custom counter resets based on count, not time | | | | |
+| `Nexus\Sequencing` | `FR-CORE-010` | Preview Service must expose the remaining count until the next reset period or limit is reached | | | | |
+| `Nexus\Sequencing` | `PR-001` | Generation time < 50ms (p95) | | | | |
+| `Nexus\Sequencing` | `PR-002` | Must pass 100 simultaneous requests with zero duplicate numbers or deadlocks | | | | |
+#### Performance Requirements
+
+| Package/App (Namespace) | Requirement # | Description | Implemented in (Class / File / Method) | Status | Notes | Date |
+| --- | --- | --- | --- | --- | --- | --- |
+| `Nexus\Sequencing` | `PR-001` | Generation time < 50ms (p95) | | | | |
+| `Nexus\Sequencing` | `PR-002` | Must pass 100 simultaneous requests with zero duplicate numbers or deadlocks | | | | |
+#### Business Rules
+
+| Package/App (Namespace) | Requirement # | Description | Implemented in (Class / File / Method) | Status | Notes | Date |
+| --- | --- | --- | --- | --- | --- | --- |
+| `Nexus\Sequencing` | `BR-001` | The sequence name/ID is unique per scope_identifier (composite key) | | | | |
+| `Nexus\Sequencing` | `BR-002` | A generated number must be immutable. Once generated and consumed, it cannot be changed | | | | |
+| `Nexus\Sequencing` | `BR-003` | Pattern variables must be padded if a padding size is specified in the pattern (e.g., {COUNTER:5}) | | | | |
+| `Nexus\Sequencing` | `BR-004` | The manual override of a sequence value must be greater than the last generated number | | | | |
+| `Nexus\Sequencing` | `BR-005` | The counter is only incremented *after* a successful database lock and generation, not during preview | | | | |
+| `Nexus\Sequencing` | `BR-006` | The package is only responsible for the Unique Base Identifier. Sub-identifiers (copies, versions, spawns) are the responsibility of the application layer | | | | |
