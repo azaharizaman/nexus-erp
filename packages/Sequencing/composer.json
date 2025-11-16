@@ -1,6 +1,6 @@
 {
     "name": "nexus/sequencing",
-    "description": "Automated serial number generation system with configurable patterns, atomic generation, and tenant isolation",
+    "description": "Framework-agnostic atomic serial number generation system with configurable patterns and tenant isolation",
     "type": "library",
     "license": "MIT",
     "authors": [
@@ -10,23 +10,16 @@
         }
     ],
     "require": {
-        "php": "^8.3",
-        "laravel/framework": "^12.0",
-        "lorisleiva/laravel-actions": "^2.0"
+        "php": "^8.3"
     },
     "require-dev": {
-        "laravel/pint": "^1.18",
+        "phpunit/phpunit": "^10.0",
         "phpstan/phpstan": "^1.12",
-        "rector/rector": "^1.0",
-        "infection/infection": "^0.27"
+        "rector/rector": "^1.0"
     },
     "scripts": {
-        "analyse:core": "phpstan analyse --configuration=phpstan-core-purity.neon --memory-limit=1G",
-        "refactor:core": "rector process --config=rector-core.php --dry-run",
-        "refactor:core:fix": "rector process --config=rector-core.php",
-        "test:core-purity": "phpstan analyse --configuration=phpstan-core-purity.neon --no-progress --error-format=table",
-        "test:mutation": "infection --threads=4 --min-msi=95 --min-covered-msi=95",
-        "format": "pint"
+        "analyse": "phpstan analyse src --level=8",
+        "test": "phpunit"
     },
     "autoload": {
         "psr-4": {
@@ -38,18 +31,6 @@
             "Nexus\\Sequencing\\Tests\\": "tests/"
         }
     },
-    "extra": {
-        "laravel": {
-            "providers": [
-                "Nexus\\Sequencing\\SequencingServiceProvider"
-            ]
-        }
-    },
     "minimum-stability": "dev",
-    "prefer-stable": true,
-    "config": {
-        "allow-plugins": {
-            "infection/extension-installer": false
-        }
-    }
+    "prefer-stable": true
 }
