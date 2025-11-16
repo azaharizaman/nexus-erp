@@ -186,6 +186,12 @@ class AuditLogManager
         if (is_array($data)) {
             $masked = [];
             foreach ($data as $key => $value) {
+                // Skip keys that are not string or integer types for string operations
+                if (!is_string($key) && !is_int($key)) {
+                    $masked[$key] = $value;
+                    continue;
+                }
+
                 $shouldMask = false;
                 foreach ($sensitiveFields as $field) {
                     if (str_contains(strtolower((string) $key), strtolower($field))) {
