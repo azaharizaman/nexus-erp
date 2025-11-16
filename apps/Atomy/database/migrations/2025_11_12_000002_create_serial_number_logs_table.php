@@ -36,29 +36,38 @@ return new class extends Migration
         Schema::create('serial_number_logs', function (Blueprint $table) {
             $table->id();
 
-            // Tenant isolation
-            $table->string('tenant_id')->index();
-
-            // Sequence identification
-            $table->string('sequence_name', 255)->index();
+            // Foreign key to sequence
+            $table->unsignedBigInteger('sequence_id')->index();
 
             // Generated number
             $table->string('generated_number', 255)->index();
 
-            // Causer (who generated this number)
-            $table->string('causer_type', 255)->nullable();
-            $table->unsignedBigInteger('causer_id')->nullable();
+            // Counter value at time of generation
+            $table->unsignedBigInteger('counter_value');
 
-            // Additional context
-            $table->json('metadata')->nullable();
+            // Context data used during generation
+            $table->json('context')->nullable();
+
+            // Action type (generated, overridden, reset)
+            $table->string('action_type', 50)->index();
+
+            // Reason for manual override or reset
+            $table->text('reason')->nullable();
+
+            // Causer (who performed this action)
+            $table->unsignedBigInteger('causer_id')->nullable()->index();
 
             // Timestamp (append-only table)
             $table->timestamp('created_at')->index();
 
-            // Composite indexes for performance
-            $table->index(['tenant_id', 'created_at'], 'idx_logs_tenant_created');
-            $table->index(['tenant_id', 'sequence_name'], 'idx_logs_tenant_sequence');
-            $table->index('causer_id', 'idx_logs_causer');
+            // Foreign key constraint
+            $table->foreign('sequence_id')
+                ->references('id')
+                ->on('serial_number_sequences')
+                ->onDelete('cascade');
+
+            // Composite index for performance
+            $table->index(['sequence_id', 'created_at'], 'idx_logs_sequence_created');
         });
     }
 

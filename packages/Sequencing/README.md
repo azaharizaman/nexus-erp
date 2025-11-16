@@ -349,8 +349,12 @@ composer install
 # Run tests
 composer test
 
-# Run static analysis
+# Run static analysis (requires phpstan.neon configuration)
 composer analyse
+
+# Note: If you encounter path-related issues with static analysis,
+# ensure a phpstan.neon file exists with proper configuration.
+# See https://phpstan.org/config-reference for details.
 ```
 
 ---
