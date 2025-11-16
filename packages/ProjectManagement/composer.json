@@ -1,0 +1,29 @@
+{
+    "name": "nexus/project-management",
+    "description": "Cohesive project management system for Nexus ERP with complete project lifecycle management",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Azahari Zaman",
+            "email": "azahari@nexusenvision.com"
+        }
+    ],
+    "require": {
+        "php": "^8.3",
+        "nexus/tenancy": "dev-main",
+        "nexus/workflow": "dev-main",
+        "nexus/sequencing": "dev-main",
+        "nexus/settings": "dev-main",
+        "nexus/audit-logger": "dev-main",
+        "nexus/backoffice": "dev-main"
+    },
+    "autoload": {
+        "psr-4": {
+            "Nexus\\ProjectManagement\\": "src/"
+        }
+    },
+    "require-dev": {
+        "pestphp/pest": "^2.0"
+    }
+}

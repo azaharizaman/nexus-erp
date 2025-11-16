@@ -15,7 +15,7 @@
         "composer-phar/phpcbf": "^4.0",
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10",
-        "nexus/audit-log": "dev-main",
+        "nexus/audit-logger": "dev-main",
         "nexus/backoffice": "dev-main",
         "nexus/crm": "dev-main",
         "nexus/hrm": "dev-main",
@@ -26,6 +26,14 @@
         "nexus/tenancy": "dev-main",
         "nexus/uom": "dev-main",
         "nexus/workflow": "dev-main",
+        "nexus/accounting": "dev-main",
+        "nexus/analytics": "dev-main",
+        "nexus/field-service": "dev-main",
+        "nexus/manufacturing": "dev-main",
+        "nexus/marketing": "dev-main",
+        "nexus/payroll": "dev-main",
+        "nexus/procurement": "dev-main",
+        "nexus/project-management": "dev-main",
         "spatie/laravel-activitylog": "^4.8",
         "spatie/laravel-permission": "^6.23"
     },
@@ -38,29 +46,6 @@
         "orchestra/testbench": "^10.0",
         "phpunit/phpunit": "^12.0",
         "squizlabs/php_codesniffer": "^4.0"
-    },
-    "autoload": {
-        "psr-4": {
-            "Nexus\\Erp\\": "src/"
-        }
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "Tests\\": "tests/"
-        }
-    },
-    "scripts": {
-        "test": "phpunit",
-        "test:app": "cd apps/headless-erp-app && composer test",
-        "lint": "pint",
-        "lint:app": "cd apps/headless-erp-app && composer lint"
-    },
-    "extra": {
-        "laravel": {
-            "providers": [
-                "Nexus\\Erp\\ErpServiceProvider"
-            ]
-        }
     },
     "config": {
         "optimize-autoloader": true,
@@ -76,47 +61,79 @@
     "repositories": [
         {
             "type": "path",
-            "url": "packages/nexus-audit-log"
+            "url": "packages/AuditLogger"
         },
         {
             "type": "path",
-            "url": "packages/nexus-backoffice"
+            "url": "packages/Backoffice"
         },
         {
             "type": "path",
-            "url": "packages/nexus-crm"
+            "url": "packages/Crm"
         },
         {
             "type": "path",
-            "url": "packages/nexus-inventory"
+            "url": "packages/Inventory"
         },
         {
             "type": "path",
-            "url": "packages/nexus-sequencing"
+            "url": "packages/Sequencing"
         },
         {
             "type": "path",
-            "url": "packages/nexus-settings"
+            "url": "packages/Settings"
         },
         {
             "type": "path",
-            "url": "packages/nexus-hrm"
+            "url": "packages/Hrm"
         },
         {
             "type": "path",
-            "url": "packages/nexus-org-structure"
+            "url": "packages/OrgStructure"
         },
         {
             "type": "path",
-            "url": "packages/nexus-uom"
+            "url": "packages/Uom"
         },
         {
             "type": "path",
-            "url": "packages/nexus-tenancy"
+            "url": "packages/Tenant"
         },
         {
             "type": "path",
-            "url": "packages/nexus-workflow"
+            "url": "packages/Workflow"
+        },
+        {
+            "type": "path",
+            "url": "packages/Accounting"
+        },
+        {
+            "type": "path",
+            "url": "packages/Analytics"
+        },
+        {
+            "type": "path",
+            "url": "packages/FieldService"
+        },
+        {
+            "type": "path",
+            "url": "packages/Manufacturing"
+        },
+        {
+            "type": "path",
+            "url": "packages/Marketing"
+        },
+        {
+            "type": "path",
+            "url": "packages/Payroll"
+        },
+        {
+            "type": "path",
+            "url": "packages/Procurement"
+        },
+        {
+            "type": "path",
+            "url": "packages/ProjectManagement"
         }
     ],
     "minimum-stability": "dev",

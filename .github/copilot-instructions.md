@@ -1,4 +1,10 @@
+This is the newly updated instructions based on the updated architecture and coding guidelines for the `nexus` monorepo. some of the existing files and folders in this repo may still design and name things based on the old architecture and coding guidelines, so you must aware of this and follow the new instructions strictly.
+
 You are to strictly adhere to the instructions provided in this file when generating responses. Do not deviate from these guidelines under any circumstances. If your actions or responses do not comply with these instructions, you must correct them immediately upon identification.
+
+Do not refer to any other architechtural or coding guidelines outside of this document. Your responses must be fully aligned with the principles, rules, and workflows outlined herein. If any User Stories, Functional Requirements, Business Requirements, Non-Functional Requirements, or other specifications are provided, you must interpret and implement them strictly according to the standards set forth in this document.
+
+YOU MUST NOT DEVIATE from THE CODING STANDARDS, ARCHITECTURAL PRINCIPLES, OR WORKFLOWS DEFINED IN THIS DOCUMENT. FAILURE TO COMPLY WITH THESE INSTRUCTIONS WILL RESULT IN IMMEDIATE CORRECTION OF YOUR RESPONSES.
 
 As an AI Coding Agent, you must always plan your moves, create relevant to-do lists, and reason about your actions before executing them. Your responses should reflect a clear understanding of the tasks at hand and demonstrate a methodical approach to problem-solving, be concise yet comprehensive, and maintain high standards of code quality and best practices. Stop and reassess if you find yourself deviating from these principles. Systematically approach your task goal, anticipate if you are going to hit the response limit, and if so, break down your response into manageable parts to ensure completeness.
 

@@ -1,0 +1,87 @@
+{
+    "name": "nexus/atomy",
+    "type": "project",
+    "description": "Nexus Atomy - Headless ERP Orchestrator",
+    "keywords": ["laravel", "erp", "headless", "api", "multi-tenant"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Azahari Zaman",
+            "email": "azahari@nexusenvision.com"
+        }
+    ],
+    "require": {
+        "php": "^8.3",
+        "laravel/framework": "^12.0",
+        "laravel/tinker": "^2.10",
+        "nexus/audit-logger": "dev-main",
+        "nexus/backoffice": "dev-main",
+        "nexus/crm": "dev-main",
+        "nexus/hrm": "dev-main",
+        "nexus/inventory": "dev-main",
+        "nexus/org-structure": "dev-main",
+        "nexus/sequencing": "dev-main",
+        "nexus/settings": "dev-main",
+        "nexus/tenancy": "dev-main",
+        "nexus/uom": "dev-main",
+        "nexus/workflow": "dev-main",
+        "nexus/accounting": "dev-main",
+        "nexus/analytics": "dev-main",
+        "nexus/field-service": "dev-main",
+        "nexus/manufacturing": "dev-main",
+        "nexus/marketing": "dev-main",
+        "nexus/payroll": "dev-main",
+        "nexus/procurement": "dev-main",
+        "nexus/project-management": "dev-main",
+        "spatie/laravel-activitylog": "^4.8",
+        "spatie/laravel-permission": "^6.23"
+    },
+    "require-dev": {
+        "infection/infection": "^0.31.9",
+        "laravel/legacy-factories": "^1.0",
+        "laravel/pint": "^1.18",
+        "pestphp/pest": "^4.0",
+        "pestphp/pest-plugin-laravel": "^4.0",
+        "orchestra/testbench": "^10.0",
+        "phpunit/phpunit": "^12.0",
+        "squizlabs/php_codesniffer": "^4.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Nexus\\Atomy\\": "app/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "phpunit",
+        "lint": "pint",
+        "post-autoload-dump": [
+            "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
+            "@php artisan package:discover --ansi"
+        ]
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Nexus\\Atomy\\Providers\\AtomyServiceProvider"
+            ]
+        }
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "preferred-install": "dist",
+        "sort-packages": true,
+        "allow-plugins": {
+            "composer/installers": true,
+            "infection/extension-installer": true,
+            "pestphp/pest-plugin": true,
+            "php-http/discovery": true
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
