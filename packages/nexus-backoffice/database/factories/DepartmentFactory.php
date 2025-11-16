@@ -33,7 +33,7 @@ class DepartmentFactory extends Factory
         ];
 
         return [
-            'name' => $this->faker->unique()->randomElement($departments),
+            'name' => $this->faker->randomElement($departments),
             'code' => strtoupper($this->faker->unique()->lexify('???')),
             'description' => $this->faker->optional()->sentence(),
             'company_id' => Company::factory(),
