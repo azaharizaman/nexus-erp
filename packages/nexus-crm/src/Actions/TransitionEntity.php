@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Nexus\Crm\Actions;
 
 use Nexus\Crm\Models\CrmEntity;
-use Lorisleiva\Actions\Concerns\AsAction;
+// Refactor: keep TransitionEntity as a plain service class (no laravel-actions)
 
 /**
  * Transition Entity Action
@@ -14,7 +14,6 @@ use Lorisleiva\Actions\Concerns\AsAction;
  */
 class TransitionEntity
 {
-    use AsAction;
 
     /**
      * Execute the action.

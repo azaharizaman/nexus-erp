@@ -50,6 +50,7 @@ class ConditionEvaluator
             '>=' => $actualValue >= $value,
             '<=' => $actualValue <= $value,
             'contains' => is_array($actualValue) && in_array($value, $actualValue),
+            'in' => is_array($value) && in_array($actualValue, $value),
             'not_contains' => is_array($actualValue) && !in_array($value, $actualValue),
             'empty' => empty($actualValue),
             'not_empty' => !empty($actualValue),

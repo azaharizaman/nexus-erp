@@ -39,6 +39,9 @@ return new class extends Migration
             // Timestamps
             $table->timestamps();
 
+            // Soft deletes - model uses SoftDeletes trait so migration must include the column
+            $table->softDeletes();
+
             // Indexes
             $table->index('type');
             $table->index('is_active');

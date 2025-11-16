@@ -66,7 +66,7 @@ $definition = CrmDefinition::create([
 
 use Nexus\Crm\Actions\CreateEntity;
 
-$entity = app(CreateEntity::class)->execute([
+$entity = app(CreateEntity::class)->handle([
     'definition_id' => $definition->id,
     'data' => [
         'first_name' => 'Jane',
@@ -95,7 +95,7 @@ $stage = CrmStage::create([
 
 use Nexus\Crm\Actions\TransitionEntity;
 
-app(TransitionEntity::class)->execute($entity, 'qualified');
+app(TransitionEntity::class)->handle($entity, 'qualified');
 ```
 
 ## Documentation

@@ -8,3 +8,4 @@ storage/framework/sessions/
 storage/framework/views/
 bootstrap/cache/
 node_modules/
+build/

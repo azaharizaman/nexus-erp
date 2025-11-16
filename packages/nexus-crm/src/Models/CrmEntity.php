@@ -109,4 +109,37 @@ class CrmEntity extends Model
     {
         return $query->where('priority', '>=', 8);
     }
+
+    /**
+     * Get nested field value using dot notation or direct attribute lookup.
+     */
+    public function getFieldValue(string $field): mixed
+    {
+        // Check nested data first
+        if (str_contains($field, '.')) {
+            $parts = explode('.', $field);
+            $value = $this;
+
+            foreach ($parts as $part) {
+                if (is_array($value) && isset($value[$part])) {
+                    $value = $value[$part];
+                } elseif (is_object($value) && isset($value->$part)) {
+                    $value = $value->$part;
+                } else {
+                    return null;
+                }
+            }
+
+            return $value;
+        }
+
+        // Check data array
+        $data = $this->data ?? [];
+        if (isset($data[$field])) {
+            return $data[$field];
+        }
+
+        // Check attribute
+        return $this->$field ?? null;
+    }
 }

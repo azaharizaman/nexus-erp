@@ -70,6 +70,9 @@ class CrmServiceProvider extends ServiceProvider
         });
         $this->app->singleton(\Nexus\Crm\Core\AssignmentStrategyResolver::class);
         $this->app->singleton(\Nexus\Crm\Core\IntegrationManager::class);
+        $this->app->singleton(\Nexus\Crm\Core\SlaService::class);
+        $this->app->singleton(\Nexus\Crm\Core\EscalationService::class);
+        $this->app->singleton(\Nexus\Crm\Core\TimerProcessor::class);
 
         // Register dashboard service
         $this->app->singleton(\Nexus\Crm\Services\CrmDashboard::class);

@@ -159,7 +159,7 @@ class LeadController extends Controller
     {
         $definition = CrmDefinition::where('type', 'lead')->first();
 
-        $entity = app(CreateEntity::class)->execute([
+        $entity = app(CreateEntity::class)->handle([
             'definition_id' => $definition->id,
             'data' => $request->only([
                 'first_name', 'last_name', 'email', 'company', 'phone', 'budget', 'notes'
@@ -272,7 +272,7 @@ public function transition(Request $request, $entityId)
     $entity = CrmEntity::findOrFail($entityId);
 
     try {
-        app(TransitionEntity::class)->execute($entity, $request->stage_name);
+        app(TransitionEntity::class)->handle($entity, $request->stage_name);
         return response()->json(['message' => 'Transitioned successfully']);
     } catch (\Exception $e) {
         return response()->json(['error' => $e->getMessage()], 400);

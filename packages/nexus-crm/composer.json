@@ -22,13 +22,17 @@
         "php": "^8.3",
         "illuminate/support": "^10.0 || ^11.0 || ^12.0 || 13.0.x-dev",
         "illuminate/database": "^10.0 || ^11.0 || ^12.0 || 13.0.x-dev",
-        "illuminate/console": "^10.0 || ^11.0 || ^12.0 || 13.0.x-dev",
-        "lorisleiva/laravel-actions": "^2.0"
+        "illuminate/console": "^10.0 || ^11.0 || ^12.0 || 13.0.x-dev"
     },
     "require-dev": {
         "mockery/mockery": "^1.6",
+        "pestphp/pest": "^3.0",
         "orchestra/testbench": "^9.0|^10.0",
         "phpunit/phpunit": "^10.0|^11.0"
+    },
+    "scripts": {
+        "test": "vendor/bin/pest --colors=always",
+        "test-coverage": "vendor/bin/pest --coverage"
     },
     "autoload": {
         "psr-4": {
@@ -48,8 +52,18 @@
         }
     },
     "config": {
-        "sort-packages": true
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
     },
     "minimum-stability": "dev",
     "prefer-stable": true
+    ,
+        "suggest": {
+                "nexus/erp": "Optional Nexus orchestrator adapter and bindings (recommended for ERP deployments)",
+                "nexus/tenancy": "Optional multi-tenant integration",
+                "nexus/audit-log": "Optional audit logging integration",
+                "nexus/sequencing": "Optional numbering integration"
+        }
 }

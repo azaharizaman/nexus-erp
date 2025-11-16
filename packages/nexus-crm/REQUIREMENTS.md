@@ -233,6 +233,7 @@ The nexus-crm package embodies core Nexus ERP architectural principles:
 |----|------------|-------|
 | **MAINT-001** | Framework-agnostic core | No Laravel dependencies in `src/Core/` directory; Laravel dependencies permitted in `src/Adapters/Laravel/` and `src/Http/` as per architectural guidelines |
 | **MAINT-002** | Laravel adapter pattern | Framework-specific code in `src/Adapters/Laravel/` |
+| **MAINT-003** | Orchestration policy | Atomic packages MUST NOT depend on `lorisleiva/laravel-actions`. Orchestration (multi-entrypoint actions) belongs in `nexus/erp` where `laravel-actions` may be used; in-package service classes should remain framework-agnostic and testable. |
 | **MAINT-003** | Test coverage | >80% overall, >90% for core business logic |
 | **MAINT-004** | Domain separation | Lead, opportunity, campaign logic independent and separately testable |
 
@@ -449,97 +450,106 @@ $history = $user->crm()->history();
 ```
 packages/nexus-crm/
 ├── src/
-│   ├── Core/                           # Framework-agnostic business logic
-│   │   ├── Contracts/
+│   ├── Core/                           # Framework-agnostic CRM engine
+│   │   ├── Contracts/                  # Contract-driven extension points
 │   │   │   ├── CrmEngineContract.php
 │   │   │   ├── IntegrationContract.php
 │   │   │   ├── ConditionEvaluatorContract.php
 │   │   │   ├── ApprovalStrategyContract.php
 │   │   │   ├── StorageContract.php
-│   │   │   └── TimerContract.php
-│   │   ├── Engine/
-│   │   │   ├── CrmEngine.php           # Core CRM execution engine
-│   │   │   ├── EntityManager.php       # Entity lifecycle management
-│   │   │   ├── TransitionManager.php   # Stage transition logic
-│   │   │   └── StateManager.php        # State persistence
-│   │   ├── Services/
-│   │   │   ├── LeadService.php         # Lead-specific business logic
-│   │   │   ├── OpportunityService.php  # Opportunity management
-│   │   │   ├── CampaignService.php     # Campaign execution
-│   │   │   ├── EscalationService.php   # Escalation rules engine
-│   │   │   └── SlaService.php          # SLA tracking and breach detection
-│   │   ├── DTOs/
-│   │   │   ├── CrmDefinition.php       # CRM definition value object
-│   │   │   ├── CrmInstance.php         # CRM instance value object
-│   │   │   ├── Contact.php             # Contact data transfer object
-│   │   │   └── Opportunity.php         # Opportunity DTO
-│   │   └── Exceptions/
+│   │   │   ├── TimerContract.php
+│   │   │   ├── TriggerContract.php
+│   │   │   └── CompensationContract.php
+│   │   ├── Engine/                     # Headless execution/statemachine logic
+│   │   │   ├── CrmEngine.php
+│   │   │   ├── EntityManager.php
+│   │   │   ├── TransitionManager.php
+│   │   │   ├── StateManager.php
+│   │   │   └── AutomationOrchestrator.php
+│   │   ├── Services/                   # Domain services used by orchestrator, timers, SLA
+│   │   │   ├── LeadService.php
+│   │   │   ├── OpportunityService.php
+│   │   │   ├── CampaignService.php
+│   │   │   ├── EscalationService.php
+│   │   │   ├── SlaService.php
+│   │   │   ├── TimerService.php
+│   │   │   └── IntegrationService.php
+│   │   ├── Automations/                # Pipeline builders and parallel gateway coordinators
+│   │   │   ├── PipelineBuilder.php
+│   │   │   ├── GatewayCoordinator.php
+│   │   │   └── CampaignCoordinator.php
+│   │   ├── Rules/                      # Guard, delegation, escalation, SLA, compensation rules
+│   │   │   ├── GuardRule.php
+│   │   │   ├── DelegationRule.php
+│   │   │   ├── EscalationRule.php
+│   │   │   ├── SlaRule.php
+│   │   │   └── CompensationRule.php
+│   │   ├── Strategies/                 # Approval strategies
+│   │   │   ├── UnisonStrategy.php
+│   │   │   ├── MajorityStrategy.php
+│   │   │   ├── QuorumStrategy.php
+│   │   │   └── FirstResponseStrategy.php
+│   │   ├── Conditions/                 # Evaluators used by guard rules/pipelines
+│   │   │   ├── ExpressionCondition.php
+│   │   │   ├── RoleCheckCondition.php
+│   │   │   ├── PermissionCheckCondition.php
+│   │   │   └── CustomConditionProxy.php
+│   │   ├── Plugins/                    # Integration plugins for email, webhook, Slack, etc.
+│   │   │   ├── EmailIntegration.php
+│   │   │   ├── WebhookIntegration.php
+│   │   │   ├── SlackIntegration.php
+│   │   │   └── PluginRegistry.php
+│   │   ├── Timers/                     # Timer subsystem responsible for escalation/SLA scheduling
+│   │   │   ├── TimerQueue.php
+│   │   │   ├── TimerScheduler.php
+│   │   │   └── TimerProcessor.php
+│   │   ├── DTOs/                       # Value objects exchanged with orchestrator/tests
+│   │   │   ├── CrmDefinition.php
+│   │   │   ├── CrmInstance.php
+│   │   │   ├── Contact.php
+│   │   │   └── Opportunity.php
+│   │   ├── Events/                     # Domain events emitted for cross-package listeners
+│   │   │   ├── LeadCreatedEvent.php
+│   │   │   ├── LeadQualifiedEvent.php
+│   │   │   ├── OpportunityCreatedEvent.php
+│   │   │   ├── OpportunityClosedEvent.php
+│   │   │   ├── CampaignStartedEvent.php
+│   │   │   ├── SlaBreachedEvent.php
+│   │   │   └── EscalationTriggeredEvent.php
+│   │   └── Exceptions/                 # Domain exceptions (transitions, SLA breaches, escalations)
 │   │       ├── CrmException.php
 │   │       ├── InvalidTransitionException.php
-│   │       └── SlaBreachException.php
-│   │
-│   ├── Strategies/                     # Approval strategies
-│   │   ├── UnisonStrategy.php          # All must approve
-│   │   ├── MajorityStrategy.php        # >50% must approve
-│   │   ├── QuorumStrategy.php          # Configurable threshold
-│   │   └── FirstResponseStrategy.php   # First response wins
-│   │
-│   ├── Conditions/                     # Condition evaluators
-│   │   ├── ExpressionCondition.php     # Simple expressions (>, ==, etc.)
-│   │   ├── RoleCheckCondition.php      # Check user role
-│   │   └── PermissionCheckCondition.php # Check user permission
-│   │
-│   ├── Plugins/                        # Integration plugins
-│   │   ├── EmailIntegration.php        # Email sending integration
-│   │   ├── WebhookIntegration.php      # Webhook HTTP integration
-│   │   └── SlackIntegration.php        # Slack notification integration
-│   │
-│   ├── Timers/                         # Timer system
-│   │   ├── TimerQueue.php              # Timer queue management
-│   │   ├── TimerProcessor.php          # Process scheduled timers
-│   │   └── TimerScheduler.php          # Schedule new timers
-│   │
-│   ├── Http/                           # API layer (Laravel-specific)
-│   │   ├── Controllers/
-│   │   │   ├── CrmController.php       # Main CRM API endpoints
-│   │   │   ├── LeadController.php      # Lead management API
-│   │   │   ├── OpportunityController.php # Opportunity API
-│   │   │   └── DashboardController.php # Dashboard data API
-│   │   ├── Resources/
-│   │   │   ├── CrmInstanceResource.php
-│   │   │   ├── ContactResource.php
-│   │   │   └── OpportunityResource.php
-│   │   └── Requests/
-│   │       ├── CreateContactRequest.php
-│   │       └── UpdateOpportunityRequest.php
-│   │
-│   ├── Adapters/                       # Framework adapters
+│   │       ├── SlaBreachException.php
+│   │       └── EscalationException.php
+│   ├── Adapters/                       # Laravel-specific adapters (isolated from core)
 │   │   └── Laravel/
 │   │       ├── Traits/
-│   │       │   └── HasCrm.php          # Eloquent model trait for Level 1
-│   │       ├── Models/
-│   │       │   ├── CrmDefinition.php   # Eloquent model for definitions
-│   │       │   ├── CrmInstance.php     # Eloquent model for instances
-│   │       │   ├── CrmContact.php      # Eloquent model for contacts
-│   │       │   └── CrmOpportunity.php  # Eloquent model for opportunities
-│   │       ├── Services/
-│   │       │   ├── CrmDashboard.php    # Dashboard query service
-│   │       │   └── EloquentStorage.php # Eloquent storage implementation
-│   │       ├── Commands/
-│   │       │   ├── ProcessTimersCommand.php  # Artisan command for timers
-│   │       │   └── ProcessEscalationsCommand.php # Process escalations
-│   │       └── CrmServiceProvider.php  # Laravel package registration
-│   │
-│   └── Events/                         # Domain events
-│       ├── LeadCreatedEvent.php
-│       ├── LeadQualifiedEvent.php
-│       ├── OpportunityCreatedEvent.php
-│       ├── OpportunityClosedEvent.php
-│       ├── CampaignStartedEvent.php
-│       ├── SlaBreachedEvent.php
-│       └── EscalationTriggeredEvent.php
-│
-├── database/
+│   │       │   └── HasCrm.php          # Level 1 trait for trait-based CRM usage
+│   │       ├── Models/                 # Eloquent models for database-driven CRM tables
+│   │       │   ├── CrmDefinition.php
+│   │       │   ├── CrmInstance.php
+│   │       │   ├── CrmContact.php
+│   │       │   ├── CrmOpportunity.php
+│   │       │   ├── CrmCampaign.php
+│   │       │   ├── CrmTimer.php
+│   │       │   ├── CrmSla.php
+│   │       │   └── CrmEscalation.php
+│   │       ├── Services/               # Laravel-specific services
+│   │       │   ├── CrmDashboard.php
+│   │       │   ├── EloquentStorage.php
+│   │       │   ├── TimerProcessorService.php
+│   │       │   └── EscalationProcessorService.php
+│   │       ├── Commands/               # Artisan commands for timers/escalations
+│   │       │   ├── ProcessTimersCommand.php
+│   │       │   └── ProcessEscalationsCommand.php
+│   │       ├── Notifications/          # Notification helpers
+│   │       │   ├── EscalationNotification.php
+│   │       │   └── SlaBreachNotification.php
+│   │       └── Providers/
+│   │           └── CrmServiceProvider.php
+│   └── Docs/                          # Internal reference documents
+│       └── architecture.md
+├── database/                            # Schema, factories, and seeders required for Levels 1-3
 │   ├── migrations/
 │   │   ├── 2025_11_15_000001_create_crm_definitions_table.php
 │   │   ├── 2025_11_15_000002_create_crm_instances_table.php
@@ -550,10 +560,15 @@ packages/nexus-crm/
 │   │   ├── 2025_11_15_000007_create_crm_timers_table.php
 │   │   ├── 2025_11_15_000008_create_crm_sla_table.php
 │   │   └── 2025_11_15_000009_create_crm_escalations_table.php
+│   ├── factories/                       # Eloquent factories used by feature tests and seeders
 │   └── seeders/
 │       └── CrmSeeder.php
-│
-├── tests/
+├── tests/                              # Coverage for core, adapters, and delegated integration hooks
+│   ├── bootstrap.php                   # Bootstraps Orchestra Testbench + mocks
+│   ├── Factories/                      # Model factories for leads, opportunities, etc.
+│   ├── Support/
+│   │   ├── TestCase.php                # Package-focused base TestCase with contract stubs
+│   │   └── Mocks/                      # TenantManager, ActivityLogger, Sequencing, Settings stubs
 │   ├── Unit/
 │   │   ├── EntityTransitionTest.php
 │   │   ├── ConditionEvaluatorTest.php
@@ -561,26 +576,39 @@ packages/nexus-crm/
 │   │   ├── TimerSchedulerTest.php
 │   │   └── SlaCalculatorTest.php
 │   ├── Feature/
-│   │   ├── Level1CrmTest.php           # Level 1 trait-based CRM
-│   │   ├── Level2AutomationTest.php    # Level 2 DB-driven automation
-│   │   ├── Level3EnterpriseTest.php    # Level 3 SLA and escalation
+│   │   ├── Level1CrmTest.php
+│   │   ├── Level2AutomationTest.php
+│   │   ├── Level3EnterpriseTest.php
 │   │   ├── LeadManagementTest.php
 │   │   ├── OpportunityManagementTest.php
 │   │   └── CampaignExecutionTest.php
-│   └── Integration/
-│       ├── TenancyIntegrationTest.php  # Test with nexus-tenancy
-│       ├── AuditLogIntegrationTest.php # Test with nexus-audit-log
-│       └── EmailIntegrationTest.php    # Test email plugin
-│
+│   └── Integration/                    # Guarded for orchestrator-level runs only
+│       ├── TenancyIntegrationTest.php
+│       ├── AuditLogIntegrationTest.php
+│       └── EmailIntegrationTest.php
 ├── config/
-│   └── crm.php                          # Package configuration
-│
-├── composer.json                        # Package dependencies
-├── README.md                            # Package documentation
-└── CHANGELOG.md                         # Version history
+│   └── crm.php                        # Package configuration defaults
+├── resources/                         # JSON schema samples referenced by adapters/tests
+│   └── definitions/
+│       └── enterprise-pipeline.json
+├── docs/
+│   ├── README.md
+│   └── architecture.md
+├── phpunit.xml                         # Package-level PHPUnit configuration (points to tests/bootstrap.php)
+├── composer.json                       # Declares dependencies and dev scripts (see Testing section)
+├── .github/
+│   └── workflows/
+│       └── ci.yml                     # Package CI that runs `composer test`
+├── README.md                           # Package overview and upgrade notes
+├── CHANGELOG.md                        # Version history
+└── CONTRIBUTING.md                     # Contribution guidelines (optional)
 ```
 
 ---
+The package maintains an independent test harness: `phpunit.xml` points at `tests/bootstrap.php`, `tests/Support/TestCase.php` boots only this package via `Orchestra\Testbench` and wires up lightweight mocks for the optional `TenantManager`, `ActivityLogger`, `Sequencing`, and `Settings` contracts found under `tests/Support/Mocks/`. Factories in both `database/factories/` and `tests/Factories/` seed leads, opportunities, campaigns, timers, and escalation data for the feature tests and `CrmSeeder`. Composer scripts such as `composer test` (invoking `phpunit --configuration phpunit.xml`) and `composer test:coverage` (adding `--coverage-text`) live in `composer.json` so package-level CI can run them without bootstrapping other Nexus packages.
+
+Package-level CI is orchestrated by `.github/workflows/ci.yml`, which runs `composer test` and other quality gates. Per the System Architectural Document (`docs/SYSTEM ARCHITECHTURAL DOCUMENT.md`), integration tests that depend on concrete implementations from other Nexus packages must be gated behind orchestrator-level execution (e.g., `nexus/erp` / Edward). The three listed integration tests should therefore be guarded by an environment flag or `@group orchestrator` so they are skipped during package-only runs and master orchestration pipelines are the only place where they execute.
+
 
 ## Integration with Nexus ERP Ecosystem
 
@@ -839,6 +867,14 @@ public function register(): void
 
 ## Testing Requirements
 
+### Package Test Harness
+
+- Package-level configuration lives in `phpunit.xml`, which loads `tests/bootstrap.php` to wire up `Orchestra\Testbench`, register service providers, and prepare package contracts without the rest of the Nexus ecosystem.
+ - Package-level configuration lives in `phpunit.xml`, which loads `tests/bootstrap.php` to wire up `Orchestra\Testbench`, register service providers, and prepare package contracts without the rest of the Nexus ecosystem. Tests use Pest (`pestphp/pest`) for human-friendly syntax; `composer test` runs `vendor/bin/pest` at the package level.
+- `tests/Support/TestCase.php` extends that bootstrap to provide shared helpers, in-memory database setup, and stub implementations for `TenantManager`, `ActivityLogger`, `Sequencing`, and `Settings` contracts located under `tests/Support/Mocks/`.
+- Factories in `database/factories/` and `tests/Factories/` build leads, opportunities, campaigns, timers, and escalations for the feature tests and the `CrmSeeder`, ensuring acceptance criteria (US-001 through US-025) have deterministic data.
+- `composer.json` exposes `scripts.test` (`phpunit --configuration phpunit.xml`) and `scripts.test-coverage` (`phpunit --configuration phpunit.xml --coverage-text --ansi`) so local development, package CI, and orchestrator automation can run the same harness. CI in `.github/workflows/ci.yml` simply runs `composer test` plus the summary checks referenced in the System Architectural Document.
+
 ### Unit Tests
 
 **Scope:** Individual classes and methods in isolation
@@ -923,6 +959,8 @@ test('lead transitions from new to qualified based on score', function () {
 - Email integration (emails queued and sent)
 - Webhook integration (HTTP requests sent correctly)
 
+Integration tests that require concrete Nexus package implementations must only execute in the orchestrator layer (`nexus/erp` / Edward). The package-level CI honors this by guarding these tests with an environment flag (e.g., `CRM_ORCHESTRATOR_TESTS=1`) or by tagging them `@group orchestrator`, so `composer test` skips them when the orchestrator and its bindings are unavailable. This aligns with the System Architectural Document’s guidance that cross-package verification runs under the orchestrator’s umbrella.
+
 ### Acceptance Tests
 
 **Scope:** User stories from requirements validated end-to-end
@@ -941,7 +979,7 @@ test('lead transitions from new to qualified based on score', function () {
 
 | Dependency | Version | Purpose |
 |------------|---------|---------|
-| **PHP** | ≥8.2 | Modern language features (enums, readonly properties) |
+| **PHP** | ≥8.3 | Aligns with the repository-wide standard and delivers the latest language features (enums, readonly properties) |
 | **Database** | MySQL 8+, PostgreSQL 12+, SQLite 3.35+, SQL Server | Data persistence |
 
 ### Optional Dependencies (Laravel Integration)
@@ -954,6 +992,15 @@ test('lead transitions from new to qualified based on score', function () {
 | **nexus-settings** | ≥1.0 | Configuration management |
 | **nexus-sequencing** | ≥1.0 | Automatic numbering for entities |
 | **Redis** | ≥6.0 | Caching and queue backend (optional) |
+
+### Dev Dependencies
+
+| Dependency | Version | Purpose |
+|------------|---------|---------|
+| **phpunit/phpunit** | ^10.0 | PHPUnit runner for `composer test` and coverage analysis |
+| **orchestra/testbench** | ^9.0 | Boots Laravel services for isolated package tests via `tests/bootstrap.php` |
+| **mockery/mockery** | ^1.6 | Simplifies contract/mocking helpers inside `tests/Support/Mocks` |
+| **pestphp/pest** | ^3.0 | Human-friendly testing DSL used in unit and feature tests |
 
 ### Package Installation
 

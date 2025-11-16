@@ -90,6 +90,7 @@ return [
             'workflow' => false,       // Not yet implemented
             'accounting' => false,     // Not yet implemented
             'inventory' => false,      // Not yet implemented
+            'crm' => false,            // CRM orchestration provider
         ],
     ],
 ];

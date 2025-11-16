@@ -6,7 +6,7 @@ namespace Nexus\Crm\Actions;
 
 use Nexus\Crm\Models\CrmDefinition;
 use Nexus\Crm\Models\CrmEntity;
-use Lorisleiva\Actions\Concerns\AsAction;
+// This action was refactored to be an atomic, framework-agnostic service.
 
 /**
  * Create Entity Action
@@ -15,10 +15,12 @@ use Lorisleiva\Actions\Concerns\AsAction;
  */
 class CreateEntity
 {
-    use AsAction;
 
     /**
      * Execute the action.
+     */
+    /**
+     * Execute the action (plain service method).
      */
     public function handle(string $entityType, string $definitionName, array $data, array $options = []): CrmEntity
     {
@@ -47,7 +49,7 @@ class CreateEntity
         ]);
 
         // Set initial stage if pipeline exists
-        if ($definition->pipeline_config) {
+        if (!empty($definition->pipeline_config)) {
             $this->setInitialStage($entity, $definition);
         }
 

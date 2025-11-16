@@ -164,6 +164,11 @@ class ErpServiceProvider extends ServiceProvider
             $providers[] = \Nexus\Erp\Providers\BackofficeServiceProvider::class;
         }
 
+        // CRM orchestration provider
+        if (config('nexus.packages.enabled.crm', false)) {
+            $providers[] = \Nexus\Erp\Providers\CrmServiceProvider::class;
+        }
+
         // Register all orchestration providers
         foreach ($providers as $provider) {
             if (class_exists($provider)) {

@@ -41,7 +41,7 @@ class ImportSalesforceLeads extends Command
         $csv->setHeaderOffset(0);
 
         foreach ($csv->getRecords() as $record) {
-            app(CreateEntity::class)->execute([
+            app(CreateEntity::class)->handle([
                 'definition_id' => $definition->id,
                 'data' => [
                     'first_name' => $record['FirstName'],
@@ -117,7 +117,7 @@ $deals = $hubspot->deals()->all();
 
 ```php
 foreach ($contacts as $contact) {
-    app(CreateEntity::class)->execute([
+    app(CreateEntity::class)->handle([
         'definition_id' => $contactDefinition->id,
         'data' => [
             'first_name' => $contact->properties['firstname'],
@@ -161,7 +161,7 @@ $zoho = new ZohoCRM\Client([
 $leads = $zoho->getRecords('Leads');
 
 foreach ($leads as $lead) {
-    app(CreateEntity::class)->execute([
+    app(CreateEntity::class)->handle([
         'definition_id' => $leadDefinition->id,
         'data' => [
             'first_name' => $lead['First_Name'],

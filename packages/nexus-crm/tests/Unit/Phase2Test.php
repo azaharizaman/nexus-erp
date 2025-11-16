@@ -27,7 +27,7 @@ it('can create a crm entity', function () {
         'email' => 'john@example.com',
     ];
 
-    $entity = CreateEntity::run('lead', 'test_lead', $data);
+    $entity = app(CreateEntity::class)->handle('lead', 'test_lead', $data, ['owner_id' => 'user-123']);
 
     expect($entity)->toBeInstanceOf(CrmEntity::class);
     expect($entity->entity_type)->toBe('lead');
@@ -70,10 +70,10 @@ it('can transition entity through pipeline stages', function () {
         'is_active' => true,
     ]);
 
-    $entity = CreateEntity::run('lead', 'test_lead', ['first_name' => 'John']);
+    $entity = app(CreateEntity::class)->handle('lead', 'test_lead', ['first_name' => 'John'], ['owner_id' => 'user-123']);
 
     // Transition to next stage
-    $result = TransitionEntity::run($entity, $stage2->id);
+    $result = app(TransitionEntity::class)->handle($entity, $stage2->id);
 
     expect($result)->toBeTrue();
     expect($entity->fresh()->current_stage_id)->toBe($stage2->id);
@@ -103,6 +103,7 @@ it('provides dashboard data for user', function () {
         'data' => ['name' => 'Lead 1'],
         'status' => 'pending',
         'assigned_users' => [$userId],
+        'owner_id' => $userId,
     ]);
 
     $entity2 = CrmEntity::create([
@@ -112,6 +113,7 @@ it('provides dashboard data for user', function () {
         'status' => 'active',
         'assigned_users' => [$userId],
         'score' => 85,
+        'owner_id' => $userId,
     ]);
 
     $dashboard = app(CrmDashboard::class);
