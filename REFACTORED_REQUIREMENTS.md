@@ -872,7 +872,7 @@ Below are the exact numbered user stories and requirements from the original `pa
 | `Nexus\Sequencing` | `ARCH-SEQ-005` | All database migrations in application layer | `apps/Atomy/database/migrations/2025_11_12_*`, `apps/Atomy/database/migrations/2025_11_14_*` | Completed | 3 migrations moved to Atomy. Package contains no migrations. | 2025-11-16 |
 | `Nexus\Sequencing` | `ARCH-SEQ-006` | All Eloquent models in application layer | `apps/Atomy/app/Models/Sequence.php`, `apps/Atomy/app/Models/SerialNumberLog.php` | Completed | 2 models implementing package interfaces. All in Atomy application. | 2025-11-16 |
 | `Nexus\Sequencing` | `ARCH-SEQ-007` | Repository implementations in application layer | `apps/Atomy/app/Repositories/Sequencing/SequenceRepository.php`, `apps/Atomy/app/Repositories/Sequencing/SerialNumberLogRepository.php` | Completed | 2 concrete repositories implementing package repository interfaces. | 2025-11-16 |
-| `Nexus\Sequencing` | `ARCH-SEQ-008` | IoC container bindings in application service provider | `apps/Atomy/app/Providers/AtomyServiceProvider.php` | Completed | All repository interfaces bound to concrete implementations. | 2025-11-16 || `Nexus\Sequencing` | `ARCH-SEQ-008` | IoC container bindings in application service provider | `apps/Atomy/app/Providers/AtomyServiceProvider.php` | Completed | All repository interfaces bound to concrete implementations. | 2025-11-16 |
+| `Nexus\Sequencing` | `ARCH-SEQ-008` | IoC container bindings in application service provider | `apps/Atomy/app/Providers/AtomyServiceProvider.php` | Completed | All repository interfaces bound to concrete implementations. | 2025-11-16 |
 
 ### Nexus\AuditLogger — Detailed Numbered Requirements
 
