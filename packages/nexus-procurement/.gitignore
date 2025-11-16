@@ -1,0 +1,84 @@
+# Laravel Package .gitignore
+# This file is for the nexus-procurement package specifically
+
+# Laravel specific
+/vendor/
+/node_modules/
+/storage/app/
+/storage/framework/
+/storage/logs/
+bootstrap/cache/
+
+# Environment files
+.env
+.env.local
+.env.production
+.env.staging
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Composer
+composer.lock
+/vendor/
+
+# Node.js
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+node_modules/
+
+# Testing
+/phpunit.result.cache
+/tests/coverage/
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Logs
+*.log
+logs/
+
+# Documentation builds
+/docs/build/
+/docs/.vuepress/dist/
+
+# Package specific
+# Keep config files but ignore local overrides
+/config/*.local.php
+
+# Database
+/database/database.sqlite
+/database/database.sqlite.backup
+
+# Generated files
+/resources/assets/compiled/
+
+# Backup files
+*.bak
+*.backup
+*.old
+
+# Archives
+*.zip
+*.tar.gz
+*.rar
+
+# CI/CD
+.github/workflows/*.yml.local
+.gitlab-ci.yml.local

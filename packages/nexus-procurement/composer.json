@@ -1,0 +1,58 @@
+{
+    "name": "nexus/procurement",
+    "description": "Cohesive procurement management system for Nexus ERP - Complete procure-to-pay lifecycle",
+    "type": "library",
+    "license": "MIT",
+    "keywords": [
+        "laravel",
+        "procurement",
+        "purchase-order",
+        "requisition",
+        "vendor-management",
+        "procure-to-pay",
+        "3-way-matching"
+    ],
+    "authors": [
+        {
+            "name": "Azahari Zaman",
+            "email": "azaharizaman@gmail.com"
+        }
+    ],
+    "require": {
+        "php": "^8.3",
+        "illuminate/support": "^10.0 || ^11.0 || ^12.0 || 13.0.x-dev",
+        "illuminate/database": "^10.0 || ^11.0 || ^12.0 || 13.0.x-dev",
+        "illuminate/console": "^10.0 || ^11.0 || ^12.0 || 13.0.x-dev",
+        "lorisleiva/laravel-actions": "^2.0",
+        "nexus/tenancy": "*",
+        "nexus/sequencing": "*",
+        "nexus/settings": "*",
+        "nexus/audit-log": "*",
+        "nexus/workflow": "*",
+        "nexus/backoffice": "*"
+    },
+    "require-dev": {
+        "mockery/mockery": "^1.6",
+        "orchestra/testbench": "^9.0|^10.0",
+        "pestphp/pest": "^2.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Nexus\\Procurement\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Nexus\\Procurement\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Nexus\\Procurement\\ProcurementServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
