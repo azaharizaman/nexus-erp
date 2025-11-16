@@ -17,6 +17,7 @@
         "laravel/tinker": "^2.10",
         "nexus/audit-log": "dev-main",
         "nexus/backoffice": "dev-main",
+        "nexus/crm": "dev-main",
         "nexus/hrm": "dev-main",
         "nexus/inventory": "dev-main",
         "nexus/org-structure": "dev-main",
@@ -80,6 +81,10 @@
         {
             "type": "path",
             "url": "packages/nexus-backoffice"
+        },
+        {
+            "type": "path",
+            "url": "packages/nexus-crm"
         },
         {
             "type": "path",
