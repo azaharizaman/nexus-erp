@@ -82,7 +82,7 @@ class Sequence extends Model implements SequenceInterface
      */
     public function logs(): HasMany
     {
-        return $this->hasMany(SerialNumberLog::class, 'sequence_name', 'sequence_name')
+        return $this->hasMany(SerialNumberLog::class, 'sequence_id', 'id')
             ->where('tenant_id', $this->tenant_id);
     }
 
